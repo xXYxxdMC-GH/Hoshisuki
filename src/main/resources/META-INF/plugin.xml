@@ -15,7 +15,7 @@
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
     Just a Music Player.<br>
-    <em>most HTML tags may be used</em>
+    <em>This just can play music.</em>
   ]]></description>
 
     <!-- Product and plugin compatibility requirements.
@@ -27,4 +27,13 @@
     <extensions defaultExtensionNs="com.intellij">
 
     </extensions>
+
+    <actions>
+        <action id="MyMusicPlayerAction" class="com.xxyxxdmc.musicplayer.MyMusicPlugin" text="Open Music Player">
+            <add-to-group group-id="ToolsMenu" anchor="first"/>
+        </action>
+        <action id="PlayMusicAction" class="com.xxyxxdmc.musicplayer.PlayMusicAction" text="播放音乐">
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt P"/>
+        </action>
+    </actions>
 </idea-plugin>

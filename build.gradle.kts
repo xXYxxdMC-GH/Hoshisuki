@@ -4,7 +4,7 @@ plugins {
     id("org.jetbrains.intellij") version "1.17.3"
 }
 
-group = "com.example"
+group = "com.xxyxxdmc"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -43,5 +43,9 @@ tasks {
 
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
+    }
+
+    dependencies {
+        implementation("javazoom:jlayer:1.0.1")
     }
 }
