@@ -13,7 +13,11 @@ import java.awt.Dimension
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
+import javax.sound.sampled.AudioSystem
+import javax.sound.sampled.Clip
+import javax.sound.sampled.LineEvent
 import javax.swing.*
+
 
 class MusicPlayerUI : JPanel() {
     private val selectButton = JButton("选择文件夹")
@@ -28,11 +32,12 @@ class MusicPlayerUI : JPanel() {
     private val listModelName = DefaultListModel<String>()
     private val list = JBList(listModelName)
     private var player: AdvancedPlayer? = null
-    private var isPaused = true
+    private var isPlaying = false
     private var playThread: Thread? = null
+    private val clip: Clip = AudioSystem.getClip()
 
     init {
-        playButton = if (!isPaused) {
+        playButton = if (isPlaying) {
             JButton("暂停")
         } else {
             JButton("播放")
@@ -91,7 +96,7 @@ class MusicPlayerUI : JPanel() {
         if (selectedFile.listFiles()?.size !=0) {
             var haveMusic = false
             for (file in selectedFile.listFiles()!!) {
-                if (file.extension.lowercase(Locale.getDefault()) == "mp3") {
+                if (file.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au", "ogg")) {
                     haveMusic = true
                     break
                 }
@@ -101,7 +106,7 @@ class MusicPlayerUI : JPanel() {
                 return
             }
             selectedFile.listFiles()?.forEach {
-                if (it.extension.lowercase(Locale.getDefault()) == "mp3") {
+                if (it.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au", "ogg")) {
                     musicList.add(it)
                 }
             }
@@ -132,26 +137,44 @@ class MusicPlayerUI : JPanel() {
             JOptionPane.showMessageDialog(null, "空文件夹")
         }
     }
-    fun playMusic() {
-        if (isPaused && state.currentMusic != null) {
+    private fun playMusic() {
+        if (!isPlaying && state.currentMusic != null) {
             try {
-                val fileStream = state.currentMusic?.let { FileInputStream(it) }
-                player = AdvancedPlayer(fileStream)
-                playThread = Thread {
-                    try {
-                        player?.play()
-                    } catch (e: JavaLayerException) {
-                        println("播放错误: ${e.message}")
+                when (state.currentMusic!!.extension.lowercase(Locale.getDefault())) {
+                    "mp3" -> {
+                        val fileStream = state.currentMusic?.let { FileInputStream(it) }
+                        player = AdvancedPlayer(fileStream)
+                        playThread = Thread {
+                            try {
+                                player?.play()
+                            } catch (e: JavaLayerException) {
+                                println("播放错误: ${e.message}")
+                            }
+                        }
+                        player!!.playBackListener = object: PlaybackListener() {
+                            override fun playbackFinished(evt: PlaybackEvent?) {
+                                player!!.close()
+                                pauseMusic()
+                            }
+                        }
+                        playThread?.start()
+                        isPlaying = true
+                        playButton.text = "暂停"
+                    }
+                    else -> {
+                        val audioStream = state.currentMusic?.let { AudioSystem.getAudioInputStream(it) }
+                        clip.open(audioStream)
+                        clip.start()
+                        clip.addLineListener { event: LineEvent ->
+                            if (event.type === LineEvent.Type.STOP) {
+                                clip.close()
+                                pauseMusic()
+                            }
+                        }
+                        isPlaying = true
+                        playButton.text = "暂停"
                     }
                 }
-                player!!.playBackListener = object: PlaybackListener() {
-                    override fun playbackFinished(evt: PlaybackEvent?) {
-                        pauseMusic()
-                    }
-                }
-                playThread?.start()
-                isPaused = false
-                playButton.text = "暂停"
                 revalidate()
                 repaint()
             } catch (_: Exception) {}
@@ -164,7 +187,8 @@ class MusicPlayerUI : JPanel() {
         if (player != null) {
             player?.close()
         }
-        isPaused = true
+        clip.close()
+        isPlaying = false
         playButton.text = "播放"
         revalidate()
         repaint()

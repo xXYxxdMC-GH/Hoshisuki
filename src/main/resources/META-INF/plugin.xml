@@ -32,14 +32,5 @@
         <action id="MyMusicPlayerAction" class="com.xxyxxdmc.musicplayer.MyMusicPlugin" text="Open Music Player">
             <add-to-group group-id="ToolsMenu" anchor="first"/>
         </action>
-        <action id="PlayMusicAction" class="com.xxyxxdmc.musicplayer.PlayMusicAction" text="播放音乐">
-            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt P"/>
-        </action>
-        <action id="com.xxyxxdmc.musicplayer.actions.PlayMusicAction"
-                class="com.xxyxxdmc.musicplayer.PlayMusicAction"
-                text="Play or Pause Music"
-                icon="com.intellij.icons.ExpUiIcons.Gutter.Run">
-            <add-to-group group-id="MainToolBar" anchor="first"/>
-        </action>
     </actions>
 </idea-plugin>

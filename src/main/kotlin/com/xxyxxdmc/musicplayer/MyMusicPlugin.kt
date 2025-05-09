@@ -7,7 +7,6 @@ import java.awt.Dimension
 import javax.swing.JFrame
 
 class MyMusicPlugin : AnAction() {
-    companion object {val musicUI = MusicPlayerUI()}
     override fun actionPerformed(event: AnActionEvent) {
         val frame = JFrame("IntelliJ Music Player").apply {
             defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
