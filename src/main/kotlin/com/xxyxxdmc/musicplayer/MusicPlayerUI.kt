@@ -13,9 +13,7 @@ import java.awt.Dimension
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
-import javax.sound.sampled.AudioSystem
-import javax.sound.sampled.Clip
-import javax.sound.sampled.LineEvent
+import javax.sound.sampled.*
 import javax.swing.*
 
 
@@ -96,7 +94,7 @@ class MusicPlayerUI : JPanel() {
         if (selectedFile.listFiles()?.size !=0) {
             var haveMusic = false
             for (file in selectedFile.listFiles()!!) {
-                if (file.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au", "ogg")) {
+                if (file.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au")) {
                     haveMusic = true
                     break
                 }
@@ -106,7 +104,7 @@ class MusicPlayerUI : JPanel() {
                 return
             }
             selectedFile.listFiles()?.forEach {
-                if (it.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au", "ogg")) {
+                if (it.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au")) {
                     musicList.add(it)
                 }
             }

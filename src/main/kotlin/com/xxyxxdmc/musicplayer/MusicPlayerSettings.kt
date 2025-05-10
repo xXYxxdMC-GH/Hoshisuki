@@ -9,11 +9,11 @@ import org.jetbrains.annotations.NotNull
 import java.io.File
 
 @Service
-@State(name = "MusicPlayerSettings", storages = [Storage("musicPlayer.xml")])
+@State(name = "MusicPlayerSettings", storages = [Storage("music-player.xml")])
 class MusicPlayerSettings : PersistentStateComponent<MusicPlayerSettings> {
     var musicFolder: String? = null
     var currentMusic: File? = null
-    var cyclePlay: Boolean = false
+    var playCase: Int = 0
 
     override fun getState(): MusicPlayerSettings {
         return this

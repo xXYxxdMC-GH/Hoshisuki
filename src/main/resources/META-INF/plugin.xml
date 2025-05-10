@@ -25,12 +25,9 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-
+        <toolWindow factoryClass="com.xxyxxdmc.musicplayer.MusicPlayerSideBar" id="Music Player"
+                    anchor="left" icon="com.xxyxxdmc.ui.icons.MusicIcons.player"/>
     </extensions>
-
     <actions>
-        <action id="MyMusicPlayerAction" class="com.xxyxxdmc.musicplayer.MyMusicPlugin" text="Open Music Player">
-            <add-to-group group-id="ToolsMenu" anchor="first"/>
-        </action>
     </actions>
 </idea-plugin>

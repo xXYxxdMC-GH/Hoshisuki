@@ -2,5 +2,12 @@
 <project version="4">
   <component name="HotSwapAgentPluginSettingsProvider">
     <option name="agentPath" value="C:\Users\Administrator\AppData\Roaming\JetBrains\IdeaIC2024.1\plugins\hotswap-agent-intellij-plugin\lib\agent\hotswap-agent-2.0.0 (2024-09-03).jar" />
+    <option name="enableAgentForAllConfiguration" value="true" />
+    <option name="selectedRunConfigurations">
+      <set>
+        <option value="Run Plugin" />
+        <option value="Music Player [build]" />
+      </set>
+    </option>
   </component>
 </project>
