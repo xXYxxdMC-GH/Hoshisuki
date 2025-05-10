@@ -47,6 +47,5 @@ tasks {
 
     dependencies {
         implementation("javazoom:jlayer:1.0.1")
-        implementation("ws.schild:jave-all-deps:3.5.0")
     }
 }
