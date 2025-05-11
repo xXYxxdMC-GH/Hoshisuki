@@ -2,7 +2,9 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/build.gradle.kts" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/musicplayer/MusicPlayerSettings.kt" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/musicplayer/MusicPlayerSideBar.kt" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/musicplayer/MusicPlayerUI.kt" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/musicplayer/MusicPlayerUI.kt" charset="UTF-8" />
+    <file url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/javazoom/jlayer/1.0.1/4e727b40356f53930966addf6a23cb5f045ec8e1/jlayer-1.0.1-sources.jar!/javazoom/jl/player/advanced/AdvancedPlayer.java" charset="UTF-8" />
   </component>
 </project>

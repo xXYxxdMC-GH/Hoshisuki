@@ -1,6 +1,5 @@
 package com.xxyxxdmc.musicplayer
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import javazoom.jl.decoder.JavaLayerException
@@ -15,17 +14,20 @@ import java.io.FileInputStream
 import java.util.*
 import javax.sound.sampled.*
 import javax.swing.*
+import kotlin.collections.ArrayList
+import kotlin.math.floor
 
 
 class MusicPlayerUI : JPanel() {
-    private val selectButton = JButton("选择文件夹")
+    private val selectButton = JButton("Choose Music Folder")
     private var playButton = JButton("")
-    private val nextButton = JButton("下一首")
-    private val prevButton = JButton("上一首")
-    private val folderLabel = JLabel("未选择文件夹")
-    private val state = ApplicationManager.getApplication().getService(MusicPlayerSettings::class.java)
+    private val nextButton = JButton("Next")
+    private val prevButton = JButton("Prev")
+    private var playCase = JButton("")
+    private val folderLabel = JLabel("Not choose folder")
+    private val state = MusicPlayerSettings.instance
     private var scrollPane: Component? = null
-    private var musicFiles: ArrayList<File>? = null
+    private var musicFiles = ArrayList<File>()
     private val listModel = DefaultListModel<File>()
     private val listModelName = DefaultListModel<String>()
     private val list = JBList(listModelName)
@@ -33,18 +35,28 @@ class MusicPlayerUI : JPanel() {
     private var isPlaying = false
     private var playThread: Thread? = null
     private val clip: Clip = AudioSystem.getClip()
+    private var selectedMusic: File? = null
 
     init {
         playButton = if (isPlaying) {
-            JButton("暂停")
+            JButton("Pause")
         } else {
-            JButton("播放")
+            JButton("Play")
+        }
+        when (state.playCase) {
+            0 -> playCase = JButton("List Cycle")
+            1 -> playCase = JButton("Alone Cycle")
+            2 -> playCase = JButton("Order")
+            3 -> playCase = JButton("Reverse Order")
+            4 -> playCase = JButton("Random")
+            5 -> playCase = JButton("Pause on Finish")
         }
         layout = BorderLayout()
         val controlPanel = JPanel().apply {
             add(prevButton)
             add(playButton)
             add(nextButton)
+            add(playCase)
         }
 
         add(selectButton, BorderLayout.NORTH)
@@ -55,11 +67,11 @@ class MusicPlayerUI : JPanel() {
         } else {
             add(folderLabel, BorderLayout.CENTER)
         }
-        if (!musicFiles.isNullOrEmpty()) {
+        if (musicFiles.isNotEmpty()) {
             listModel.clear()
             listModelName.clear()
-            musicFiles?.forEach { listModel.addElement(it) }
-            musicFiles?.forEach { listModelName.addElement(it.name) }
+            musicFiles.forEach { listModel.addElement(it) }
+            musicFiles.forEach { listModelName.addElement(it.name) }
             scrollPane = JBScrollPane(list).apply {
                 preferredSize = Dimension(200, 150)
             }
@@ -70,9 +82,48 @@ class MusicPlayerUI : JPanel() {
             }
         }
         selectButton.addActionListener { chooseFolder() }
-        playButton.addActionListener { playMusic() }
+        playButton.addActionListener {
+            state.currentMusic = selectedMusic
+            playMusic()
+        }
         prevButton.addActionListener {
-
+            if (state.musicFolder != null) {
+                if (musicFiles.size > 1) {
+                    var index = musicFiles.indexOf(state.currentMusic) - 1
+                    if (index<0) index = musicFiles.size - 1
+                    pauseMusic()
+                    state.currentMusic = musicFiles[index]
+                    selectedMusic = musicFiles[index]
+                    playMusic()
+                }
+            }
+        }
+        nextButton.addActionListener {
+            if (state.musicFolder != null) {
+                if (musicFiles.size > 1) {
+                    var index = musicFiles.indexOf(state.currentMusic) + 1
+                    if (index>musicFiles.size - 1) index = 0
+                    pauseMusic()
+                    state.currentMusic = musicFiles[index]
+                    selectedMusic = musicFiles[index]
+                    playMusic()
+                }
+            }
+        }
+        playCase.addActionListener {
+            if (state.playCase + 1 > 5) state.playCase = 0
+            else state.playCase++
+            val index = state.playCase
+            when (index) {
+                0 -> playCase.text = "List Cycle"
+                1 -> playCase.text = "Alone Cycle"
+                2 -> playCase.text = "Order"
+                3 -> playCase.text = "Reverse Order"
+                4 -> playCase.text = "Random"
+                5 -> playCase.text = "Pause on Finish"
+            }
+            revalidate()
+            repaint()
         }
 
         if (scrollPane!=null){
@@ -84,7 +135,6 @@ class MusicPlayerUI : JPanel() {
         val chooser = JFileChooser().apply { fileSelectionMode = JFileChooser.DIRECTORIES_ONLY }
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             state.musicFolder = chooser.selectedFile.absolutePath
-            MusicPlayerSettings().loadState(state)
             displayMusicList(chooser.selectedFile)
         }
     }
@@ -100,7 +150,7 @@ class MusicPlayerUI : JPanel() {
                 }
             }
             if (!haveMusic) {
-                JOptionPane.showMessageDialog(null, "无支持的音乐")
+                JOptionPane.showMessageDialog(null, "Don't have any supported music")
                 return
             }
             selectedFile.listFiles()?.forEach {
@@ -110,18 +160,18 @@ class MusicPlayerUI : JPanel() {
             }
             remove(folderLabel)
             musicFiles = musicList
-            if (!musicFiles.isNullOrEmpty()) {
+            if (musicFiles.isNotEmpty()) {
                 listModel.clear()
                 listModelName.clear()
-                musicFiles?.forEach { listModel.addElement(it) }
-                musicFiles?.forEach { listModelName.addElement(it.name) }
+                musicFiles.forEach { listModel.addElement(it) }
+                musicFiles.forEach { listModelName.addElement(it.name) }
                 scrollPane = JBScrollPane(list).apply {
                     preferredSize = Dimension(200, 150)
                 }
                 list.selectionMode = ListSelectionModel.SINGLE_SELECTION
                 list.addListSelectionListener {
                     if (!it.valueIsAdjusting) {
-                        state.currentMusic = listModel.elementAt(list.selectedIndex)
+                        selectedMusic = listModel.elementAt(list.selectedIndex)
                         MusicPlayerSettings().loadState(state)
                     }
                 }
@@ -132,11 +182,11 @@ class MusicPlayerUI : JPanel() {
             revalidate()
             repaint()
         } else {
-            JOptionPane.showMessageDialog(null, "空文件夹")
+            JOptionPane.showMessageDialog(null, "Empty Folder")
         }
     }
     private fun playMusic() {
-        if (!isPlaying && state.currentMusic != null) {
+        if (!isPlaying && selectedMusic != null) {
             try {
                 when (state.currentMusic!!.extension.lowercase(Locale.getDefault())) {
                     "mp3" -> {
@@ -146,18 +196,69 @@ class MusicPlayerUI : JPanel() {
                             try {
                                 player?.play()
                             } catch (e: JavaLayerException) {
-                                println("播放错误: ${e.message}")
+                                println("Play ERROR: ${e.message}")
                             }
                         }
                         player!!.playBackListener = object: PlaybackListener() {
                             override fun playbackFinished(evt: PlaybackEvent?) {
                                 player!!.close()
-                                pauseMusic()
+                                when (state.playCase) {
+                                    0 -> {
+                                        if (state.musicFolder != null) {
+                                            if (musicFiles.size > 1) {
+                                                var index = musicFiles.indexOf(state.currentMusic) + 1
+                                                if (index>musicFiles.size - 1) index = 0
+                                                pauseMusic()
+                                                state.currentMusic = musicFiles[index]
+                                                selectedMusic = musicFiles[index]
+                                                playMusic()
+                                            }
+                                        }
+                                    }
+                                    1 -> playMusic()
+                                    2 -> {
+                                        if (state.musicFolder != null) {
+                                            if (musicFiles.size > 1) {
+                                                val index = musicFiles.indexOf(state.currentMusic) + 1
+                                                if (index>musicFiles.size - 1) return
+                                                pauseMusic()
+                                                state.currentMusic = musicFiles[index]
+                                                selectedMusic = musicFiles[index]
+                                                playMusic()
+                                            }
+                                        }
+                                    }
+                                    3 -> {
+                                        if (state.musicFolder != null) {
+                                            if (musicFiles.size > 1) {
+                                                var index = musicFiles.indexOf(state.currentMusic) - 1
+                                                if (index<0) index = musicFiles.size - 1
+                                                pauseMusic()
+                                                state.currentMusic = musicFiles[index]
+                                                selectedMusic = musicFiles[index]
+                                                playMusic()
+                                            }
+                                        }
+                                    }
+                                    4 -> {
+                                        if (state.musicFolder != null) {
+                                            if (musicFiles.size > 1) {
+                                                var index = floor(musicFiles.indexOf(state.currentMusic) * Math.random()).toInt()
+                                                if (index<0) index = musicFiles.size - 1
+                                                pauseMusic()
+                                                state.currentMusic = musicFiles[index]
+                                                selectedMusic = musicFiles[index]
+                                                playMusic()
+                                            } else playMusic()
+                                        }
+                                    }
+                                    5 -> {}
+                                }
                             }
                         }
                         playThread?.start()
                         isPlaying = true
-                        playButton.text = "暂停"
+                        playButton.text = "Pause"
                     }
                     else -> {
                         val audioStream = state.currentMusic?.let { AudioSystem.getAudioInputStream(it) }
@@ -166,11 +267,62 @@ class MusicPlayerUI : JPanel() {
                         clip.addLineListener { event: LineEvent ->
                             if (event.type === LineEvent.Type.STOP) {
                                 clip.close()
-                                pauseMusic()
+                                when (state.playCase) {
+                                    0 -> {
+                                        if (state.musicFolder != null) {
+                                            if (musicFiles.size > 1) {
+                                                var index = musicFiles.indexOf(state.currentMusic) + 1
+                                                if (index>musicFiles.size - 1) index = 0
+                                                pauseMusic()
+                                                state.currentMusic = musicFiles[index]
+                                                selectedMusic = musicFiles[index]
+                                                playMusic()
+                                            }
+                                        }
+                                    }
+                                    1 -> playMusic()
+                                    2 -> {
+                                        if (state.musicFolder != null) {
+                                            if (musicFiles.size > 1) {
+                                                val index = musicFiles.indexOf(state.currentMusic) + 1
+                                                if (index>musicFiles.size - 1) return@addLineListener
+                                                pauseMusic()
+                                                state.currentMusic = musicFiles[index]
+                                                selectedMusic = musicFiles[index]
+                                                playMusic()
+                                            }
+                                        }
+                                    }
+                                    3 -> {
+                                        if (state.musicFolder != null) {
+                                            if (musicFiles.size > 1) {
+                                                var index = musicFiles.indexOf(state.currentMusic) - 1
+                                                if (index<0) index = musicFiles.size - 1
+                                                pauseMusic()
+                                                state.currentMusic = musicFiles[index]
+                                                selectedMusic = musicFiles[index]
+                                                playMusic()
+                                            }
+                                        }
+                                    }
+                                    4 -> {
+                                        if (state.musicFolder != null) {
+                                            if (musicFiles.size > 1) {
+                                                var index = floor(musicFiles.indexOf(state.currentMusic) * Math.random()).toInt()
+                                                if (index<0) index = musicFiles.size - 1
+                                                pauseMusic()
+                                                state.currentMusic = musicFiles[index]
+                                                selectedMusic = musicFiles[index]
+                                                playMusic()
+                                            } else playMusic()
+                                        }
+                                    }
+                                    5 -> {}
+                                }
                             }
                         }
                         isPlaying = true
-                        playButton.text = "暂停"
+                        playButton.text = "Pause"
                     }
                 }
                 revalidate()
@@ -182,12 +334,13 @@ class MusicPlayerUI : JPanel() {
     }
 
     private fun pauseMusic() {
-        if (player != null) {
+        if (player != null && state.currentMusic!!.extension.lowercase(Locale.getDefault()) == "mp3") {
             player?.close()
+        } else {
+            clip.close()
         }
-        clip.close()
         isPlaying = false
-        playButton.text = "播放"
+        playButton.text = "Play"
         revalidate()
         repaint()
     }

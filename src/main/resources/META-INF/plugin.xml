@@ -1,14 +1,14 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-    <id>com.xxyxxdmc.MusicPlayer</id>
+    <id>com.xxyxxdmc.musicplayer</id>
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-    <name>MusicPlayer</name>
+    <name>Hoshisuki Music Player</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor email="xxyxxdmc@outlook.com" url="https://github.com/xXYxxdMC-GH">null</vendor>
+    <vendor email="xxyxxdmc@outlook.com" url="https://github.com/xXYxxdMC-GH">xXYxxdMC</vendor>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
@@ -27,6 +27,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.xxyxxdmc.musicplayer.MusicPlayerSideBar" id="Music Player"
                     anchor="left" icon="com.xxyxxdmc.ui.icons.MusicIcons.player"/>
+        <applicationService serviceImplementation="com.xxyxxdmc.musicplayer.MusicPlayerSettings"/>
     </extensions>
     <actions>
     </actions>
