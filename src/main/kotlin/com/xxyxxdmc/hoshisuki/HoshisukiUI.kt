@@ -1,4 +1,4 @@
-package com.xxyxxdmc.musicplayer
+package com.xxyxxdmc.hoshisuki
 
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
@@ -18,14 +18,14 @@ import kotlin.collections.ArrayList
 import kotlin.math.floor
 
 
-class MusicPlayerUI : JPanel() {
+class HoshisukiUI : JPanel() {
     private val selectButton = JButton("Choose Music Folder")
     private var playButton = JButton("")
     private val nextButton = JButton("Next")
     private val prevButton = JButton("Prev")
     private var playCase = JButton("")
     private val folderLabel = JLabel("Not choose folder")
-    private val state = MusicPlayerSettings.instance
+    private val state = HoshisukiSettings.instance
     private var scrollPane: Component? = null
     private var musicFiles = ArrayList<File>()
     private val listModel = DefaultListModel<File>()
@@ -172,7 +172,7 @@ class MusicPlayerUI : JPanel() {
                 list.addListSelectionListener {
                     if (!it.valueIsAdjusting) {
                         selectedMusic = listModel.elementAt(list.selectedIndex)
-                        MusicPlayerSettings().loadState(state)
+                        HoshisukiSettings().loadState(state)
                     }
                 }
             }
@@ -202,13 +202,13 @@ class MusicPlayerUI : JPanel() {
                         player!!.playBackListener = object: PlaybackListener() {
                             override fun playbackFinished(evt: PlaybackEvent?) {
                                 player!!.close()
+                                pauseMusic()
                                 when (state.playCase) {
                                     0 -> {
                                         if (state.musicFolder != null) {
                                             if (musicFiles.size > 1) {
                                                 var index = musicFiles.indexOf(state.currentMusic) + 1
                                                 if (index>musicFiles.size - 1) index = 0
-                                                pauseMusic()
                                                 state.currentMusic = musicFiles[index]
                                                 selectedMusic = musicFiles[index]
                                                 playMusic()
@@ -221,7 +221,6 @@ class MusicPlayerUI : JPanel() {
                                             if (musicFiles.size > 1) {
                                                 val index = musicFiles.indexOf(state.currentMusic) + 1
                                                 if (index>musicFiles.size - 1) return
-                                                pauseMusic()
                                                 state.currentMusic = musicFiles[index]
                                                 selectedMusic = musicFiles[index]
                                                 playMusic()
@@ -233,7 +232,6 @@ class MusicPlayerUI : JPanel() {
                                             if (musicFiles.size > 1) {
                                                 var index = musicFiles.indexOf(state.currentMusic) - 1
                                                 if (index<0) index = musicFiles.size - 1
-                                                pauseMusic()
                                                 state.currentMusic = musicFiles[index]
                                                 selectedMusic = musicFiles[index]
                                                 playMusic()
@@ -245,7 +243,6 @@ class MusicPlayerUI : JPanel() {
                                             if (musicFiles.size > 1) {
                                                 var index = floor(musicFiles.indexOf(state.currentMusic) * Math.random()).toInt()
                                                 if (index<0) index = musicFiles.size - 1
-                                                pauseMusic()
                                                 state.currentMusic = musicFiles[index]
                                                 selectedMusic = musicFiles[index]
                                                 playMusic()

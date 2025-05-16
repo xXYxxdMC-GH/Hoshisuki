@@ -1,4 +1,4 @@
-package com.xxyxxdmc.musicplayer
+package com.xxyxxdmc.hoshisuki
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
@@ -7,9 +7,9 @@ import com.intellij.ui.content.ContentFactory
 import org.jetbrains.annotations.NotNull
 
 
-class MusicPlayerSideBar: ToolWindowFactory {
+class HoshisukiSideBar: ToolWindowFactory {
     override fun createToolWindowContent(project: Project, @NotNull toolWindow: ToolWindow) {
         toolWindow.contentManager.addContent(
-            ContentFactory.getInstance().createContent(MusicPlayerUI(), "", false))
+            ContentFactory.getInstance().createContent(HoshisukiUI(), "", false))
     }
 }

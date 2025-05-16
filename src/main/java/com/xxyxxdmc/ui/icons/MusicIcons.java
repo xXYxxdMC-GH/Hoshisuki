@@ -13,5 +13,5 @@ public interface MusicIcons {
     Icon playBack = AllIcons.Actions.Play_back;
     Icon listCycle = AllIcons.General.InlineRefresh;
     Icon aloneCycle = AllIcons.Actions.Restart;
-    Icon player = IconLoader.getIcon("/icons/player.svg", MusicIcons.class);
+    Icon player = IconLoader.getIcon("/icons/hoshisuki.svg", MusicIcons.class);
 }
