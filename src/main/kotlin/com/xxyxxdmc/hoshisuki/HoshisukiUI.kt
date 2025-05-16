@@ -93,7 +93,7 @@ class HoshisukiUI : JPanel() {
                     if (index<0) index = musicFiles.size - 1
                     pauseMusic()
                     state.currentMusic = musicFiles[index]
-                    selectedMusic = musicFiles[index]
+                    list.selectedIndex = index
                     playMusic()
                 }
             }
@@ -102,10 +102,10 @@ class HoshisukiUI : JPanel() {
             if (state.musicFolder != null) {
                 if (musicFiles.size > 1) {
                     var index = musicFiles.indexOf(state.currentMusic) + 1
-                    if (index>musicFiles.size - 1) index = 0
+                    if (index > musicFiles.size - 1) index = 0
                     pauseMusic()
                     state.currentMusic = musicFiles[index]
-                    selectedMusic = musicFiles[index]
+                    list.selectedIndex = index
                     playMusic()
                 }
             }
