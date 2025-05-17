@@ -1,4 +1,4 @@
-package com.xxyxxdmc.ui.icons;
+package icons;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.util.IconLoader;

@@ -32,7 +32,7 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("232")
-        untilBuild.set("242.*")
+        untilBuild.set("252.*")
     }
 
     signPlugin {
@@ -46,7 +46,8 @@ tasks {
     }
 
     dependencies {
-        implementation("javazoom:jlayer:1.0.1")
-        implementation("org.jcraft:jorbis:0.0.17")
+        implementation("com.googlecode.soundlibs:vorbisspi:1.0.3.3")
+        implementation("com.googlecode.soundlibs:mp3spi:1.9.5.4")
+        implementation("be.tarsos.dsp:core:2.5")
     }
 }
