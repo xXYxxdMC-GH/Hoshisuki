@@ -13,7 +13,6 @@ public class HoshisukiSettings implements PersistentStateComponent<HoshisukiSett
     File currentMusic = null;
     int playCase = 0;
 
-    @Nullable
     @Override
     public HoshisukiSettings getState() {
         return this;
