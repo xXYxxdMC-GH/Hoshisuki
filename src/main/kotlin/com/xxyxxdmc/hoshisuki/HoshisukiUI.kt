@@ -2,6 +2,7 @@ package com.xxyxxdmc.hoshisuki
 
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
+import com.xxyxxdmc.ui.icons.MusicIcons
 import javazoom.jl.decoder.JavaLayerException
 import javazoom.jl.player.advanced.AdvancedPlayer
 import javazoom.jl.player.advanced.PlaybackEvent
@@ -19,8 +20,8 @@ import kotlin.math.floor
 
 
 class HoshisukiUI : JPanel() {
-    private val selectButton = JButton("Choose Music Folder")
-    private var playButton = JButton("")
+    private val selectButton = JButton("")
+    private var playButton = JButton("Folder")
     private val nextButton = JButton("Next")
     private val prevButton = JButton("Prev")
     private var playCase = JButton("")
@@ -38,11 +39,17 @@ class HoshisukiUI : JPanel() {
     private var selectedMusic: File? = null
     private var objectivePause = false
 
+
     init {
-        playButton = if (isPlaying) {
-            JButton("Pause")
+        selectButton.icon = MusicIcons.folder
+        nextButton.icon = MusicIcons.playForward
+        prevButton.icon = MusicIcons.playBack
+        if (isPlaying) {
+            playButton = JButton("Pause")
+            playButton.icon = MusicIcons.pause
         } else {
-            JButton("Play")
+            playButton = JButton("Play")
+            playButton.icon = MusicIcons.run
         }
         when (state.playCase) {
             0 -> playCase = JButton("List Cycle")
@@ -60,13 +67,19 @@ class HoshisukiUI : JPanel() {
             add(playCase)
         }
 
-        add(selectButton, BorderLayout.NORTH)
+        val displayPanel = JPanel().apply {
+            layout = BorderLayout()
+            add(JLabel("  Music Folder:  "), BorderLayout.WEST)
+            add(folderLabel, BorderLayout.CENTER)
+            folderLabel.text = state.musicFolder ?: "Not choose folder"
+            add(selectButton, BorderLayout.EAST)
+        }
+
+        add(displayPanel, BorderLayout.NORTH)
         add(controlPanel, BorderLayout.SOUTH)
 
         if (state.musicFolder!=null) {
             displayMusicList(File(state.musicFolder!!))
-        } else {
-            add(folderLabel, BorderLayout.CENTER)
         }
         if (musicFiles.isNotEmpty()) {
             listModel.clear()
@@ -78,36 +91,45 @@ class HoshisukiUI : JPanel() {
             }
             list.addListSelectionListener {
                 if (!it.valueIsAdjusting) {
-                    state.currentMusic = listModel.elementAt(list.selectedIndex)
+                    selectedMusic = listModel.elementAt(list.selectedIndex)
                 }
             }
         }
         selectButton.addActionListener { chooseFolder() }
         playButton.addActionListener {
+            objectivePause = true
             state.currentMusic = selectedMusic
+            list.isEnabled = !isPlaying
             playMusic()
+            objectivePause = false
         }
         prevButton.addActionListener {
-            if (state.musicFolder != null) {
+            if (state.musicFolder != null && isPlaying) {
                 if (musicFiles.size > 1) {
+                    objectivePause = true
                     var index = musicFiles.indexOf(state.currentMusic) - 1
                     if (index<0) index = musicFiles.size - 1
                     pauseMusic()
                     state.currentMusic = musicFiles[index]
+                    selectedMusic = musicFiles[index]
                     list.selectedIndex = index
                     playMusic()
+                    objectivePause = false
                 }
             }
         }
         nextButton.addActionListener {
-            if (state.musicFolder != null) {
+            if (state.musicFolder != null && isPlaying) {
                 if (musicFiles.size > 1) {
+                    objectivePause = true
                     var index = musicFiles.indexOf(state.currentMusic) + 1
-                    if (index > musicFiles.size - 1) index = 0
+                    if (index >= musicFiles.size) index = 0
                     pauseMusic()
                     state.currentMusic = musicFiles[index]
+                    selectedMusic = musicFiles[index]
                     list.selectedIndex = index
                     playMusic()
+                    objectivePause = false
                 }
             }
         }
@@ -154,12 +176,12 @@ class HoshisukiUI : JPanel() {
                 JOptionPane.showMessageDialog(null, "Don't have any supported music")
                 return
             }
+            folderLabel.text = selectedFile.path
             selectedFile.listFiles()?.forEach {
                 if (it.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au")) {
                     musicList.add(it)
                 }
             }
-            remove(folderLabel)
             musicFiles = musicList
             if (musicFiles.isNotEmpty()) {
                 listModel.clear()
@@ -209,6 +231,7 @@ class HoshisukiUI : JPanel() {
                         playThread?.start()
                         isPlaying = true
                         playButton.text = "Pause"
+                        playButton.icon = MusicIcons.pause
                     }
                     else -> {
                         val audioStream = state.currentMusic?.let { AudioSystem.getAudioInputStream(it) }
@@ -222,6 +245,7 @@ class HoshisukiUI : JPanel() {
                         }
                         isPlaying = true
                         playButton.text = "Pause"
+                        playButton.icon = MusicIcons.pause
                     }
                 }
                 revalidate()
@@ -237,6 +261,7 @@ class HoshisukiUI : JPanel() {
         clip.close()
         isPlaying = false
         playButton.text = "Play"
+        playButton.icon = MusicIcons.run
         revalidate()
         repaint()
     }
@@ -244,38 +269,42 @@ class HoshisukiUI : JPanel() {
     private fun playCase() {
         when (state.playCase) {
             0 -> {
-                if (state.musicFolder != null) {
+                if (state.musicFolder != null && isPlaying) {
                     if (musicFiles.size > 1) {
                         var index = musicFiles.indexOf(state.currentMusic) + 1
-                        if (index>musicFiles.size - 1) index = 0
-                        pauseMusic()
+                        if (index >= musicFiles.size) index = 0
                         state.currentMusic = musicFiles[index]
                         selectedMusic = musicFiles[index]
+                        list.selectedIndex = index
                         playMusic()
                     }
                 }
             }
-            1 -> playMusic()
+            1 -> {
+                if (state.currentMusic != null) {
+                    playMusic()
+                }
+            }
             2 -> {
-                if (state.musicFolder != null) {
+                if (state.musicFolder != null && isPlaying) {
                     if (musicFiles.size > 1) {
                         val index = musicFiles.indexOf(state.currentMusic) + 1
-                        if (index>musicFiles.size - 1) return
-                        pauseMusic()
+                        if (index >= musicFiles.size) return
                         state.currentMusic = musicFiles[index]
                         selectedMusic = musicFiles[index]
+                        list.selectedIndex = index
                         playMusic()
                     }
                 }
             }
             3 -> {
-                if (state.musicFolder != null) {
+                if (state.musicFolder != null && isPlaying) {
                     if (musicFiles.size > 1) {
                         var index = musicFiles.indexOf(state.currentMusic) - 1
-                        if (index<0) index = musicFiles.size - 1
-                        pauseMusic()
+                        if (index < 0) index = musicFiles.size - 1
                         state.currentMusic = musicFiles[index]
                         selectedMusic = musicFiles[index]
+                        list.selectedIndex = index
                         playMusic()
                     }
                 }
@@ -289,7 +318,9 @@ class HoshisukiUI : JPanel() {
                         state.currentMusic = musicFiles[index]
                         selectedMusic = musicFiles[index]
                         playMusic()
-                    } else playMusic()
+                    } else {
+                        playMusic()
+                    }
                 }
             }
             5 -> {}
