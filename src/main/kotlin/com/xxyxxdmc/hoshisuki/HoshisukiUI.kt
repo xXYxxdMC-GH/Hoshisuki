@@ -233,6 +233,8 @@ class HoshisukiUI : JPanel() {
     }
 
     private fun pauseMusic() {
+        if (player != null) player!!.close()
+        clip.close()
         isPlaying = false
         playButton.text = "Play"
         revalidate()
