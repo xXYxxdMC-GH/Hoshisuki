@@ -36,6 +36,7 @@ class HoshisukiUI : JPanel() {
     private var playThread: Thread? = null
     private val clip: Clip = AudioSystem.getClip()
     private var selectedMusic: File? = null
+    private var objectivePause = false
 
     init {
         playButton = if (isPlaying) {
@@ -201,56 +202,8 @@ class HoshisukiUI : JPanel() {
                         }
                         player!!.playBackListener = object: PlaybackListener() {
                             override fun playbackFinished(evt: PlaybackEvent?) {
-                                player!!.close()
                                 pauseMusic()
-                                when (state.playCase) {
-                                    0 -> {
-                                        if (state.musicFolder != null) {
-                                            if (musicFiles.size > 1) {
-                                                var index = musicFiles.indexOf(state.currentMusic) + 1
-                                                if (index>musicFiles.size - 1) index = 0
-                                                state.currentMusic = musicFiles[index]
-                                                selectedMusic = musicFiles[index]
-                                                playMusic()
-                                            }
-                                        }
-                                    }
-                                    1 -> playMusic()
-                                    2 -> {
-                                        if (state.musicFolder != null) {
-                                            if (musicFiles.size > 1) {
-                                                val index = musicFiles.indexOf(state.currentMusic) + 1
-                                                if (index>musicFiles.size - 1) return
-                                                state.currentMusic = musicFiles[index]
-                                                selectedMusic = musicFiles[index]
-                                                playMusic()
-                                            }
-                                        }
-                                    }
-                                    3 -> {
-                                        if (state.musicFolder != null) {
-                                            if (musicFiles.size > 1) {
-                                                var index = musicFiles.indexOf(state.currentMusic) - 1
-                                                if (index<0) index = musicFiles.size - 1
-                                                state.currentMusic = musicFiles[index]
-                                                selectedMusic = musicFiles[index]
-                                                playMusic()
-                                            }
-                                        }
-                                    }
-                                    4 -> {
-                                        if (state.musicFolder != null) {
-                                            if (musicFiles.size > 1) {
-                                                var index = floor(musicFiles.indexOf(state.currentMusic) * Math.random()).toInt()
-                                                if (index<0) index = musicFiles.size - 1
-                                                state.currentMusic = musicFiles[index]
-                                                selectedMusic = musicFiles[index]
-                                                playMusic()
-                                            } else playMusic()
-                                        }
-                                    }
-                                    5 -> {}
-                                }
+                                playCase()
                             }
                         }
                         playThread?.start()
@@ -262,60 +215,9 @@ class HoshisukiUI : JPanel() {
                         clip.open(audioStream)
                         clip.start()
                         clip.addLineListener { event: LineEvent ->
-                            if (event.type === LineEvent.Type.STOP) {
-                                clip.close()
-                                when (state.playCase) {
-                                    0 -> {
-                                        if (state.musicFolder != null) {
-                                            if (musicFiles.size > 1) {
-                                                var index = musicFiles.indexOf(state.currentMusic) + 1
-                                                if (index>musicFiles.size - 1) index = 0
-                                                pauseMusic()
-                                                state.currentMusic = musicFiles[index]
-                                                selectedMusic = musicFiles[index]
-                                                playMusic()
-                                            }
-                                        }
-                                    }
-                                    1 -> playMusic()
-                                    2 -> {
-                                        if (state.musicFolder != null) {
-                                            if (musicFiles.size > 1) {
-                                                val index = musicFiles.indexOf(state.currentMusic) + 1
-                                                if (index>musicFiles.size - 1) return@addLineListener
-                                                pauseMusic()
-                                                state.currentMusic = musicFiles[index]
-                                                selectedMusic = musicFiles[index]
-                                                playMusic()
-                                            }
-                                        }
-                                    }
-                                    3 -> {
-                                        if (state.musicFolder != null) {
-                                            if (musicFiles.size > 1) {
-                                                var index = musicFiles.indexOf(state.currentMusic) - 1
-                                                if (index<0) index = musicFiles.size - 1
-                                                pauseMusic()
-                                                state.currentMusic = musicFiles[index]
-                                                selectedMusic = musicFiles[index]
-                                                playMusic()
-                                            }
-                                        }
-                                    }
-                                    4 -> {
-                                        if (state.musicFolder != null) {
-                                            if (musicFiles.size > 1) {
-                                                var index = floor(musicFiles.indexOf(state.currentMusic) * Math.random()).toInt()
-                                                if (index<0) index = musicFiles.size - 1
-                                                pauseMusic()
-                                                state.currentMusic = musicFiles[index]
-                                                selectedMusic = musicFiles[index]
-                                                playMusic()
-                                            } else playMusic()
-                                        }
-                                    }
-                                    5 -> {}
-                                }
+                            if (event.type === LineEvent.Type.STOP && !objectivePause) {
+                                pauseMusic()
+                                playCase()
                             }
                         }
                         isPlaying = true
@@ -331,14 +233,64 @@ class HoshisukiUI : JPanel() {
     }
 
     private fun pauseMusic() {
-        if (player != null && state.currentMusic!!.extension.lowercase(Locale.getDefault()) == "mp3") {
-            player?.close()
-        } else {
-            clip.close()
-        }
         isPlaying = false
         playButton.text = "Play"
         revalidate()
         repaint()
+    }
+
+    private fun playCase() {
+        when (state.playCase) {
+            0 -> {
+                if (state.musicFolder != null) {
+                    if (musicFiles.size > 1) {
+                        var index = musicFiles.indexOf(state.currentMusic) + 1
+                        if (index>musicFiles.size - 1) index = 0
+                        pauseMusic()
+                        state.currentMusic = musicFiles[index]
+                        selectedMusic = musicFiles[index]
+                        playMusic()
+                    }
+                }
+            }
+            1 -> playMusic()
+            2 -> {
+                if (state.musicFolder != null) {
+                    if (musicFiles.size > 1) {
+                        val index = musicFiles.indexOf(state.currentMusic) + 1
+                        if (index>musicFiles.size - 1) return
+                        pauseMusic()
+                        state.currentMusic = musicFiles[index]
+                        selectedMusic = musicFiles[index]
+                        playMusic()
+                    }
+                }
+            }
+            3 -> {
+                if (state.musicFolder != null) {
+                    if (musicFiles.size > 1) {
+                        var index = musicFiles.indexOf(state.currentMusic) - 1
+                        if (index<0) index = musicFiles.size - 1
+                        pauseMusic()
+                        state.currentMusic = musicFiles[index]
+                        selectedMusic = musicFiles[index]
+                        playMusic()
+                    }
+                }
+            }
+            4 -> {
+                if (state.musicFolder != null) {
+                    if (musicFiles.size > 1) {
+                        var index = floor(musicFiles.indexOf(state.currentMusic) * Math.random()).toInt()
+                        if (index<0) index = musicFiles.size - 1
+                        pauseMusic()
+                        state.currentMusic = musicFiles[index]
+                        selectedMusic = musicFiles[index]
+                        playMusic()
+                    } else playMusic()
+                }
+            }
+            5 -> {}
+        }
     }
 }
