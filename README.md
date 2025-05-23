@@ -4,7 +4,7 @@ A simple IntelliJ music player plugin that allows you to play specified music wh
 
 ## Features
 
-- **Support for multiple audio formats**: The plugin includes various libraries that enable playback of `wav`, `MP3`, `AIFF`, and `au` audio files.
+- **Support for multiple audio formats**: The plugin includes various libraries that enable playback of `WAV`, `MP3`, `AIF(F)`, and `AU` audio files.
 - **Integrated panel**: A panel is added to the left sidebar, where you can play music or configure settings.
 - **Various playback modes**:
   - Single-track loop
