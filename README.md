@@ -18,6 +18,10 @@ A simple IntelliJ music player plugin that allows you to play specified music wh
 
 This is the author's first Kotlin project, and there may be some hidden bugs. Feel free to submit an Issue on GitHub!
 
+## Download
+
+You can go to `https://plugins.jetbrains.com/plugin/27400-hoshisuki-music-player` to download for your IDEA.
+
 ## License
 
 This project is licensed under `GPL-3`. You may use it in your own projects, but you must credit the original author.
