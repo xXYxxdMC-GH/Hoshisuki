@@ -20,7 +20,7 @@ import kotlin.math.floor
 
 
 class HoshisukiUI : JPanel() {
-    private val selectButton = JButton("")
+    private val selectButton = JButton("Choose")
     private var playButton = JButton("Folder")
     private val nextButton = JButton("Next")
     private val prevButton = JButton("Prev")
@@ -30,14 +30,17 @@ class HoshisukiUI : JPanel() {
     private var scrollPane: Component? = null
     private var musicFiles = ArrayList<File>()
     private val listModel = DefaultListModel<File>()
-    private val listModelName = DefaultListModel<String>()
-    private val list = JBList(listModelName)
+    private val listModelPanel = DefaultListModel<JPanel>()
+    private val list = JBList(listModelPanel)
     private var player: AdvancedPlayer? = null
     private var isPlaying = false
     private var playThread: Thread? = null
     private val clip: Clip = AudioSystem.getClip()
     private var selectedMusic: File? = null
     private var objectivePause = false
+    private var currentMusic: File? = null
+    private var currentLikeList = ArrayList<File>()
+    private var currentDislikeList = ArrayList<File>()
 
 
     init {
@@ -69,7 +72,7 @@ class HoshisukiUI : JPanel() {
 
         val displayPanel = JPanel().apply {
             layout = BorderLayout()
-            add(JLabel("  Music Folder:  "), BorderLayout.WEST)
+            add(JLabel("  "+"Music Folder:"+"  "), BorderLayout.WEST)
             add(folderLabel, BorderLayout.CENTER)
             folderLabel.text = state.musicFolder ?: "Not choose folder"
             add(selectButton, BorderLayout.EAST)
@@ -83,12 +86,14 @@ class HoshisukiUI : JPanel() {
         }
         if (musicFiles.isNotEmpty()) {
             listModel.clear()
-            listModelName.clear()
+            listModelPanel.clear()
             musicFiles.forEach { listModel.addElement(it) }
-            musicFiles.forEach { listModelName.addElement(it.name) }
+            musicFiles.forEach { listModelPanel.addElement(createMusicPanel(it)) }
+            scrollPane?.let { remove(it) }
             scrollPane = JBScrollPane(list).apply {
                 preferredSize = Dimension(200, 150)
             }
+            list.selectionMode = ListSelectionModel.SINGLE_SELECTION
             list.addListSelectionListener {
                 if (!it.valueIsAdjusting) {
                     selectedMusic = listModel.elementAt(list.selectedIndex)
@@ -97,20 +102,24 @@ class HoshisukiUI : JPanel() {
         }
         selectButton.addActionListener { chooseFolder() }
         playButton.addActionListener {
-            objectivePause = true
-            state.currentMusic = selectedMusic
-            list.isEnabled = !isPlaying
-            playMusic()
-            objectivePause = false
+            if (state.musicFolder != null) {
+                objectivePause = true
+                if (selectedMusic != null) currentMusic = selectedMusic
+                else currentMusic = musicFiles[0]
+                // TODO: Add Highlight
+                list.isEnabled = isPlaying
+                playMusic()
+                objectivePause = false
+            }
         }
         prevButton.addActionListener {
             if (state.musicFolder != null && isPlaying) {
                 if (musicFiles.size > 1) {
                     objectivePause = true
-                    var index = musicFiles.indexOf(state.currentMusic) - 1
+                    var index = musicFiles.indexOf(currentMusic) - 1
                     if (index<0) index = musicFiles.size - 1
                     pauseMusic()
-                    state.currentMusic = musicFiles[index]
+                    currentMusic = musicFiles[index]
                     selectedMusic = musicFiles[index]
                     list.selectedIndex = index
                     playMusic()
@@ -122,10 +131,10 @@ class HoshisukiUI : JPanel() {
             if (state.musicFolder != null && isPlaying) {
                 if (musicFiles.size > 1) {
                     objectivePause = true
-                    var index = musicFiles.indexOf(state.currentMusic) + 1
+                    var index = musicFiles.indexOf(currentMusic) + 1
                     if (index >= musicFiles.size) index = 0
                     pauseMusic()
-                    state.currentMusic = musicFiles[index]
+                    currentMusic = musicFiles[index]
                     selectedMusic = musicFiles[index]
                     list.selectedIndex = index
                     playMusic()
@@ -138,6 +147,7 @@ class HoshisukiUI : JPanel() {
             else state.playCase++
             val index = state.playCase
             when (index) {
+                // TODO: Add More Case
                 0 -> playCase.text = "List Cycle"
                 1 -> playCase.text = "Alone Cycle"
                 2 -> playCase.text = "Order"
@@ -165,29 +175,24 @@ class HoshisukiUI : JPanel() {
     private fun displayMusicList(selectedFile: File) {
         val musicList = ArrayList<File>()
         if (selectedFile.listFiles()?.size !=0) {
-            var haveMusic = false
-            for (file in selectedFile.listFiles()!!) {
-                if (file.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au")) {
-                    haveMusic = true
-                    break
-                }
-            }
-            if (!haveMusic) {
-                JOptionPane.showMessageDialog(null, "Don't have any supported music")
-                return
-            }
-            folderLabel.text = selectedFile.path
             selectedFile.listFiles()?.forEach {
                 if (it.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au")) {
                     musicList.add(it)
                 }
             }
+            if (musicList.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Don't have any supported music")
+                return
+            }
+            folderLabel.text = selectedFile.path
+
             musicFiles = musicList
             if (musicFiles.isNotEmpty()) {
                 listModel.clear()
-                listModelName.clear()
+                listModelPanel.clear()
                 musicFiles.forEach { listModel.addElement(it) }
-                musicFiles.forEach { listModelName.addElement(it.name) }
+                musicFiles.forEach { listModelPanel.addElement(createMusicPanel(it)) }
+                scrollPane?.let { remove(it) }
                 scrollPane = JBScrollPane(list).apply {
                     preferredSize = Dimension(200, 150)
                 }
@@ -208,12 +213,21 @@ class HoshisukiUI : JPanel() {
             JOptionPane.showMessageDialog(null, "Empty Folder")
         }
     }
+    private fun createMusicPanel(music: File): JPanel {
+        return JPanel().apply {
+            layout = BorderLayout()
+            if (music === currentMusic) {
+                add(JLabel().apply { icon = MusicIcons.playing }, BorderLayout.WEST)
+            }
+            add(JLabel(music.name), BorderLayout.CENTER)
+        }
+    }
     private fun playMusic() {
         if (!isPlaying && selectedMusic != null) {
             try {
-                when (state.currentMusic!!.extension.lowercase(Locale.getDefault())) {
+                when (currentMusic!!.extension.lowercase(Locale.getDefault())) {
                     "mp3" -> {
-                        val fileStream = state.currentMusic?.let { FileInputStream(it) }
+                        val fileStream = currentMusic?.let { FileInputStream(it) }
                         player = AdvancedPlayer(fileStream)
                         playThread = Thread {
                             try {
@@ -234,7 +248,7 @@ class HoshisukiUI : JPanel() {
                         playButton.icon = MusicIcons.pause
                     }
                     else -> {
-                        val audioStream = state.currentMusic?.let { AudioSystem.getAudioInputStream(it) }
+                        val audioStream = currentMusic?.let { AudioSystem.getAudioInputStream(it) }
                         clip.open(audioStream)
                         clip.start()
                         clip.addLineListener { event: LineEvent ->
@@ -271,9 +285,9 @@ class HoshisukiUI : JPanel() {
             0 -> {
                 if (state.musicFolder != null && isPlaying) {
                     if (musicFiles.size > 1) {
-                        var index = musicFiles.indexOf(state.currentMusic) + 1
+                        var index = musicFiles.indexOf(currentMusic) + 1
                         if (index >= musicFiles.size) index = 0
-                        state.currentMusic = musicFiles[index]
+                        currentMusic = musicFiles[index]
                         selectedMusic = musicFiles[index]
                         list.selectedIndex = index
                         playMusic()
@@ -281,16 +295,16 @@ class HoshisukiUI : JPanel() {
                 }
             }
             1 -> {
-                if (state.currentMusic != null) {
+                if (currentMusic != null) {
                     playMusic()
                 }
             }
             2 -> {
                 if (state.musicFolder != null && isPlaying) {
                     if (musicFiles.size > 1) {
-                        val index = musicFiles.indexOf(state.currentMusic) + 1
+                        val index = musicFiles.indexOf(currentMusic) + 1
                         if (index >= musicFiles.size) return
-                        state.currentMusic = musicFiles[index]
+                        currentMusic = musicFiles[index]
                         selectedMusic = musicFiles[index]
                         list.selectedIndex = index
                         playMusic()
@@ -300,9 +314,9 @@ class HoshisukiUI : JPanel() {
             3 -> {
                 if (state.musicFolder != null && isPlaying) {
                     if (musicFiles.size > 1) {
-                        var index = musicFiles.indexOf(state.currentMusic) - 1
+                        var index = musicFiles.indexOf(currentMusic) - 1
                         if (index < 0) index = musicFiles.size - 1
-                        state.currentMusic = musicFiles[index]
+                        currentMusic = musicFiles[index]
                         selectedMusic = musicFiles[index]
                         list.selectedIndex = index
                         playMusic()
@@ -312,10 +326,10 @@ class HoshisukiUI : JPanel() {
             4 -> {
                 if (state.musicFolder != null) {
                     if (musicFiles.size > 1) {
-                        var index = floor(musicFiles.indexOf(state.currentMusic) * Math.random()).toInt()
+                        var index = floor(musicFiles.indexOf(currentMusic) * Math.random()).toInt()
                         if (index<0) index = musicFiles.size - 1
                         pauseMusic()
-                        state.currentMusic = musicFiles[index]
+                        currentMusic = musicFiles[index]
                         selectedMusic = musicFiles[index]
                         playMusic()
                     } else {

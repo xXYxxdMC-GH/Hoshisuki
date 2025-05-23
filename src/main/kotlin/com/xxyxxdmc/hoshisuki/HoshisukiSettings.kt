@@ -10,8 +10,9 @@ import java.io.File
 @State(name = "HoshisukiSettings", storages = [Storage("HoshisukiSettings.xml")])
 class HoshisukiSettings : PersistentStateComponent<HoshisukiSettings> {
     var musicFolder: String? = null
-    var currentMusic: File? = null
     var playCase: Int = 0
+    var likeList = ArrayList<File>()
+    var dislikeList = ArrayList<File>()
 
     @Nullable
     override fun getState(): HoshisukiSettings {
