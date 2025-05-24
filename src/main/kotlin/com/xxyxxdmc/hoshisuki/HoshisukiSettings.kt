@@ -13,6 +13,7 @@ class HoshisukiSettings : PersistentStateComponent<HoshisukiSettings> {
     var playCase: Int = 0
     var likeList = ArrayList<File>()
     var dislikeList = ArrayList<File>()
+    var detailTooltip: Boolean = true
 
     @Nullable
     override fun getState(): HoshisukiSettings {
