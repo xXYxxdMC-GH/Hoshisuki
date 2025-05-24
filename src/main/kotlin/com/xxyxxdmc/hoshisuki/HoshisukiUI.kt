@@ -8,6 +8,7 @@ import javazoom.jl.decoder.JavaLayerException
 import javazoom.jl.player.advanced.AdvancedPlayer
 import javazoom.jl.player.advanced.PlaybackEvent
 import javazoom.jl.player.advanced.PlaybackListener
+import kotlinx.coroutines.Runnable
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
@@ -134,7 +135,7 @@ class HoshisukiUI : JPanel() {
         }
         selectButton.addActionListener { chooseFolder() }
 
-        prevButton.addActionListener {
+        prevButton.action = Runnable {
             if (state.musicFolder != null && isPlaying) {
                 if (musicFiles.size > 1) {
                     objectivePause = true
@@ -143,7 +144,7 @@ class HoshisukiUI : JPanel() {
                         index = 0
                     } else if (index == -1) {
                         objectivePause = false
-                        return@addActionListener
+                        return@Runnable
                     }
 
                     index--
@@ -160,7 +161,7 @@ class HoshisukiUI : JPanel() {
             }
         }
 
-        nextButton.addActionListener {
+        nextButton.action = Runnable {
             if (state.musicFolder != null && isPlaying) {
                 if (musicFiles.size > 1) {
                     objectivePause = true
@@ -169,7 +170,7 @@ class HoshisukiUI : JPanel() {
                         index = 0
                     } else if (index == -1) {
                         objectivePause = false
-                        return@addActionListener
+                        return@Runnable
                     }
 
                     index++
@@ -186,7 +187,7 @@ class HoshisukiUI : JPanel() {
             }
         }
 
-        playCase.addActionListener {
+        playCase.action = Runnable {
             if (state.playCase + 1 > 5) state.playCase = 0
             else state.playCase++
             val index = state.playCase
