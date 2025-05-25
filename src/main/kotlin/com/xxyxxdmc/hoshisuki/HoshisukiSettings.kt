@@ -11,9 +11,11 @@ import java.io.File
 class HoshisukiSettings : PersistentStateComponent<HoshisukiSettings> {
     var musicFolder: String? = null
     var playCase: Int = 0
-    var likeList = ArrayList<File>()
-    var dislikeList = ArrayList<File>()
+    var likeList = ArrayList<String>()
+    var dislikeList = ArrayList<String>()
     var detailTooltip: Boolean = true
+    var alonePlayTimes: Int = 5
+    var sensitiveIcon: Boolean = false
 
     @Nullable
     override fun getState(): HoshisukiSettings {

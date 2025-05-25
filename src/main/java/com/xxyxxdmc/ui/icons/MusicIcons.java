@@ -1,29 +1,29 @@
 package com.xxyxxdmc.ui.icons;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.icons.ExpUiIcons;
 import com.intellij.openapi.util.IconLoader;
 import javax.swing.Icon;
 
 public interface MusicIcons {
-    Icon folder = ExpUiIcons.Nodes.Folder;
-    Icon run = ExpUiIcons.Gutter.Run;
-    Icon pause = ExpUiIcons.Run.Pause;
-    Icon stop = ExpUiIcons.Run.Stop;
-    Icon playForward = ExpUiIcons.Actions.PlayForward;
-    Icon playBack = ExpUiIcons.Actions.PlayBack;
-    Icon listCycle = ExpUiIcons.General.Refresh;
-    Icon listReverseCycle = ExpUiIcons.General.SoftWrap;
-    Icon listPlay = ExpUiIcons.General.ScrollDown;
-    Icon listReversePlay = ExpUiIcons.General.ScrollUp;
-    Icon aloneCycle = ExpUiIcons.Run.Restart;
-    Icon aloneCycleInTimes = ExpUiIcons.Gutter.RecursiveMethod;
-    Icon random = ExpUiIcons.Actions.Deploy;
-    Icon randomInTimes = ExpUiIcons.Actions.Undeploy;
-    Icon pauseOnFinish = ExpUiIcons.Actions.MoveToButton;
-    Icon playing = ExpUiIcons.Nodes.Library;
-    Icon like = ExpUiIcons.CodeInsight.IntentionBulb;
-    Icon unlike = ExpUiIcons.CodeInsight.IntentionBulbGrey;
-    Icon dislike = ExpUiIcons.CodeInsight.QuickfixBulb;
-    Icon dislikeAnti = ExpUiIcons.CodeInsight.QuickfixOffBulb;
+    Icon folder = AllIcons.Nodes.Folder;
+    Icon run = AllIcons.RunConfigurations.TestState.Run;
+    Icon stop = AllIcons.Actions.Suspend;
+    Icon playForward = AllIcons.Actions.Play_forward;
+    Icon playBack = AllIcons.Actions.Play_back;
+    Icon listCycle = AllIcons.Actions.Refresh;
+    Icon listReverseCycle = AllIcons.Actions.ToggleSoftWrap;
+    Icon listPlay = AllIcons.RunConfigurations.Scroll_down;
+    Icon listReversePlay = AllIcons.RunConfigurations.Scroll_up;
+    Icon aloneCycle = AllIcons.Actions.Restart;
+    Icon aloneCycleInTimes = AllIcons.Gutter.RecursiveMethod;
+    Icon random = AllIcons.Nodes.Deploy;
+    Icon randomInTimes = AllIcons.Nodes.Undeploy;
+    Icon stopOnFinish = AllIcons.Actions.MoveToButton;
+    Icon playing = IconLoader.getIcon("/icons/library.svg", MusicIcons.class);
+    Icon like = AllIcons.Actions.IntentionBulb;
+    Icon unDislike = AllIcons.Actions.IntentionBulbGrey;
+    Icon dislike = AllIcons.Actions.QuickfixBulb;
+    Icon dislikeAnti = AllIcons.Actions.QuickfixOffBulb;
     Icon player = IconLoader.getIcon("/icons/hoshisuki.svg", MusicIcons.class);
 }

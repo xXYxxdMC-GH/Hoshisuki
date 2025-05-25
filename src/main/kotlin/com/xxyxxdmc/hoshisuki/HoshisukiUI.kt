@@ -1,5 +1,7 @@
 package com.xxyxxdmc.hoshisuki
 
+import com.intellij.ide.HelpTooltip
+import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.xxyxxdmc.ui.component.IconTooltipActionButton
@@ -8,7 +10,6 @@ import javazoom.jl.decoder.JavaLayerException
 import javazoom.jl.player.advanced.AdvancedPlayer
 import javazoom.jl.player.advanced.PlaybackEvent
 import javazoom.jl.player.advanced.PlaybackListener
-import kotlinx.coroutines.Runnable
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
@@ -19,17 +20,19 @@ import javax.sound.sampled.*
 import javax.swing.*
 import kotlin.collections.ArrayList
 
-
-@Suppress("DialogTitleCapitalization")
 class HoshisukiUI : JPanel() {
     private val bundle = HoshisukiBundle
-    private val selectButton = JButton("Choose")
-    private var playButton = IconTooltipActionButton(MusicIcons.run, bundle.message("button.play.tooltip")) {}
-    private val nextButton = IconTooltipActionButton(MusicIcons.playForward, "Next") {}
-    private val prevButton = IconTooltipActionButton(MusicIcons.playBack, "Prev") {}
-    private var playCase = IconTooltipActionButton(MusicIcons.listCycle, "") {}
-    private val folderLabel = JLabel("Not choose folder")
     private val state = HoshisukiSettings.instance
+    private fun getExplainableMessage(key: String): String {
+        return bundle.message(if (state.detailTooltip) "$key.detail" else key)
+    }
+    private val selectButton = JButton(bundle.message("button.choose.text"))
+    private var likeButton = IconTooltipActionButton(MusicIcons.like, getExplainableMessage("button.like.tooltip")) {}
+    private var playButton = IconTooltipActionButton(MusicIcons.run, getExplainableMessage("button.play.tooltip")) {}
+    private val nextButton = IconTooltipActionButton(MusicIcons.playForward, getExplainableMessage("button.next.tooltip")) {}
+    private val prevButton = IconTooltipActionButton(MusicIcons.playBack, getExplainableMessage("button.prev.tooltip")) {}
+    private var playCase = IconTooltipActionButton(MusicIcons.listCycle, "") {}
+    private val folderLabel = JLabel(bundle.message("folder.label.not.chosen"))
     private var scrollPane: Component? = null
     private var musicFiles = ArrayList<File>()
     private val listModel = DefaultListModel<File>()
@@ -45,10 +48,40 @@ class HoshisukiUI : JPanel() {
     private var currentLikeList = ArrayList<File>()
     private var currentDislikeList = ArrayList<File>()
     private var currentNormalList = ArrayList<File>()
+    private var alonePlayTime = 0
 
     init {
-        //minimumSize = Dimension()
+        minimumSize = Dimension(150, 0)
         selectButton.icon = MusicIcons.folder
+        likeButton.action = Runnable {
+            if (selectedMusic != null) {
+                when (selectedMusic) {
+                    in currentLikeList -> {
+                        currentLikeList.remove(selectedMusic)
+                        state.likeList.remove(selectedMusic!!.absolutePath)
+                        currentDislikeList.add(selectedMusic!!)
+                        state.dislikeList.add(selectedMusic!!.absolutePath)
+                        likeButton.text = getExplainableMessage("button.un.dislike.tooltip")
+                        likeButton.icon = MusicIcons.unDislike
+                    }
+                    in currentDislikeList -> {
+                        currentDislikeList.remove(selectedMusic)
+                        state.dislikeList.remove(selectedMusic!!.absolutePath)
+                        likeButton.text = getExplainableMessage("button.like.tooltip")
+                        likeButton.icon = MusicIcons.like
+                    }
+                    else -> {
+                        currentLikeList.add(selectedMusic!!)
+                        state.likeList.add(selectedMusic!!.absolutePath)
+                        likeButton.text = getExplainableMessage("button.dislike.tooltip")
+                        likeButton.icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
+                    }
+                }
+                refreshPlayingIconInList()
+                revalidate()
+                repaint()
+            }
+        }
         playButton.action = Runnable {
             if (state.musicFolder != null) {
                 objectivePause = true
@@ -57,81 +90,130 @@ class HoshisukiUI : JPanel() {
                 } else if (musicFiles.isNotEmpty()) {
                     list.selectedIndex = 0
                     musicFiles[0]
-                } else {
-                    null
-                }
+                } else null
 
+                refreshLikeButtonVisuals()
                 if (currentMusic != null) {
                     refreshPlayingIconInList()
                     playMusic()
                 }
+                revalidate()
+                repaint()
                 objectivePause = false
             }
         }
+        layout = BorderLayout()
+
         when (state.playCase) {
-            0 -> {
-                playCase.text = "List Cycle"
+            0 -> { // List Cycle
+                playCase.text = getExplainableMessage("play.case.list.cycle")
                 playCase.icon = MusicIcons.listCycle
             }
-            1 -> {
-                playCase.text = "Alone Reverse Cycle"
+            1 -> { // List Reverse Cycle
+                playCase.text = getExplainableMessage("play.case.list.reverse.cycle")
+                playCase.icon = MusicIcons.listReverseCycle
+            }
+            2 -> { // Alone Cycle
+                playCase.text = getExplainableMessage("play.case.alone.cycle")
                 playCase.icon = MusicIcons.aloneCycle
             }
-            2 -> {
-                playCase = JButton("Order")
+            3 -> { // Alone Finite Cycle
+                playCase.text = getExplainableMessage("play.case.alone.finite.cycle")
+                playCase.icon = MusicIcons.aloneCycleInTimes
+            }
+            4 -> { // List Play
+                playCase.text = getExplainableMessage("play.case.order")
                 playCase.icon = MusicIcons.listPlay
             }
-            3 -> {
-                playCase = JButton("Reverse Order")
+            5 -> { // List Reverse Play
+                playCase.text = getExplainableMessage("play.case.reverse.order")
                 playCase.icon = MusicIcons.listReversePlay
             }
-            4 -> {
-                playCase = JButton("Random")
+            6 -> { // Random
+                playCase.text = getExplainableMessage("play.case.random")
                 playCase.icon = MusicIcons.random
             }
-            5 -> {
-                playCase = JButton("Stop on Finish")
-                playCase.icon = MusicIcons.pauseOnFinish
+            7 -> { // Random Finite
+                playCase.text = getExplainableMessage("play.case.random.finite")
+                playCase.icon = MusicIcons.randomInTimes
+            }
+            8 -> { // Stop on Finish
+                playCase.text = getExplainableMessage("play.case.stop.on.finish")
+                playCase.icon = MusicIcons.stopOnFinish
             }
         }
-        layout = BorderLayout()
         val controlPanel = JPanel().apply {
+            add(likeButton)
             add(prevButton)
             add(playButton)
             add(nextButton)
             add(playCase)
         }
 
+        val settingPanel = JPanel().apply {
+            layout = BoxLayout(this@apply, BoxLayout.PAGE_AXIS)
+            add(JSeparator(SwingConstants.HORIZONTAL))
+            add(Box.createVerticalStrut(5))
+            add(JPanel().apply {
+                layout = BorderLayout()
+                add(JLabel("  "+bundle.message("option.detail.text")).apply {
+                    HelpTooltip().setDescription(bundle.message("option.detail.context")).installOn(this)
+                }, BorderLayout.WEST)
+                add(JBCheckBox("", state.detailTooltip).apply {
+                    addActionListener {
+                        state.detailTooltip = this.isSelected
+                        refreshAllButtonTooltips()
+                    } }, BorderLayout.EAST)
+            })
+            add(Box.createVerticalStrut(7))
+            add(JPanel().apply {
+                layout = BorderLayout()
+                add(JLabel("  "+bundle.message("option.sensitive.text")).apply {
+                    HelpTooltip().setDescription(bundle.message("option.sensitive.context")).installOn(this)
+                }, BorderLayout.WEST)
+                add(JBCheckBox("", state.sensitiveIcon).apply {
+                    addActionListener {
+                        state.sensitiveIcon = this.isSelected
+                        if (likeButton.icon == MusicIcons.dislike && this.isSelected) {
+                            likeButton.icon = MusicIcons.dislikeAnti
+                        } else if (likeButton.icon == MusicIcons.dislikeAnti && !this.isSelected) {
+                            likeButton.icon = MusicIcons.dislike
+                        }
+                        revalidate()
+                        repaint()
+                        refreshPlayingIconInList()
+                    }
+                }, BorderLayout.EAST)
+            })
+            add(Box.createVerticalStrut(7))
+            add(JPanel().apply {
+                layout = BorderLayout()
+                add(JLabel("  "+bundle.message("option.alone.play.times.text")).apply {
+                    HelpTooltip().setDescription(bundle.message("option.alone.play.times.context")).installOn(this)
+                })
+                add(JSpinner(SpinnerNumberModel(state.alonePlayTimes, 2, Int.MAX_VALUE, 1).apply {
+                    addChangeListener { state.alonePlayTimes = value as Int }
+                }), BorderLayout.EAST)
+            })
+            add(Box.createVerticalStrut(10))
+        }
+
         val displayPanel = JPanel().apply {
             layout = BorderLayout()
-            add(JLabel("  "+"Music Folder:"+"  "), BorderLayout.WEST)
+            add(JLabel("  "+bundle.message("music.folder.label.prefix")+"  "), BorderLayout.WEST)
             add(folderLabel, BorderLayout.CENTER)
-            folderLabel.text = state.musicFolder ?: "Not choose folder"
+            folderLabel.text = state.musicFolder ?: bundle.message("folder.label.not.chosen")
             add(selectButton, BorderLayout.EAST)
         }
 
         add(displayPanel, BorderLayout.NORTH)
-        add(controlPanel, BorderLayout.SOUTH)
+        add(JPanel().apply { layout = BorderLayout() }
+            .apply { add(controlPanel, BorderLayout.NORTH) }
+            .apply { add(settingPanel, BorderLayout.CENTER) }
+            , BorderLayout.SOUTH)
 
         if (state.musicFolder!=null) {
             displayMusicList(File(state.musicFolder!!))
-        }
-        if (musicFiles.isNotEmpty()) {
-            listModel.clear()
-            listModelPanel.clear()
-            musicFiles.forEach { listModel.addElement(it) }
-            musicFiles.forEach { listModelPanel.addElement(createMusicPanel(it)) }
-            scrollPane?.let { remove(it) }
-            scrollPane = JBScrollPane(list).apply {
-                preferredSize = Dimension(200, 150)
-            }
-            list.cellRenderer = PanelCellRenderer()
-            list.selectionMode = ListSelectionModel.SINGLE_SELECTION
-            list.addListSelectionListener {
-                if (!it.valueIsAdjusting) {
-                    selectedMusic = listModel.elementAt(list.selectedIndex)
-                }
-            }
         }
         selectButton.addActionListener { chooseFolder() }
 
@@ -188,34 +270,44 @@ class HoshisukiUI : JPanel() {
         }
 
         playCase.action = Runnable {
-            if (state.playCase + 1 > 5) state.playCase = 0
+            if (state.playCase + 1 > 8) state.playCase = 0
             else state.playCase++
-            val index = state.playCase
-            when (index) {
-                // TODO: Add More Case
-                0 -> {
-                    playCase.text = "List Cycle"
+            when (state.playCase) {
+                0 -> { // List Cycle
+                    playCase.text = getExplainableMessage("play.case.list.cycle")
                     playCase.icon = MusicIcons.listCycle
                 }
-                1 -> {
-                    playCase.text = "Alone Cycle"
+                1 -> { // List Reverse Cycle
+                    playCase.text = getExplainableMessage("play.case.list.reverse.cycle")
+                    playCase.icon = MusicIcons.listReverseCycle
+                }
+                2 -> { // Alone Cycle
+                    playCase.text = getExplainableMessage("play.case.alone.cycle")
                     playCase.icon = MusicIcons.aloneCycle
                 }
-                2 -> {
-                    playCase.text = "Order"
+                3 -> { // Alone Finite Cycle
+                    playCase.text = getExplainableMessage("play.case.alone.finite.cycle")
+                    playCase.icon = MusicIcons.aloneCycleInTimes
+                }
+                4 -> { // List Play
+                    playCase.text = getExplainableMessage("play.case.order")
                     playCase.icon = MusicIcons.listPlay
                 }
-                3 -> {
-                    playCase.text = "Reverse Order"
+                5 -> { // List Reverse Play
+                    playCase.text = getExplainableMessage("play.case.reverse.order")
                     playCase.icon = MusicIcons.listReversePlay
                 }
-                4 -> {
-                    playCase.text = "Random"
+                6 -> { // Random
+                    playCase.text = getExplainableMessage("play.case.random")
                     playCase.icon = MusicIcons.random
                 }
-                5 -> {
-                    playCase.text = "Stop on Finish"
-                    playCase.icon = MusicIcons.pauseOnFinish
+                7 -> { // Random Finite
+                    playCase.text = getExplainableMessage("play.case.random.finite")
+                    playCase.icon = MusicIcons.randomInTimes
+                }
+                8 -> { // Stop on Finish
+                    playCase.text = getExplainableMessage("play.case.stop.on.finish")
+                    playCase.icon = MusicIcons.stopOnFinish
                 }
             }
             revalidate()
@@ -227,7 +319,47 @@ class HoshisukiUI : JPanel() {
         }
     }
 
+    private fun refreshPlayCaseButtonVisuals() {
+        val (textKey, icon) = when (state.playCase) {
+            0 -> "play.case.list.cycle" to MusicIcons.listCycle
+            1 -> "play.case.list.reverse.cycle" to MusicIcons.listReverseCycle
+            2 -> "play.case.alone.cycle" to MusicIcons.aloneCycle
+            3 -> "play.case.alone.finite.cycle" to MusicIcons.aloneCycleInTimes
+            4 -> "play.case.order" to MusicIcons.listPlay
+            5 -> "play.case.reverse.order" to MusicIcons.listReversePlay
+            6 -> "play.case.random" to MusicIcons.random
+            7 -> "play.case.random.finite" to MusicIcons.randomInTimes
+            8 -> "play.case.stop.on.finish" to MusicIcons.stopOnFinish
+            else -> "play.case.list.cycle" to MusicIcons.listCycle // Fallback
+        }
+        playCase.text = getExplainableMessage(textKey)
+        playCase.icon = icon
+    }
+
+    private fun refreshLikeButtonVisuals() {
+        if (selectedMusic != null) {
+            when {
+                currentLikeList.contains(selectedMusic) -> {
+                    likeButton.text = getExplainableMessage("button.dislike.tooltip")
+                    likeButton.icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
+                }
+                currentDislikeList.contains(selectedMusic) -> {
+                    likeButton.text = getExplainableMessage("button.un.dislike.tooltip")
+                    likeButton.icon = MusicIcons.unDislike
+                }
+                else -> {
+                    likeButton.text = getExplainableMessage("button.like.tooltip")
+                    likeButton.icon = MusicIcons.like
+                }
+            }
+        } else {
+            likeButton.text = getExplainableMessage("button.like.tooltip")
+            likeButton.icon = MusicIcons.like
+        }
+    }
+
     private fun refreshPlayingIconInList() {
+        refreshLikeButtonVisuals()
         if (listModelPanel.isEmpty || listModel.isEmpty || listModelPanel.size() != listModel.size()) {
             return
         }
@@ -243,6 +375,12 @@ class HoshisukiUI : JPanel() {
             }
             panel.add(JLabel(" " + fileForPanel.name), BorderLayout.CENTER)
 
+            if (fileForPanel in currentLikeList) {
+                panel.add(JLabel().apply { icon = MusicIcons.like }, BorderLayout.EAST)
+            } else if (fileForPanel in currentDislikeList) {
+                panel.add(JLabel().apply { icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike }, BorderLayout.EAST)
+            }
+
             panel.revalidate()
         }
         list.repaint()
@@ -251,42 +389,61 @@ class HoshisukiUI : JPanel() {
     private fun chooseFolder() {
         val chooser = JFileChooser().apply { fileSelectionMode = JFileChooser.DIRECTORIES_ONLY }
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            state.musicFolder = chooser.selectedFile.absolutePath
             displayMusicList(chooser.selectedFile)
         }
     }
 
     private fun displayMusicList(selectedFile: File) {
         val musicList = ArrayList<File>()
-        if (selectedFile.listFiles()?.size !=0) {
+        if (selectedFile.listFiles()?.isNotEmpty() == true) {
             selectedFile.listFiles()?.forEach {
-                if (it.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au")) {
+                if (it.isFile && it.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au")) {
                     musicList.add(it)
                 }
             }
             if (musicList.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Don't have any supported music")
+                JOptionPane.showMessageDialog(this,
+                    bundle.message("message.no.supported.music"),
+                    bundle.message("message.no.music.title"),
+                    JOptionPane.INFORMATION_MESSAGE
+                )
                 return
             }
+            state.musicFolder = selectedFile.absolutePath
             folderLabel.text = selectedFile.path
 
+            currentMusic = null
+            selectedMusic = null
+            currentLikeList.clear()
+            currentDislikeList.clear()
+            currentNormalList.clear()
             musicFiles = musicList
             if (musicFiles.isNotEmpty()) {
+                musicFiles.forEach {
+                    when (it.absolutePath) {
+                        in state.likeList -> currentLikeList.add(it)
+                        in state.dislikeList -> currentDislikeList.add(it)
+                        else -> currentNormalList.add(it)
+                    }
+                }
                 listModel.clear()
                 listModelPanel.clear()
                 musicFiles.forEach { listModel.addElement(it) }
                 musicFiles.forEach { listModelPanel.addElement(createMusicPanel(it)) }
                 scrollPane?.let { remove(it) }
-                scrollPane = JBScrollPane(list).apply {
-                    preferredSize = Dimension(200, 150)
-                }
                 list.cellRenderer = PanelCellRenderer()
                 list.selectionMode = ListSelectionModel.SINGLE_SELECTION
+                list.listSelectionListeners.forEach { list.removeListSelectionListener(it) }
                 list.addListSelectionListener {
                     if (!it.valueIsAdjusting) {
-                        selectedMusic = listModel.elementAt(list.selectedIndex)
-                        HoshisukiSettings().loadState(state)
+                        if (list.selectedIndex != -1 && list.selectedIndex < listModel.size()) {
+                            selectedMusic = listModel.elementAt(list.selectedIndex)
+                            refreshLikeButtonVisuals()
+                        }
                     }
+                }
+                scrollPane = JBScrollPane(list).apply {
+                    preferredSize = Dimension(200, 150)
                 }
             }
             if (scrollPane!=null){
@@ -295,7 +452,7 @@ class HoshisukiUI : JPanel() {
             revalidate()
             repaint()
         } else {
-            JOptionPane.showMessageDialog(null, "Empty Folder")
+            JOptionPane.showMessageDialog(null, bundle.message("message.empty.folder"))
         }
     }
     private fun createMusicPanel(music: File): JPanel {
@@ -305,9 +462,15 @@ class HoshisukiUI : JPanel() {
                 add(JLabel().apply { icon = MusicIcons.playing }, BorderLayout.WEST)
             }
             add(JLabel(" " + music.name), BorderLayout.CENTER)
+            if (music in currentLikeList) {
+                add(JLabel().apply { icon = MusicIcons.like }, BorderLayout.EAST)
+            } else if (music in currentDislikeList) {
+                add(JLabel().apply { icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike }, BorderLayout.EAST)
+            }
         }
     }
     private fun playMusic() {
+        alonePlayTime = 0
         if (!isPlaying && selectedMusic != null) {
             try {
                 when (currentMusic!!.extension.lowercase(Locale.getDefault())) {
@@ -330,7 +493,7 @@ class HoshisukiUI : JPanel() {
                         }
                         playThread!!.start()
                         isPlaying = true
-                        playButton.text = "Stop"
+                        playButton.text = getExplainableMessage("button.stop.tooltip")
                         playButton.icon = MusicIcons.stop
                     }
                     else -> {
@@ -344,7 +507,7 @@ class HoshisukiUI : JPanel() {
                             }
                         }
                         isPlaying = true
-                        playButton.text = "Stop"
+                        playButton.text = getExplainableMessage("button.stop.tooltip")
                         playButton.icon = MusicIcons.stop
                     }
                 }
@@ -362,16 +525,27 @@ class HoshisukiUI : JPanel() {
             if (playThread!!.isAlive) playThread!!.interrupt()
         }
         clip.close()
+        refreshPlayingIconInList()
+        alonePlayTime = 0
         isPlaying = false
-        playButton.text = "Play"
+        playButton.text = getExplainableMessage("button.play.tooltip")
         playButton.icon = MusicIcons.run
         revalidate()
         repaint()
     }
 
+    private fun refreshAllButtonTooltips() {
+        refreshLikeButtonVisuals()
+        refreshPlayCaseButtonVisuals()
+        playButton.text = if (isPlaying) getExplainableMessage("button.stop.tooltip") else getExplainableMessage("button.play.tooltip")
+        nextButton.text = getExplainableMessage("button.next.tooltip")
+        prevButton.text = getExplainableMessage("button.prev.tooltip")
+        selectButton.toolTipText = bundle.message("button.choose.text")
+    }
+
     private fun playCase() {
         when (state.playCase) {
-            0 -> {
+            0 -> { // List Cycle
                 if (musicFiles.isNotEmpty()) {
                     var index = musicFiles.indexOf(currentMusic)
                     if (index == -1) index = -1
@@ -384,24 +558,11 @@ class HoshisukiUI : JPanel() {
                     playMusic()
                 }
             }
-            1 -> {
-                if (currentMusic != null) {
-                    refreshPlayingIconInList()
-                    playMusic()
-                }
-            }
-            2 -> {
+            1 -> { // List Reverse Cycle
                 if (musicFiles.isNotEmpty()) {
                     var index = musicFiles.indexOf(currentMusic)
-                    if (index == -1) {
-                        return
-                    }
-                    index++
-                    if (index >= musicFiles.size) {
-                        currentMusic = null
-                        refreshPlayingIconInList()
-                        return
-                    }
+                    index--
+                    if (index < 0) index = musicFiles.size - 1
                     currentMusic = musicFiles[index]
                     selectedMusic = musicFiles[index]
                     list.selectedIndex = index
@@ -409,7 +570,20 @@ class HoshisukiUI : JPanel() {
                     playMusic()
                 }
             }
-            3 -> {
+            2 -> { // Alone Cycle
+                if (currentMusic != null) {
+                    refreshPlayingIconInList()
+                    playMusic()
+                }
+            }
+            3 -> { // Alone Finite Cycle
+                if (currentMusic != null && alonePlayTime < state.alonePlayTimes) {
+                    refreshPlayingIconInList()
+                    alonePlayTime++
+                    playMusic()
+                }
+            }
+            4 -> { // List Play
                 if (musicFiles.isNotEmpty()) {
                     var index = musicFiles.indexOf(currentMusic)
                     if (index == -1) {
@@ -428,7 +602,7 @@ class HoshisukiUI : JPanel() {
                     playMusic()
                 }
             }
-            4 -> {
+            5 -> { // List Reverse Play
                 if (musicFiles.isNotEmpty()) {
                     var newIndex: Int
                     if (musicFiles.size > 1) {
@@ -446,7 +620,33 @@ class HoshisukiUI : JPanel() {
                     playMusic()
                 }
             }
-            5 -> {
+            6 -> { // Random
+                currentMusic = if (musicFiles.isNotEmpty()) {
+                    if (musicFiles.size == 1) musicFiles[0]
+                    else {
+                        var newIndex: Int
+                        val currentIndex = musicFiles.indexOf(currentMusic)
+                        do { newIndex = Random().nextInt(musicFiles.size) } while (newIndex == currentIndex && currentMusic != null)
+                        musicFiles[newIndex]
+                    }
+                } else null
+                refreshPlayingIconInList()
+                playMusic()
+            }
+            7 -> { // Random Finite
+                currentMusic = if (musicFiles.isNotEmpty()) {
+                    if (musicFiles.size == 1) musicFiles[0]
+                    else {
+                        var newIndex: Int
+                        val currentIndex = musicFiles.indexOf(currentMusic)
+                        do { newIndex = Random().nextInt(musicFiles.size) } while (newIndex == currentIndex && currentMusic != null)
+                        musicFiles[newIndex]
+                    }
+                } else null
+                refreshPlayingIconInList()
+                playMusic()
+            }
+            8 -> { // Stop on Finish
                 refreshPlayingIconInList()
             }
         }
