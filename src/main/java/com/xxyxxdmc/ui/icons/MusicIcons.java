@@ -1,7 +1,6 @@
 package com.xxyxxdmc.ui.icons;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.icons.ExpUiIcons;
 import com.intellij.openapi.util.IconLoader;
 import javax.swing.Icon;
 

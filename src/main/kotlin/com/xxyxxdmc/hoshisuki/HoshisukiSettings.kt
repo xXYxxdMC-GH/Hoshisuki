@@ -5,7 +5,6 @@ import com.intellij.openapi.components.*
 import com.intellij.util.xmlb.XmlSerializerUtil
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
-import java.io.File
 
 @State(name = "HoshisukiSettings", storages = [Storage("HoshisukiSettings.xml")])
 class HoshisukiSettings : PersistentStateComponent<HoshisukiSettings> {
