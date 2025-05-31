@@ -1,4 +1,4 @@
-package com.xxyxxdmc.ui.component;
+package com.xxyxxdmc.component;
 
 import com.intellij.openapi.actionSystem.ActionButtonComponent;
 import com.intellij.openapi.actionSystem.ex.ActionButtonLook;

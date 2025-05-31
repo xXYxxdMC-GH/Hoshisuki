@@ -4,8 +4,9 @@ import com.intellij.ide.HelpTooltip
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
-import com.xxyxxdmc.ui.component.IconTooltipActionButton
-import com.xxyxxdmc.ui.icons.MusicIcons
+import com.xxyxxdmc.RandomPlayException
+import com.xxyxxdmc.component.IconTooltipActionButton
+import com.xxyxxdmc.icons.MusicIcons
 import javazoom.jl.decoder.JavaLayerException
 import javazoom.jl.player.advanced.AdvancedPlayer
 import javazoom.jl.player.advanced.PlaybackEvent
@@ -49,6 +50,7 @@ class HoshisukiUI : JPanel() {
     private var currentDislikeList = ArrayList<File>()
     private var currentNormalList = ArrayList<File>()
     private var alonePlayTime = 0
+    private var playedMusic = ArrayList<File>()
 
     init {
         minimumSize = Dimension(150, 0)
@@ -200,7 +202,7 @@ class HoshisukiUI : JPanel() {
 
         val displayPanel = JPanel().apply {
             layout = BorderLayout()
-            add(JLabel("  "+bundle.message("music.folder.label.prefix")+"  "), BorderLayout.WEST)
+            add(JLabel("  "+bundle.message("music.folder.label.prefix")+" "), BorderLayout.WEST)
             add(folderLabel, BorderLayout.CENTER)
             folderLabel.text = state.musicFolder ?: bundle.message("folder.label.not.chosen")
             add(selectButton, BorderLayout.EAST)
@@ -370,7 +372,7 @@ class HoshisukiUI : JPanel() {
 
             panel.removeAll()
 
-            if (fileForPanel.absolutePath == currentMusic?.absolutePath) {
+            if (fileForPanel === currentMusic && isPlaying) {
                 panel.add(JLabel().apply { icon = MusicIcons.playing }, BorderLayout.WEST)
             }
             panel.add(JLabel(" " + fileForPanel.name), BorderLayout.CENTER)
@@ -621,34 +623,65 @@ class HoshisukiUI : JPanel() {
                 }
             }
             6 -> { // Random
-                currentMusic = if (musicFiles.isNotEmpty()) {
-                    if (musicFiles.size == 1) musicFiles[0]
-                    else {
-                        var newIndex: Int
-                        val currentIndex = musicFiles.indexOf(currentMusic)
-                        do { newIndex = Random().nextInt(musicFiles.size) } while (newIndex == currentIndex && currentMusic != null)
-                        musicFiles[newIndex]
-                    }
-                } else null
-                refreshPlayingIconInList()
-                playMusic()
+                randomPlayMusic(false)
             }
             7 -> { // Random Finite
-                currentMusic = if (musicFiles.isNotEmpty()) {
-                    if (musicFiles.size == 1) musicFiles[0]
-                    else {
-                        var newIndex: Int
-                        val currentIndex = musicFiles.indexOf(currentMusic)
-                        do { newIndex = Random().nextInt(musicFiles.size) } while (newIndex == currentIndex && currentMusic != null)
-                        musicFiles[newIndex]
-                    }
-                } else null
-                refreshPlayingIconInList()
-                playMusic()
+                randomPlayMusic(true)
             }
             8 -> { // Stop on Finish
                 refreshPlayingIconInList()
             }
+        }
+    }
+
+    private fun randomPlayMusic(recordPlayedMusic: Boolean) {
+        if (playedMusic.size == musicFiles.size) return
+        if (musicFiles.size <= 1) {
+            if (recordPlayedMusic) playMusic()
+        } else if (state.likeWeight == 0.0 && state.dislikeWeight == 0.0) {
+            var index = Math.floor(Math.random() * musicFiles.size).toInt()
+            while ((state.antiAgainLevel == 2) && currentMusic === musicFiles[index]) {
+                index = Math.floor(Math.random() * musicFiles.size).toInt()
+            }
+            currentMusic = musicFiles[index]
+        } else if (state.likeWeight == 0.0) {
+            val chooseDislike = if (state.dislikeWeight < 0) (Math.random() < (1 + state.dislikeWeight) * 0.1) else (Math.random() < state.dislikeWeight)
+            currentMusic = weightChooseMusic(true, chooseDislike, true)
+        } else if (state.dislikeWeight == 0.0) {
+            val chooseLike = if (state.likeWeight < 0) (Math.random() < (1 + state.likeWeight) * 0.1) else (Math.random() < state.likeWeight)
+            currentMusic = weightChooseMusic(chooseLike, true, true)
+        } else if (state.likeWeight != 0.0 && state.dislikeWeight != 0.0) {
+            val chooseLike = if (state.likeWeight < 0) (Math.random() < (1 + state.likeWeight) * 0.1) else (Math.random() < state.likeWeight)
+            val chooseDislike = if (state.dislikeWeight < 0) (Math.random() < (1 + state.dislikeWeight) * 0.1) else (Math.random() < state.dislikeWeight)
+            currentMusic = weightChooseMusic(chooseLike, chooseDislike, false)
+        } else throw RandomPlayException()
+        if (currentMusic == null) throw RandomPlayException()
+        if (recordPlayedMusic && !playedMusic.contains(currentMusic!!)) playedMusic.add(currentMusic!!)
+        selectedMusic = currentMusic
+        list.selectedIndex = musicFiles.indexOf(currentMusic)
+        refreshPlayingIconInList()
+        playMusic()
+    }
+
+    private fun weightChooseMusic(chooseLike: Boolean, chooseDislike: Boolean, withNormal: Boolean): File {
+        var tempList = ArrayList<File>()
+        if (chooseLike && state.likeWeight != 1.0) tempList.addAll(currentLikeList)
+        if (chooseDislike && state.dislikeWeight != 1.0) tempList.addAll(currentDislikeList)
+        if (withNormal) tempList.addAll(currentNormalList)
+        if (tempList.size > 1) {
+            var index = Math.floor(Math.random() * tempList.size).toInt()
+            while ((state.antiAgainLevel == 2) && currentMusic === tempList[index]) {
+                index = Math.floor(Math.random() * tempList.size).toInt()
+            }
+            return tempList[index]
+        } else if (tempList.size == 1) {
+            return tempList[0]
+        } else {
+            var index = Math.floor(Math.random() * musicFiles.size).toInt()
+            while ((state.antiAgainLevel == 2) && currentMusic === musicFiles[index]) {
+                index = Math.floor(Math.random() * musicFiles.size).toInt()
+            }
+            return musicFiles[index]
         }
     }
 }
