@@ -53,6 +53,4 @@
             />
         <applicationService serviceImplementation="com.xxyxxdmc.hoshisuki.HoshisukiSettings"/>
     </extensions>
-    <actions>
-    </actions>
 </idea-plugin>
