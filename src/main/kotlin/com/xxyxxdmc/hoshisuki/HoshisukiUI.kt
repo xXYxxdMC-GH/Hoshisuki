@@ -20,6 +20,7 @@ import java.util.*
 import javax.sound.sampled.*
 import javax.swing.*
 import kotlin.collections.ArrayList
+import kotlin.math.floor
 
 class HoshisukiUI : JPanel() {
     private val bundle = HoshisukiBundle
@@ -152,10 +153,15 @@ class HoshisukiUI : JPanel() {
             add(playCase)
         }
 
+        // 这一部分比较抽象，我将会逐条进行讲解
         val settingPanel = JPanel().apply {
+            //设置布局管理器
             layout = BoxLayout(this@apply, BoxLayout.PAGE_AXIS)
+            //添加一条横线
             add(JSeparator(SwingConstants.HORIZONTAL))
+            //添加空缺
             add(Box.createVerticalStrut(5))
+            //添加详细信息显示面板
             add(JPanel().apply {
                 layout = BorderLayout()
                 add(JLabel("  "+bundle.message("option.detail.text")).apply {
@@ -167,7 +173,9 @@ class HoshisukiUI : JPanel() {
                         refreshAllButtonTooltips()
                     } }, BorderLayout.EAST)
             })
+            //添加空缺
             add(Box.createVerticalStrut(7))
+            //添加反敏感面板
             add(JPanel().apply {
                 layout = BorderLayout()
                 add(JLabel("  "+bundle.message("option.sensitive.text")).apply {
@@ -187,6 +195,7 @@ class HoshisukiUI : JPanel() {
                     }
                 }, BorderLayout.EAST)
             })
+            //添加空缺
             add(Box.createVerticalStrut(7))
             add(JPanel().apply {
                 layout = BorderLayout()
@@ -197,7 +206,21 @@ class HoshisukiUI : JPanel() {
                     addChangeListener { state.alonePlayTimes = value as Int }
                 }), BorderLayout.EAST)
             })
-            add(Box.createVerticalStrut(10))
+            //添加空缺
+            add(Box.createVerticalStrut(7))
+            //添加单曲循环次数面板
+            add(JPanel().apply {
+                layout = BorderLayout()
+                add(JLabel("  "+bundle.message("option.alone.play.times.text")).apply {
+                    HelpTooltip().setDescription(bundle.message("option.alone.play.times.context")).installOn(this)
+                })
+                add(JSpinner(SpinnerNumberModel(state.alonePlayTimes, 2, Int.MAX_VALUE, 1).apply {
+                    addChangeListener { state.alonePlayTimes = value as Int }
+                }), BorderLayout.EAST)
+            })
+            //添加空缺
+            add(Box.createVerticalStrut(7))
+
         }
 
         val displayPanel = JPanel().apply {
@@ -639,9 +662,9 @@ class HoshisukiUI : JPanel() {
         if (musicFiles.size <= 1) {
             if (recordPlayedMusic) playMusic()
         } else if (state.likeWeight == 0.0 && state.dislikeWeight == 0.0) {
-            var index = Math.floor(Math.random() * musicFiles.size).toInt()
+            var index = floor(Math.random() * musicFiles.size).toInt()
             while ((state.antiAgainLevel == 2) && currentMusic === musicFiles[index]) {
-                index = Math.floor(Math.random() * musicFiles.size).toInt()
+                index = floor(Math.random() * musicFiles.size).toInt()
             }
             currentMusic = musicFiles[index]
         } else if (state.likeWeight == 0.0) {
@@ -649,7 +672,7 @@ class HoshisukiUI : JPanel() {
             currentMusic = weightChooseMusic(true, chooseDislike, true)
         } else if (state.dislikeWeight == 0.0) {
             val chooseLike = if (state.likeWeight < 0) (Math.random() < (1 + state.likeWeight) * 0.1) else (Math.random() < state.likeWeight)
-            currentMusic = weightChooseMusic(chooseLike, true, true)
+            currentMusic = weightChooseMusic(chooseLike, chooseDislike = true, withNormal = true)
         } else if (state.likeWeight != 0.0 && state.dislikeWeight != 0.0) {
             val chooseLike = if (state.likeWeight < 0) (Math.random() < (1 + state.likeWeight) * 0.1) else (Math.random() < state.likeWeight)
             val chooseDislike = if (state.dislikeWeight < 0) (Math.random() < (1 + state.dislikeWeight) * 0.1) else (Math.random() < state.dislikeWeight)
@@ -669,17 +692,17 @@ class HoshisukiUI : JPanel() {
         if (chooseDislike && state.dislikeWeight != 1.0) tempList.addAll(currentDislikeList)
         if (withNormal) tempList.addAll(currentNormalList)
         if (tempList.size > 1) {
-            var index = Math.floor(Math.random() * tempList.size).toInt()
+            var index = floor(Math.random() * tempList.size).toInt()
             while ((state.antiAgainLevel == 2) && currentMusic === tempList[index]) {
-                index = Math.floor(Math.random() * tempList.size).toInt()
+                index = floor(Math.random() * tempList.size).toInt()
             }
             return tempList[index]
         } else if (tempList.size == 1) {
             return tempList[0]
         } else {
-            var index = Math.floor(Math.random() * musicFiles.size).toInt()
+            var index = floor(Math.random() * musicFiles.size).toInt()
             while ((state.antiAgainLevel == 2) && currentMusic === musicFiles[index]) {
-                index = Math.floor(Math.random() * musicFiles.size).toInt()
+                index = floor(Math.random() * musicFiles.size).toInt()
             }
             return musicFiles[index]
         }
