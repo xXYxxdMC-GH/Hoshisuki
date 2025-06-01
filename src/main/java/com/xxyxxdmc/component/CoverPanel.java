@@ -1,10 +1,12 @@
 package com.xxyxxdmc.component;
 
 import com.intellij.ui.JBColor;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
+import java.net.URL;
 
 public class CoverPanel extends JPanel {
     private ImageIcon cover;
@@ -12,8 +14,13 @@ public class CoverPanel extends JPanel {
     private int padding = 10;
     private int arcRadius = 20;
 
-    public CoverPanel(ImageIcon cover, int edgeLength) {
-        this.cover = cover;
+    public CoverPanel(@Nullable ImageIcon cover, int edgeLength) {
+        if (cover != null) this.cover = cover;
+        else {
+            URL defaultCoverUrl = getClass().getClassLoader().getResource("icons/cover.png");
+            assert defaultCoverUrl != null;
+            this.cover = new ImageIcon(defaultCoverUrl);
+        }
         this.edgeLength = edgeLength;
         setPreferredSize(new Dimension(edgeLength, edgeLength));
     }
@@ -22,10 +29,8 @@ public class CoverPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // 转换为 Graphics2D 以使用更高级的绘图功能
-        Graphics2D g2d = (Graphics2D) g.create(); // 创建副本以避免修改原始 Graphics 对象
+        Graphics2D g2d = (Graphics2D) g.create();
 
-        // 开启抗锯齿，使圆角更平滑
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         int imageX = padding;

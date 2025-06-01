@@ -5,6 +5,7 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.xxyxxdmc.RandomPlayException
+import com.xxyxxdmc.component.CoverPanel
 import com.xxyxxdmc.component.IconTooltipActionButton
 import com.xxyxxdmc.icons.MusicIcons
 import javazoom.jl.decoder.JavaLayerException
@@ -52,6 +53,7 @@ class HoshisukiUI : JPanel() {
     private var currentNormalList = ArrayList<File>()
     private var alonePlayTime = 0
     private var playedMusic = ArrayList<File>()
+    private val volumeSlider = JSlider(JSlider.HORIZONTAL, -80, 6, 0)
 
     init {
         minimumSize = Dimension(150, 0)
@@ -145,10 +147,7 @@ class HoshisukiUI : JPanel() {
                 playCase.icon = MusicIcons.stopOnFinish
             }
         }
-        val coverPanel = JPanel().apply {
-            layout = BorderLayout()
-
-        }
+        val coverPanel = CoverPanel(null, size.width)
 
         val controlPanel = JPanel().apply {
             add(likeButton)
@@ -254,6 +253,23 @@ class HoshisukiUI : JPanel() {
             })
             //添加空缺
             add(Box.createVerticalStrut(7))
+            add(JPanel().apply {
+                layout = BorderLayout()
+                add(JLabel("  " + "Control Volume"/*bundle.message("option.volume.text")*/), BorderLayout.WEST)
+                volumeSlider.addChangeListener {
+                    val currentVolumeDB = volumeSlider.value.toFloat()
+
+                    if (player != null && isPlaying && player!!.isClosed == false) {
+                        player?.setVolume(currentVolumeDB)
+                    }
+                    if (clip.isOpen && clip.isRunning) {
+                        setClipVolume(clip, currentVolumeDB)
+                    }
+                }
+                add(volumeSlider, BorderLayout.CENTER)
+            })
+            //添加空缺
+            add(Box.createVerticalStrut(7))
         }
 
         val displayPanel = JPanel().apply {
@@ -264,7 +280,11 @@ class HoshisukiUI : JPanel() {
             add(selectButton, BorderLayout.EAST)
         }
 
-        add(displayPanel, BorderLayout.NORTH)
+        add(JPanel().apply {
+            layout = BorderLayout()
+            add(displayPanel, BorderLayout.SOUTH)
+            add(coverPanel, BorderLayout.CENTER)
+        }, BorderLayout.NORTH)
         add(JPanel().apply { layout = BorderLayout() }
             .apply { add(controlPanel, BorderLayout.NORTH) }
             .apply { add(settingPanel, BorderLayout.CENTER) }
@@ -536,6 +556,7 @@ class HoshisukiUI : JPanel() {
                         val fileStream = currentMusic?.let { FileInputStream(it) }
                         player = AdvancedPlayer(fileStream)
                         if (playThread != null) if (playThread!!.isAlive) playThread!!.interrupt()
+                        player?.setVolume(volumeSlider.value.toFloat())
                         playThread = Thread {
                             try {
                                 player!!.play()
@@ -557,7 +578,9 @@ class HoshisukiUI : JPanel() {
                     else -> {
                         val audioStream = currentMusic?.let { AudioSystem.getAudioInputStream(it) }
                         clip.open(audioStream)
+                        setClipVolume(clip, volumeSlider.value.toFloat())
                         clip.start()
+                        clip.removeLineListener { it?.type == LineEvent.Type.STOP }
                         clip.addLineListener { event: LineEvent ->
                             if (event.type === LineEvent.Type.STOP && !objectivePause) {
                                 stopMusic()
@@ -738,6 +761,42 @@ class HoshisukiUI : JPanel() {
                 index = floor(Math.random() * musicFiles.size).toInt()
             }
             return musicFiles[index]
+        }
+    }
+
+    private fun setClipVolume(clip: Clip, volumeDB: Float) {
+        if (clip.isOpen) {
+            try {
+                if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                    val gainControl = clip.getControl(FloatControl.Type.MASTER_GAIN) as FloatControl
+                    val min = gainControl.minimum
+                    val max = gainControl.maximum
+                    var actualVolumeDB = volumeDB
+                    if (actualVolumeDB < min) actualVolumeDB = min
+                    if (actualVolumeDB > max) actualVolumeDB = max
+                    gainControl.value = actualVolumeDB
+                } else if (clip.isControlSupported(FloatControl.Type.VOLUME)) {
+                    // 如果 MASTER_GAIN 不支持，可以尝试 VOLUME
+                    // 注意：FloatControl.Type.VOLUME 通常范围是 0.0f 到 1.0f
+                    // 你需要将 volumeDB (分贝值) 转换为线性值
+                    val volumeControl = clip.getControl(FloatControl.Type.VOLUME) as FloatControl
+                    // 这是一个简化的转换示例，实际应用中可能需要更精确的对数到线性转换
+                    // 例如: 0dB -> 1.0, -6dB -> 0.5, -20dB -> 0.1 等
+                    // 这里我们暂时只打印信息，表示需要进一步处理
+                    val linearVolume = Math.pow(10.0, (volumeDB / 20.0)).toFloat()
+                    val minLin = volumeControl.minimum
+                    val maxLin = volumeControl.maximum
+                    var actualLinearVolume = linearVolume
+                    if (actualLinearVolume < minLin) actualLinearVolume = minLin
+                    if (actualLinearVolume > maxLin) actualLinearVolume = maxLin
+                    volumeControl.value = actualLinearVolume
+                } else {
+                    println("Clip: Volume control not supported.")
+                }
+            } catch (e: IllegalArgumentException) {
+                // 当控件不支持特定类型或值超出范围时，可能会抛出此异常
+                println("Error setting clip volume: ${e.message}")
+            }
         }
     }
 }
