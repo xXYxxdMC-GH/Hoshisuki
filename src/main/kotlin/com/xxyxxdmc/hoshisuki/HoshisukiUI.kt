@@ -145,6 +145,11 @@ class HoshisukiUI : JPanel() {
                 playCase.icon = MusicIcons.stopOnFinish
             }
         }
+        val coverPanel = JPanel().apply {
+            layout = BorderLayout()
+
+        }
+
         val controlPanel = JPanel().apply {
             add(likeButton)
             add(prevButton)
@@ -197,13 +202,41 @@ class HoshisukiUI : JPanel() {
             })
             //添加空缺
             add(Box.createVerticalStrut(7))
+            //添加抗重复播放面板
             add(JPanel().apply {
                 layout = BorderLayout()
-                add(JLabel("  "+bundle.message("option.alone.play.times.text")).apply {
-                    HelpTooltip().setDescription(bundle.message("option.alone.play.times.context")).installOn(this)
+                add(JLabel("  "+bundle.message("option.anti.again.level.text")).apply {
+                    HelpTooltip().setDescription(bundle.message("option.anti.again.level.context")).installOn(this)
                 })
-                add(JSpinner(SpinnerNumberModel(state.alonePlayTimes, 2, Int.MAX_VALUE, 1).apply {
-                    addChangeListener { state.alonePlayTimes = value as Int }
+                val options = arrayOf(bundle.message("option.anti.again.level.off"), bundle.message("option.anti.again.level.normal"), bundle.message("option.anti.again.level.enhanced"))
+                add(JComboBox(options).apply {
+                    selectedIndex = state.antiAgainLevel
+                    addItemListener { state.antiAgainLevel = it.stateChange }
+                    preferredSize = Dimension(80, 30)
+                }, BorderLayout.EAST)
+            })
+            //添加空缺
+            add(Box.createVerticalStrut(7))
+            add(JPanel().apply {
+                layout = BorderLayout()
+                add(JLabel("  "+bundle.message("option.weight.liked.text")).apply {
+                    HelpTooltip().setDescription(bundle.message("option.weight.context")).installOn(this)
+                })
+                add(JSpinner(SpinnerNumberModel(state.likeWeight, -1.0, 1.0, 0.1).apply {
+                    addChangeListener { state.likeWeight = value as Double }
+                    preferredSize = Dimension(80, 30)
+                }), BorderLayout.EAST)
+            })
+            //添加空缺
+            add(Box.createVerticalStrut(7))
+            add(JPanel().apply {
+                layout = BorderLayout()
+                add(JLabel("  "+bundle.message("option.weight.disliked.text")).apply {
+                    HelpTooltip().setDescription(bundle.message("option.weight.context")).installOn(this)
+                })
+                add(JSpinner(SpinnerNumberModel(state.dislikeWeight, -1.0, 1.0, 0.1).apply {
+                    addChangeListener { state.dislikeWeight = value as Double }
+                    preferredSize = Dimension(80, 30)
                 }), BorderLayout.EAST)
             })
             //添加空缺
@@ -215,12 +248,12 @@ class HoshisukiUI : JPanel() {
                     HelpTooltip().setDescription(bundle.message("option.alone.play.times.context")).installOn(this)
                 })
                 add(JSpinner(SpinnerNumberModel(state.alonePlayTimes, 2, Int.MAX_VALUE, 1).apply {
+                    preferredSize = Dimension(80, 30)
                     addChangeListener { state.alonePlayTimes = value as Int }
                 }), BorderLayout.EAST)
             })
             //添加空缺
             add(Box.createVerticalStrut(7))
-
         }
 
         val displayPanel = JPanel().apply {
@@ -355,7 +388,7 @@ class HoshisukiUI : JPanel() {
             6 -> "play.case.random" to MusicIcons.random
             7 -> "play.case.random.finite" to MusicIcons.randomInTimes
             8 -> "play.case.stop.on.finish" to MusicIcons.stopOnFinish
-            else -> "play.case.list.cycle" to MusicIcons.listCycle // Fallback
+            else -> "play.case.list.cycle" to MusicIcons.listCycle
         }
         playCase.text = getExplainableMessage(textKey)
         playCase.icon = icon
@@ -677,8 +710,8 @@ class HoshisukiUI : JPanel() {
             val chooseLike = if (state.likeWeight < 0) (Math.random() < (1 + state.likeWeight) * 0.1) else (Math.random() < state.likeWeight)
             val chooseDislike = if (state.dislikeWeight < 0) (Math.random() < (1 + state.dislikeWeight) * 0.1) else (Math.random() < state.dislikeWeight)
             currentMusic = weightChooseMusic(chooseLike, chooseDislike, false)
-        } else throw RandomPlayException()
-        if (currentMusic == null) throw RandomPlayException()
+        } else throw RandomPlayException("")
+        if (currentMusic == null) throw RandomPlayException("")
         if (recordPlayedMusic && !playedMusic.contains(currentMusic!!)) playedMusic.add(currentMusic!!)
         selectedMusic = currentMusic
         list.selectedIndex = musicFiles.indexOf(currentMusic)
