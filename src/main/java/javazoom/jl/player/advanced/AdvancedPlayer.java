@@ -320,24 +320,24 @@ public class AdvancedPlayer
      */
     public synchronized void setVolume(float volumeDB) {
         AudioDevice out = audio;
-        // ¼ì²é audio device ÊÇ·ñÓĞĞ§¡¢²¥·ÅÆ÷ÊÇ·ñ¹Ø±Õ£¬ÒÔ¼° audio device ÊÇ·ñÎª SourceDataLine ÀàĞÍ
+        // æ£€æŸ¥ audio device æ˜¯å¦æœ‰æ•ˆã€æ’­æ”¾å™¨æ˜¯å¦å…³é—­ï¼Œä»¥åŠ audio device æ˜¯å¦ä¸º SourceDataLine ç±»å‹
         if (!closed && out instanceof javax.sound.sampled.SourceDataLine) {
             try {
                 javax.sound.sampled.SourceDataLine sdl = (javax.sound.sampled.SourceDataLine) out;
-                // ÓÅÏÈ³¢ÊÔ MASTER_GAIN ¿ØÖÆ
+                // ä¼˜å…ˆå°è¯• MASTER_GAIN æ§åˆ¶
                 if (sdl.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
                     FloatControl gainControl = (FloatControl) sdl.getControl(FloatControl.Type.MASTER_GAIN);
-                    float min = gainControl.getMinimum(); // »ñÈ¡×îĞ¡dBÖµ
-                    float max = gainControl.getMaximum(); // »ñÈ¡×î´ódBÖµ
-                    // È·±£ÒôÁ¿ÖµÔÚÔÊĞí·¶Î§ÄÚ
+                    float min = gainControl.getMinimum(); // è·å–æœ€å°dBå€¼
+                    float max = gainControl.getMaximum(); // è·å–æœ€å¤§dBå€¼
+                    // ç¡®ä¿éŸ³é‡å€¼åœ¨å…è®¸èŒƒå›´å†…
                     if (volumeDB < min) volumeDB = min;
                     if (volumeDB > max) volumeDB = max;
-                    gainControl.setValue(volumeDB); // ÉèÖÃÒôÁ¿ (dB)
+                    gainControl.setValue(volumeDB); // è®¾ç½®éŸ³é‡ (dB)
                 } else if (sdl.isControlSupported(FloatControl.Type.VOLUME)) {
-                    // Èç¹û MASTER_GAIN ²»Ö§³Ö£¬³¢ÊÔ VOLUME ¿ØÖÆ
-                    // ×¢Òâ£ºÕâÀïµÄ volumeDB ²ÎÊı¿ÉÄÜĞèÒªÕë¶Ô 0.0-1.0 µÄ·¶Î§½øĞĞÖØĞÂ½âÊÍ
+                    // å¦‚æœ MASTER_GAIN ä¸æ”¯æŒï¼Œå°è¯• VOLUME æ§åˆ¶
+                    // æ³¨æ„ï¼šè¿™é‡Œçš„ volumeDB å‚æ•°å¯èƒ½éœ€è¦é’ˆå¯¹ 0.0-1.0 çš„èŒƒå›´è¿›è¡Œé‡æ–°è§£é‡Š
                     FloatControl volCtrl = (FloatControl) sdl.getControl(FloatControl.Type.VOLUME);
-                    // ... (´Ë´¦´úÂë¿éÖĞÓĞ×¢ÊÍ£¬ËµÃ÷ĞèÒª½øĞĞdBµ½ÏßĞÔÖµµÄ×ª»»)
+                    // ... (æ­¤å¤„ä»£ç å—ä¸­æœ‰æ³¨é‡Šï¼Œè¯´æ˜éœ€è¦è¿›è¡ŒdBåˆ°çº¿æ€§å€¼çš„è½¬æ¢)
                     System.out.println("MASTER_GAIN not supported, VOLUME control might be available but requires different scaling for the 'volumeDB' parameter.");
                 } else {
                     System.out.println("Volume control not supported by this AudioDevice.");

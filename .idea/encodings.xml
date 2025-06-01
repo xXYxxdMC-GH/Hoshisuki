@@ -5,6 +5,7 @@
     <file url="file://$PROJECT_DIR$/src/main/java/com/xxyxxdmc/RandomPlayException.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/CoverPanel.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/xxyxxdmc/icons/MusicIcons.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/javazoom/jl/player/advanced/AdvancedPlayer.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSideBar.kt" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" charset="UTF-8" />

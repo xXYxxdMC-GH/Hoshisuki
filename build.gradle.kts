@@ -9,6 +9,9 @@ version = "1.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://www.beatunes.com/repo/maven2/")
+    }
 }
 
 // Configure Gradle IntelliJ Plugin
@@ -47,5 +50,7 @@ tasks {
 
     dependencies {
         implementation("javazoom:jlayer:1.0.1")
+        implementation("org.jcraft:jorbis:0.0.17")
+        implementation("com.jcraft:jogg:0.0.7")
     }
 }
