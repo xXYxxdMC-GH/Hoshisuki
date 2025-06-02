@@ -24,6 +24,10 @@ public class OggPlayer {
         }
     }
 
+    public void removePlaybackListener() {
+        this.listeners.clear();
+    }
+
     public void removePlaybackListener(PlaybackListener listener) {
         this.listeners.remove(listener);
     }
@@ -107,8 +111,8 @@ public class OggPlayer {
              throw e; // Rethrow
         } finally {
             if (outputLine != null) {
-                // outputLine.stop(); // Already handled in decodeAndPlayStream if stopRequested
-                // outputLine.flush(); // Already handled
+                outputLine.stop(); // Already handled in decodeAndPlayStream if stopRequested
+                outputLine.flush(); // Already handled
                 outputLine.close(); // Ensure it's closed
             }
             streamState.clear();
@@ -155,7 +159,6 @@ public class OggPlayer {
         }
         if (stopRequested) return;
 
-        // Read the next two header packets (Comment and Setup Headers)
         int headersProcessed = 0;
         while (headersProcessed < 2 && !stopRequested) {
             int pageoutResult = syncState.pageout(page);
@@ -257,7 +260,6 @@ public class OggPlayer {
         }
 
         if (stopRequested) {
-            System.out.println("Playback loop terminated due to stop request.");
             outputLine.stop();
             outputLine.flush();
             firePlaybackStopped(false);

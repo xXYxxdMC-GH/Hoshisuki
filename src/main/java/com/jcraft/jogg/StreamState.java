@@ -34,7 +34,7 @@ public class StreamState{
 
     int[] lacing_vals; /* The values that will go to the segment table */
     long[] granule_vals; /* pcm_pos values for headers. Not compact
-   		   this way, but it is simple coupled to the
+   		   this way, but it is simply coupled to the
    		   lacing fifo */
     int lacing_storage;
     int lacing_fill;
@@ -359,7 +359,7 @@ public class StreamState{
      even if there is not enough data to trigger a flush normally
      (undersized page). If there are no packets or partial packets to
      flush, ogg_stream_flush returns 0.  Note that ogg_stream_flush will
-     try to flush a normal sized page like ogg_stream_pageout; a call to
+     try to flush a normal-sized page like ogg_stream_pageout; a call to
      ogg_stream_flush does not gurantee that all packets have flushed.
      Only a return value of 0 from ogg_stream_flush indicates all packet
      data is flushed into pages.

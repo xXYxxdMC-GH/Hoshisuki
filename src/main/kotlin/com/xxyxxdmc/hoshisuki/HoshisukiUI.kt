@@ -4,12 +4,12 @@ import com.intellij.ide.HelpTooltip
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
-import com.xxyxxdmc.player.OggPlayer
-import com.xxyxxdmc.player.OggPlayerException
 import com.xxyxxdmc.RandomPlayException
 import com.xxyxxdmc.component.CoverPanel
 import com.xxyxxdmc.component.IconTooltipActionButton
 import com.xxyxxdmc.icons.MusicIcons
+import com.xxyxxdmc.player.OggPlayer
+import com.xxyxxdmc.player.OggPlayerException
 import javazoom.jl.decoder.JavaLayerException
 import javazoom.jl.player.advanced.AdvancedPlayer
 import javazoom.jl.player.advanced.PlaybackEvent
@@ -20,10 +20,13 @@ import java.awt.Dimension
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
-import javax.sound.sampled.*
+import javax.sound.sampled.AudioSystem
+import javax.sound.sampled.Clip
+import javax.sound.sampled.FloatControl
+import javax.sound.sampled.LineEvent
 import javax.swing.*
-import kotlin.collections.ArrayList
 import kotlin.math.floor
+import kotlin.math.round
 
 class HoshisukiUI : JPanel() {
     private val bundle = HoshisukiBundle
@@ -99,6 +102,7 @@ class HoshisukiUI : JPanel() {
                     musicFiles[0]
                 } else null
 
+                playedMusic.clear()
                 refreshLikeButtonVisuals()
                 if (currentMusic != null) {
                     playMusic()
@@ -294,12 +298,14 @@ class HoshisukiUI : JPanel() {
                     index--
                     if (index < 0) index = musicFiles.size - 1
 
+                    playedMusic.clear()
+
                     stopMusic()
                     currentMusic = musicFiles[index]
                     selectedMusic = musicFiles[index]
                     list.selectedIndex = index
-                    refreshPlayingIconInList()
                     playMusic()
+                    refreshPlayingIconInList()
                     objectivePause = false
                 }
             }
@@ -320,12 +326,14 @@ class HoshisukiUI : JPanel() {
                     index++
                     if (index >= musicFiles.size) index = 0
 
+                    playedMusic.clear()
+
                     stopMusic()
                     currentMusic = musicFiles[index]
                     selectedMusic = musicFiles[index]
                     list.selectedIndex = index
-                    refreshPlayingIconInList()
                     playMusic()
+                    refreshPlayingIconInList()
                     objectivePause = false
                 }
             }
@@ -334,6 +342,7 @@ class HoshisukiUI : JPanel() {
         playCase.action = Runnable {
             if (state.playCase + 1 > 8) state.playCase = 0
             else state.playCase++
+            playedMusic.clear()
             when (state.playCase) {
                 0 -> { // List Cycle
                     playCase.text = getExplainableMessage("play.case.list.cycle")
@@ -567,6 +576,7 @@ class HoshisukiUI : JPanel() {
                                 println("Play ERROR: ${e.message}")
                             }
                         }
+                        oggPlayer.removePlaybackListener()
                         oggPlayer.addPlaybackListener(
                             object: com.xxyxxdmc.player.PlaybackListener {
                                 override fun onPlaybackFinished(filePath: String) {
@@ -630,9 +640,9 @@ class HoshisukiUI : JPanel() {
             if (playThread!!.isAlive) playThread!!.interrupt()
         }
         clip.close()
-        refreshPlayingIconInList()
         alonePlayTime = 0
         isPlaying = false
+        refreshPlayingIconInList()
         playButton.text = getExplainableMessage("button.play.tooltip")
         playButton.icon = MusicIcons.run
         revalidate()
@@ -737,23 +747,29 @@ class HoshisukiUI : JPanel() {
         }
     }
 
+    fun Double.compare(value: Double): Boolean {
+        val roundedThis = round(this * 10.0) / 10.0
+        val roundedOther = round(value * 10.0) / 10.0
+        return roundedThis == roundedOther
+    }
+
     private fun randomPlayMusic(recordPlayedMusic: Boolean) {
         if (playedMusic.size == musicFiles.size) return
         if (musicFiles.size <= 1) {
             if (recordPlayedMusic) playMusic()
-        } else if (state.likeWeight == 0.0 && state.dislikeWeight == 0.0) {
+        } else if (state.likeWeight.compare(0.0) && state.dislikeWeight.compare(0.0)) {
             var index = floor(Math.random() * musicFiles.size).toInt()
             while ((state.antiAgainLevel == 2) && currentMusic === musicFiles[index]) {
                 index = floor(Math.random() * musicFiles.size).toInt()
             }
             currentMusic = musicFiles[index]
-        } else if (state.likeWeight == 0.0) {
+        } else if (state.likeWeight.compare(0.0)) {
             val chooseDislike = if (state.dislikeWeight < 0) (Math.random() < (1 + state.dislikeWeight) * 0.1) else (Math.random() < state.dislikeWeight)
             currentMusic = weightChooseMusic(true, chooseDislike, true)
-        } else if (state.dislikeWeight == 0.0) {
+        } else if (state.dislikeWeight.compare(0.0)) {
             val chooseLike = if (state.likeWeight < 0) (Math.random() < (1 + state.likeWeight) * 0.1) else (Math.random() < state.likeWeight)
             currentMusic = weightChooseMusic(chooseLike, chooseDislike = true, withNormal = true)
-        } else if (state.likeWeight != 0.0 && state.dislikeWeight != 0.0) {
+        } else if (!state.likeWeight.compare(0.0) && !state.dislikeWeight.compare(0.0)) {
             val chooseLike = if (state.likeWeight < 0) (Math.random() < (1 + state.likeWeight) * 0.1) else (Math.random() < state.likeWeight)
             val chooseDislike = if (state.dislikeWeight < 0) (Math.random() < (1 + state.dislikeWeight) * 0.1) else (Math.random() < state.dislikeWeight)
             currentMusic = weightChooseMusic(chooseLike, chooseDislike, false)
