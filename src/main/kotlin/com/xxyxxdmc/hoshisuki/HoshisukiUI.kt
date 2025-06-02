@@ -101,7 +101,6 @@ class HoshisukiUI : JPanel() {
 
                 refreshLikeButtonVisuals()
                 if (currentMusic != null) {
-                    refreshPlayingIconInList()
                     playMusic()
                 }
                 revalidate()
@@ -612,6 +611,7 @@ class HoshisukiUI : JPanel() {
                         playButton.icon = MusicIcons.stop
                     }
                 }
+                refreshPlayingIconInList()
                 revalidate()
                 repaint()
             } catch (_: Exception) {}
@@ -788,6 +788,7 @@ class HoshisukiUI : JPanel() {
         }
     }
 
+    // TODO: Volume Control
     private fun setClipVolume(clip: Clip, volumeDB: Float) {
         if (clip.isOpen) {
             try {
@@ -800,13 +801,7 @@ class HoshisukiUI : JPanel() {
                     if (actualVolumeDB > max) actualVolumeDB = max
                     gainControl.value = actualVolumeDB
                 } else if (clip.isControlSupported(FloatControl.Type.VOLUME)) {
-                    // 如果 MASTER_GAIN 不支持，可以尝试 VOLUME
-                    // 注意：FloatControl.Type.VOLUME 通常范围是 0.0f 到 1.0f
-                    // 你需要将 volumeDB (分贝值) 转换为线性值
                     val volumeControl = clip.getControl(FloatControl.Type.VOLUME) as FloatControl
-                    // 这是一个简化的转换示例，实际应用中可能需要更精确的对数到线性转换
-                    // 例如: 0dB -> 1.0, -6dB -> 0.5, -20dB -> 0.1 等
-                    // 这里我们暂时只打印信息，表示需要进一步处理
                     val linearVolume = Math.pow(10.0, (volumeDB / 20.0)).toFloat()
                     val minLin = volumeControl.minimum
                     val maxLin = volumeControl.maximum
@@ -818,7 +813,6 @@ class HoshisukiUI : JPanel() {
                     println("Clip: Volume control not supported.")
                 }
             } catch (e: IllegalArgumentException) {
-                // 当控件不支持特定类型或值超出范围时，可能会抛出此异常
                 println("Error setting clip volume: ${e.message}")
             }
         }
