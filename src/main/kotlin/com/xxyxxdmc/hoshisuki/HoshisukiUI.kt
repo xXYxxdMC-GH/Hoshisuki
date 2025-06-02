@@ -4,6 +4,8 @@ import com.intellij.ide.HelpTooltip
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
+import com.xxyxxdmc.player.OggPlayer
+import com.xxyxxdmc.player.OggPlayerException
 import com.xxyxxdmc.RandomPlayException
 import com.xxyxxdmc.component.CoverPanel
 import com.xxyxxdmc.component.IconTooltipActionButton
@@ -42,9 +44,10 @@ class HoshisukiUI : JPanel() {
     private val listModelPanel = DefaultListModel<JPanel>()
     private val list = JBList(listModelPanel)
     private var player: AdvancedPlayer? = null
+    private val clip: Clip = AudioSystem.getClip()
+    private val oggPlayer: OggPlayer = OggPlayer()
     private var isPlaying = false
     private var playThread: Thread? = null
-    private val clip: Clip = AudioSystem.getClip()
     private var selectedMusic: File? = null
     private var objectivePause = false
     private var currentMusic: File? = null
@@ -53,7 +56,6 @@ class HoshisukiUI : JPanel() {
     private var currentNormalList = ArrayList<File>()
     private var alonePlayTime = 0
     private var playedMusic = ArrayList<File>()
-    private val volumeSlider = JSlider(JSlider.HORIZONTAL, -80, 6, 0)
 
     init {
         minimumSize = Dimension(150, 0)
@@ -250,23 +252,6 @@ class HoshisukiUI : JPanel() {
                     preferredSize = Dimension(80, 30)
                     addChangeListener { state.alonePlayTimes = value as Int }
                 }), BorderLayout.EAST)
-            })
-            //添加空缺
-            add(Box.createVerticalStrut(7))
-            add(JPanel().apply {
-                layout = BorderLayout()
-                add(JLabel("  " + "Control Volume"/*bundle.message("option.volume.text")*/), BorderLayout.WEST)
-                volumeSlider.addChangeListener {
-                    val currentVolumeDB = volumeSlider.value.toFloat()
-
-                    if (player != null && isPlaying && player!!.isClosed == false) {
-                        player?.setVolume(currentVolumeDB)
-                    }
-                    if (clip.isOpen && clip.isRunning) {
-                        setClipVolume(clip, currentVolumeDB)
-                    }
-                }
-                add(volumeSlider, BorderLayout.CENTER)
             })
             //添加空缺
             add(Box.createVerticalStrut(7))
@@ -475,7 +460,7 @@ class HoshisukiUI : JPanel() {
         val musicList = ArrayList<File>()
         if (selectedFile.listFiles()?.isNotEmpty() == true) {
             selectedFile.listFiles()?.forEach {
-                if (it.isFile && it.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au")) {
+                if (it.isFile && it.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au", "ogg")) {
                     musicList.add(it)
                 }
             }
@@ -556,7 +541,6 @@ class HoshisukiUI : JPanel() {
                         val fileStream = currentMusic?.let { FileInputStream(it) }
                         player = AdvancedPlayer(fileStream)
                         if (playThread != null) if (playThread!!.isAlive) playThread!!.interrupt()
-                        player?.setVolume(volumeSlider.value.toFloat())
                         playThread = Thread {
                             try {
                                 player!!.play()
@@ -575,10 +559,46 @@ class HoshisukiUI : JPanel() {
                         playButton.text = getExplainableMessage("button.stop.tooltip")
                         playButton.icon = MusicIcons.stop
                     }
+                    "ogg" -> {
+                        if (playThread != null) if (playThread!!.isAlive) playThread!!.interrupt()
+                        playThread = Thread {
+                            try {
+                                oggPlayer.play(currentMusic!!.path)
+                            } catch (e: OggPlayerException) {
+                                println("Play ERROR: ${e.message}")
+                            }
+                        }
+                        oggPlayer.addPlaybackListener(
+                            object: com.xxyxxdmc.player.PlaybackListener {
+                                override fun onPlaybackFinished(filePath: String) {
+                                    stopMusic()
+                                    playCase()
+                                }
+                                override fun onPlaybackStarted(filePath: String) {
+                                }
+                                override fun onPlaybackStopped(filePath: String, dueToError: Boolean) {
+                                }
+                                override fun onPlaybackError(
+                                    filePath: String,
+                                    e: OggPlayerException
+                                ) {
+                                }
+                                override fun onProgressUpdate(
+                                    filePath: String,
+                                    currentMicroseconds: Long,
+                                    totalMicroseconds: Long
+                                ) {
+                                }
+                            }
+                        )
+                        playThread!!.start()
+                        isPlaying = true
+                        playButton.text = getExplainableMessage("button.stop.tooltip")
+                        playButton.icon = MusicIcons.stop
+                    }
                     else -> {
                         val audioStream = currentMusic?.let { AudioSystem.getAudioInputStream(it) }
                         clip.open(audioStream)
-                        setClipVolume(clip, volumeSlider.value.toFloat())
                         clip.start()
                         clip.removeLineListener { it?.type == LineEvent.Type.STOP }
                         clip.addLineListener { event: LineEvent ->
@@ -603,6 +623,10 @@ class HoshisukiUI : JPanel() {
     private fun stopMusic() {
         if (player != null && playThread != null) {
             player!!.close()
+            if (playThread!!.isAlive) playThread!!.interrupt()
+        }
+        if (playThread != null) {
+            oggPlayer.stop()
             if (playThread!!.isAlive) playThread!!.interrupt()
         }
         clip.close()
