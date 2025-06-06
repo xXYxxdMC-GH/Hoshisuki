@@ -30,18 +30,18 @@ import kotlin.math.floor
 import kotlin.math.round
 
 class HoshisukiUI : JPanel() {
+    private val bundle = HoshisukiBundle
     init {
         try {
             AudioSystem.getClip()
         } catch (_ : Exception) {
             JOptionPane.showMessageDialog(null,
-                "You may not have any audio output device, please restart your IDE to retry.",
-                "Hoshisuki Music Player ERROR",
+                bundle.message("message.no.audio.device"),
+                bundle.message("message.no.audio.device.title"),
                 JOptionPane.ERROR_MESSAGE
             )
         }
     }
-    private val bundle = HoshisukiBundle
     private val state = HoshisukiSettings.instance
     private fun getExplainableMessage(key: String): String {
         return bundle.message(if (state.detailTooltip) "$key.detail" else key)
@@ -51,6 +51,7 @@ class HoshisukiUI : JPanel() {
     private var playButton = IconTooltipActionButton(MusicIcons.run, getExplainableMessage("button.play.tooltip")) {}
     private val nextButton = IconTooltipActionButton(MusicIcons.playForward, getExplainableMessage("button.next.tooltip")) {}
     private val prevButton = IconTooltipActionButton(MusicIcons.playBack, getExplainableMessage("button.prev.tooltip")) {}
+    private val rescanButton = IconTooltipActionButton(MusicIcons.rescan, getExplainableMessage("button.rescan.tooltip")) {}
     private var playCase = IconTooltipActionButton(MusicIcons.listCycle, "") {}
     private val folderLabel = JLabel(bundle.message("folder.label.not.chosen"))
     private var scrollPane: Component? = null
@@ -105,6 +106,7 @@ class HoshisukiUI : JPanel() {
                 repaint()
             }
         }
+
         playButton.action = Runnable {
             if (state.musicFolder != null) {
                 objectivePause = true
@@ -125,6 +127,13 @@ class HoshisukiUI : JPanel() {
                 objectivePause = false
             }
         }
+
+        rescanButton.action = Runnable {
+            if (state.musicFolder != null) {
+                displayMusicList(File(state.musicFolder!!))
+            }
+        }
+
         layout = BorderLayout()
 
         when (state.playCase) {
@@ -219,6 +228,19 @@ class HoshisukiUI : JPanel() {
             })
             //添加空缺
             add(Box.createVerticalStrut(7))
+            //添加面板显示优化
+            add(JPanel().apply {
+                layout = BorderLayout()
+                add(JLabel("  "+bundle.message("option.optimize.panel.text")).apply {
+                    HelpTooltip().setDescription(bundle.message("option.optimize.panel.context")).installOn(this)
+                }, BorderLayout.WEST)
+                add(JBCheckBox("", state.optimizePanel).apply {
+                    addActionListener {
+                        state.optimizePanel = this.isSelected
+                    } }, BorderLayout.EAST)
+            })
+            //添加空缺
+            add(Box.createVerticalStrut(7))
             //添加抗重复播放面板
             add(JPanel().apply {
                 layout = BorderLayout()
@@ -234,6 +256,7 @@ class HoshisukiUI : JPanel() {
             })
             //添加空缺
             add(Box.createVerticalStrut(7))
+            //添加喜欢歌曲播放权重面板
             add(JPanel().apply {
                 layout = BorderLayout()
                 add(JLabel("  "+bundle.message("option.weight.liked.text")).apply {
@@ -246,6 +269,7 @@ class HoshisukiUI : JPanel() {
             })
             //添加空缺
             add(Box.createVerticalStrut(7))
+            //添加不喜欢歌曲播放权重面板
             add(JPanel().apply {
                 layout = BorderLayout()
                 add(JLabel("  "+bundle.message("option.weight.disliked.text")).apply {
@@ -278,7 +302,11 @@ class HoshisukiUI : JPanel() {
             add(JLabel("  "+bundle.message("music.folder.label.prefix")+" "), BorderLayout.WEST)
             add(folderLabel, BorderLayout.CENTER)
             folderLabel.text = state.musicFolder ?: bundle.message("folder.label.not.chosen")
-            add(selectButton, BorderLayout.EAST)
+            add(JPanel().apply {
+                layout = BorderLayout()
+                add(rescanButton, BorderLayout.WEST)
+                add(selectButton, BorderLayout.CENTER)
+            }, BorderLayout.EAST)
         }
 
         add(JPanel().apply {
@@ -294,6 +322,7 @@ class HoshisukiUI : JPanel() {
         if (state.musicFolder!=null) {
             displayMusicList(File(state.musicFolder!!))
         }
+
         selectButton.addActionListener { chooseFolder() }
 
         prevButton.action = Runnable {
@@ -452,6 +481,38 @@ class HoshisukiUI : JPanel() {
             val panel = listModelPanel.getElementAt(i) ?: continue
             val fileForPanel = listModel.getElementAt(i) ?: continue
 
+            if (state.optimizePanel) {
+                var panelHasPlayingIcon = false
+                var panelLikeStatusIcon: Icon? = null
+                var panelHasCorrectNameLabel = false
+                val expectedNameText = " " + fileForPanel.name
+
+                panel.components.forEach { comp ->
+                    if (comp is JLabel) {
+                        if (comp.icon == MusicIcons.playing) {
+                            panelHasPlayingIcon = true
+                        } else if (comp.icon == MusicIcons.like || comp.icon == MusicIcons.dislike || comp.icon == MusicIcons.dislikeAnti) {
+                            panelLikeStatusIcon = comp.icon
+                        } else if (comp.text == expectedNameText && comp.icon == null) { // Name label usually has no icon
+                            panelHasCorrectNameLabel = true
+                        }
+                    }
+                }
+
+                val shouldHavePlayingIcon = (fileForPanel === currentMusic && isPlaying)
+                val expectedLikeStatusIcon: Icon? = when {
+                    fileForPanel in currentLikeList -> MusicIcons.like
+                    fileForPanel in currentDislikeList -> if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
+                    else -> null
+                }
+
+                if (panelHasCorrectNameLabel &&
+                    shouldHavePlayingIcon == panelHasPlayingIcon &&
+                    expectedLikeStatusIcon == panelLikeStatusIcon) {
+                    continue
+                }
+            }
+
             panel.removeAll()
 
             if (fileForPanel === currentMusic && isPlaying) {
@@ -533,12 +594,14 @@ class HoshisukiUI : JPanel() {
             if (scrollPane!=null){
                 scrollPane?.let { add(it, BorderLayout.CENTER) }
             }
+            refreshPlayingIconInList()
             revalidate()
             repaint()
         } else {
             JOptionPane.showMessageDialog(null, bundle.message("message.empty.folder"))
         }
     }
+
     private fun createMusicPanel(music: File): JPanel {
         return JPanel().apply {
             layout = BorderLayout()
@@ -553,6 +616,7 @@ class HoshisukiUI : JPanel() {
             }
         }
     }
+
     private fun playMusic() {
         alonePlayTime = 0
         if (!isPlaying && selectedMusic != null) {
@@ -562,13 +626,11 @@ class HoshisukiUI : JPanel() {
                         val fileStream = currentMusic?.let { FileInputStream(it) }
                         player = AdvancedPlayer(fileStream)
                         if (mp3PlayThread != null) if (mp3PlayThread!!.isAlive) mp3PlayThread!!.interrupt()
-                        if (mp3PlayThread == null) {
-                            mp3PlayThread = Thread {
-                                try {
-                                    player!!.play()
-                                } catch (e: JavaLayerException) {
-                                    println("Play ERROR: ${e.message}")
-                                }
+                        mp3PlayThread = Thread {
+                            try {
+                                player!!.play()
+                            } catch (e: JavaLayerException) {
+                                println("Play ERROR: ${e.message}")
                             }
                         }
                         player!!.playBackListener = object: PlaybackListener() {
@@ -584,30 +646,29 @@ class HoshisukiUI : JPanel() {
                     }
                     "ogg" -> {
                         if (oggPlayThread != null) if (oggPlayThread!!.isAlive) oggPlayThread!!.interrupt()
-                        if (oggPlayThread == null) {
-                            oggPlayThread = Thread {
-                                try {
-                                    oggPlayer.play(currentMusic!!.path)
-                                } catch (e: OggPlayerException) {
-                                    println("Play ERROR: ${e.message}")
+                        oggPlayThread = Thread {
+                            try {
+                                oggPlayer.play(currentMusic!!.path)
+                            } catch (e: OggPlayerException) {
+                                println("Play ERROR: ${e.message}")
+                            }
+                        }
+                        oggPlayer.removePlaybackListener()
+                        oggPlayer.addPlaybackListener(
+                            object: OggPlaybackListener {
+                                override fun onPlaybackFinished(filePath: String) {
+                                    stopMusic()
+                                    playCase()
+                                }
+                                override fun onPlaybackStopped(filePath: String, dueToError: Boolean) {
+                                }
+                                override fun onPlaybackError(
+                                    filePath: String,
+                                    e: OggPlayerException
+                                ) {
                                 }
                             }
-                            oggPlayer.addPlaybackListener(
-                                object: OggPlaybackListener {
-                                    override fun onPlaybackFinished(filePath: String) {
-                                        stopMusic()
-                                        playCase()
-                                    }
-                                    override fun onPlaybackStopped(filePath: String, dueToError: Boolean) {
-                                    }
-                                    override fun onPlaybackError(
-                                        filePath: String,
-                                        e: OggPlayerException
-                                    ) {
-                                    }
-                                }
-                            )
-                        }
+                        )
                         oggPlayThread!!.start()
                         isPlaying = true
                         playButton.text = getExplainableMessage("button.stop.tooltip")
@@ -663,7 +724,7 @@ class HoshisukiUI : JPanel() {
         playButton.text = if (isPlaying) getExplainableMessage("button.stop.tooltip") else getExplainableMessage("button.play.tooltip")
         nextButton.text = getExplainableMessage("button.next.tooltip")
         prevButton.text = getExplainableMessage("button.prev.tooltip")
-        selectButton.toolTipText = bundle.message("button.choose.text")
+        rescanButton.text = getExplainableMessage("button.rescan.tooltip")
     }
 
     private fun playCase() {

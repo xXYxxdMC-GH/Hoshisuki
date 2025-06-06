@@ -18,6 +18,7 @@ class HoshisukiSettings : PersistentStateComponent<HoshisukiSettings> {
     var likeWeight: Double = 0.0
     var dislikeWeight: Double = 0.0
     var antiAgainLevel: Int = 0
+    var optimizePanel: Boolean = false
     var musicCoverMap: Map<String, String> = emptyMap()
 
     @Nullable

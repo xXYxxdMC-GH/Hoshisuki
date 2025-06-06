@@ -19,10 +19,11 @@ public interface MusicIcons {
     Icon random = AllIcons.Nodes.Deploy;
     Icon randomInTimes = AllIcons.Nodes.Undeploy;
     Icon stopOnFinish = AllIcons.Actions.MoveToButton;
-    Icon playing = IconLoader.getIcon("/icons/library.svg", MusicIcons.class);
     Icon like = AllIcons.Actions.IntentionBulb;
     Icon unDislike = AllIcons.Actions.IntentionBulbGrey;
     Icon dislike = AllIcons.Actions.QuickfixBulb;
     Icon dislikeAnti = AllIcons.Actions.QuickfixOffBulb;
+    Icon rescan = AllIcons.Actions.RestartFrame;
+    Icon playing = IconLoader.getIcon("/icons/library.svg", MusicIcons.class);
     Icon player = IconLoader.getIcon("/icons/hoshisuki.svg", MusicIcons.class);
 }
