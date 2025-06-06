@@ -8,6 +8,7 @@ import com.xxyxxdmc.RandomPlayException
 import com.xxyxxdmc.component.CoverPanel
 import com.xxyxxdmc.component.IconTooltipActionButton
 import com.xxyxxdmc.icons.MusicIcons
+import com.xxyxxdmc.player.OggPlaybackListener
 import com.xxyxxdmc.player.OggPlayer
 import com.xxyxxdmc.player.OggPlayerException
 import javazoom.jl.decoder.JavaLayerException
@@ -29,6 +30,17 @@ import kotlin.math.floor
 import kotlin.math.round
 
 class HoshisukiUI : JPanel() {
+    init {
+        try {
+            AudioSystem.getClip()
+        } catch (_ : Exception) {
+            JOptionPane.showMessageDialog(null,
+                "You may not have any audio output device, please restart your IDE to retry.",
+                "Hoshisuki Music Player ERROR",
+                JOptionPane.ERROR_MESSAGE
+            )
+        }
+    }
     private val bundle = HoshisukiBundle
     private val state = HoshisukiSettings.instance
     private fun getExplainableMessage(key: String): String {
@@ -50,7 +62,8 @@ class HoshisukiUI : JPanel() {
     private val clip: Clip = AudioSystem.getClip()
     private val oggPlayer: OggPlayer = OggPlayer()
     private var isPlaying = false
-    private var playThread: Thread? = null
+    private var mp3PlayThread: Thread? = null
+    private var oggPlayThread: Thread? = null
     private var selectedMusic: File? = null
     private var objectivePause = false
     private var currentMusic: File? = null
@@ -152,7 +165,7 @@ class HoshisukiUI : JPanel() {
                 playCase.icon = MusicIcons.stopOnFinish
             }
         }
-        val coverPanel = CoverPanel(null, size.width)
+        //val coverPanel = CoverPanel(null, size.width)
 
         val controlPanel = JPanel().apply {
             add(likeButton)
@@ -271,7 +284,7 @@ class HoshisukiUI : JPanel() {
         add(JPanel().apply {
             layout = BorderLayout()
             add(displayPanel, BorderLayout.SOUTH)
-            add(coverPanel, BorderLayout.CENTER)
+            //add(coverPanel, BorderLayout.CENTER)
         }, BorderLayout.NORTH)
         add(JPanel().apply { layout = BorderLayout() }
             .apply { add(controlPanel, BorderLayout.NORTH) }
@@ -548,12 +561,14 @@ class HoshisukiUI : JPanel() {
                     "mp3" -> {
                         val fileStream = currentMusic?.let { FileInputStream(it) }
                         player = AdvancedPlayer(fileStream)
-                        if (playThread != null) if (playThread!!.isAlive) playThread!!.interrupt()
-                        playThread = Thread {
-                            try {
-                                player!!.play()
-                            } catch (e: JavaLayerException) {
-                                println("Play ERROR: ${e.message}")
+                        if (mp3PlayThread != null) if (mp3PlayThread!!.isAlive) mp3PlayThread!!.interrupt()
+                        if (mp3PlayThread == null) {
+                            mp3PlayThread = Thread {
+                                try {
+                                    player!!.play()
+                                } catch (e: JavaLayerException) {
+                                    println("Play ERROR: ${e.message}")
+                                }
                             }
                         }
                         player!!.playBackListener = object: PlaybackListener() {
@@ -562,45 +577,38 @@ class HoshisukiUI : JPanel() {
                                 playCase()
                             }
                         }
-                        playThread!!.start()
+                        mp3PlayThread!!.start()
                         isPlaying = true
                         playButton.text = getExplainableMessage("button.stop.tooltip")
                         playButton.icon = MusicIcons.stop
                     }
                     "ogg" -> {
-                        if (playThread != null) if (playThread!!.isAlive) playThread!!.interrupt()
-                        playThread = Thread {
-                            try {
-                                oggPlayer.play(currentMusic!!.path)
-                            } catch (e: OggPlayerException) {
-                                println("Play ERROR: ${e.message}")
+                        if (oggPlayThread != null) if (oggPlayThread!!.isAlive) oggPlayThread!!.interrupt()
+                        if (oggPlayThread == null) {
+                            oggPlayThread = Thread {
+                                try {
+                                    oggPlayer.play(currentMusic!!.path)
+                                } catch (e: OggPlayerException) {
+                                    println("Play ERROR: ${e.message}")
+                                }
                             }
+                            oggPlayer.addPlaybackListener(
+                                object: OggPlaybackListener {
+                                    override fun onPlaybackFinished(filePath: String) {
+                                        stopMusic()
+                                        playCase()
+                                    }
+                                    override fun onPlaybackStopped(filePath: String, dueToError: Boolean) {
+                                    }
+                                    override fun onPlaybackError(
+                                        filePath: String,
+                                        e: OggPlayerException
+                                    ) {
+                                    }
+                                }
+                            )
                         }
-                        oggPlayer.removePlaybackListener()
-                        oggPlayer.addPlaybackListener(
-                            object: com.xxyxxdmc.player.PlaybackListener {
-                                override fun onPlaybackFinished(filePath: String) {
-                                    stopMusic()
-                                    playCase()
-                                }
-                                override fun onPlaybackStarted(filePath: String) {
-                                }
-                                override fun onPlaybackStopped(filePath: String, dueToError: Boolean) {
-                                }
-                                override fun onPlaybackError(
-                                    filePath: String,
-                                    e: OggPlayerException
-                                ) {
-                                }
-                                override fun onProgressUpdate(
-                                    filePath: String,
-                                    currentMicroseconds: Long,
-                                    totalMicroseconds: Long
-                                ) {
-                                }
-                            }
-                        )
-                        playThread!!.start()
+                        oggPlayThread!!.start()
                         isPlaying = true
                         playButton.text = getExplainableMessage("button.stop.tooltip")
                         playButton.icon = MusicIcons.stop
@@ -631,13 +639,13 @@ class HoshisukiUI : JPanel() {
     }
 
     private fun stopMusic() {
-        if (player != null && playThread != null) {
+        if (player != null && mp3PlayThread != null) {
             player!!.close()
-            if (playThread!!.isAlive) playThread!!.interrupt()
+            if (mp3PlayThread!!.isAlive) mp3PlayThread!!.interrupt()
         }
-        if (playThread != null) {
+        if (oggPlayThread != null) {
             oggPlayer.stop()
-            if (playThread!!.isAlive) playThread!!.interrupt()
+            if (oggPlayThread!!.isAlive) oggPlayThread!!.interrupt()
         }
         clip.close()
         alonePlayTime = 0

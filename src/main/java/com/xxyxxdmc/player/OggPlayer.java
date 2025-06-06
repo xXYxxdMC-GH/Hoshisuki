@@ -12,13 +12,13 @@ public class OggPlayer {
     private static final int JOGG_BUFFER_SIZE = 4096;
     private volatile boolean stopRequested = false;
 
-    private final List<PlaybackListener> listeners = new CopyOnWriteArrayList<>();
+    private final List<OggPlaybackListener> listeners = new CopyOnWriteArrayList<>();
 
     private long lastProgressUpdateTime = 0;
     private static final long PROGRESS_UPDATE_INTERVAL_MS = 1000;
     private String currentFilePath;
 
-    public void addPlaybackListener(PlaybackListener listener) {
+    public void addPlaybackListener(OggPlaybackListener listener) {
         if (listener != null) {
             this.listeners.add(listener);
         }
@@ -28,52 +28,39 @@ public class OggPlayer {
         this.listeners.clear();
     }
 
-    public void removePlaybackListener(PlaybackListener listener) {
+    public void removePlaybackListener(OggPlaybackListener listener) {
         this.listeners.remove(listener);
     }
 
-    private void firePlaybackStarted() {
-        for (PlaybackListener listener : listeners) {
-            listener.onPlaybackStarted(this.currentFilePath);
-        }
-    }
-
     private void firePlaybackStopped(boolean dueToError) {
-        for (PlaybackListener listener : listeners) {
+        for (OggPlaybackListener listener : listeners) {
             listener.onPlaybackStopped(this.currentFilePath, dueToError);
         }
     }
 
     private void firePlaybackFinished() {
-        for (PlaybackListener listener : listeners) {
+        for (OggPlaybackListener listener : listeners) {
             listener.onPlaybackFinished(this.currentFilePath);
         }
     }
 
     private void firePlaybackError(OggPlayerException e) {
-        for (PlaybackListener listener : listeners) {
+        for (OggPlaybackListener listener : listeners) {
             listener.onPlaybackError(this.currentFilePath, e);
         }
     }
 
-    private void fireProgressUpdate(long currentMicroseconds, long totalMicroseconds) {
-        for (PlaybackListener listener : listeners) {
-            listener.onProgressUpdate(this.currentFilePath, currentMicroseconds, totalMicroseconds);
-        }
-    }
-
-
-    public void play(String filePath) throws OggPlayerException { // Simplified exception signature
+    public void play(String filePath) throws OggPlayerException {
         this.stopRequested = false;
-        this.currentFilePath = filePath; // Store for listeners
-        this.lastProgressUpdateTime = 0; // Reset for new playback
+        this.currentFilePath = filePath;
+        this.lastProgressUpdateTime = 0;
 
         SyncState syncState = new SyncState();
         StreamState streamState = new StreamState();
         Info info = new Info();
         Comment comment = new Comment();
         DspState dspState = new DspState();
-        SourceDataLine outputLine = null; // Declare here for access in finally and for progress
+        SourceDataLine outputLine = null;
 
         try (InputStream inputStream = new FileInputStream(filePath);
              BufferedInputStream bitStream = new BufferedInputStream(inputStream)) {
@@ -88,21 +75,18 @@ public class OggPlayer {
             AudioFormat audioFormat = new AudioFormat((float) info.rate, 16, info.channels, true, false);
             DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
 
-            outputLine = (SourceDataLine) AudioSystem.getLine(dataLineInfo); // Assign to class-accessible variable
+            outputLine = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
             outputLine.open(audioFormat);
             outputLine.start();
 
-            firePlaybackStarted(); // Notify listeners: playback has started
-
             decodeAndPlayStream(bitStream, syncState, streamState, info, dspState, block, outputLine);
 
-            if (!stopRequested) { // If not stopped by user or error
-                outputLine.drain(); // Wait for buffer to empty only if playback completed naturally
-                firePlaybackFinished(); // Notify listeners: playback finished naturally
+            if (!stopRequested) {
+                outputLine.drain();
+                firePlaybackFinished();
             }
 
         } catch (IOException | LineUnavailableException | SecurityException e) {
-            // Wrap standard exceptions into OggPlayerException
             OggPlayerException oggEx = new OggPlayerException("Error during playback setup or IO: " + e.getMessage());
             firePlaybackError(oggEx); // Notify listeners of the error
             throw oggEx; // Rethrow
@@ -203,13 +187,9 @@ public class OggPlayer {
         float[][][] pcmWorkspace = new float[1][][];
         int[] pcmChannelIndex = new int[info.channels];
 
-        long totalMicroseconds = -1;
-
         while (!endOfStream && !stopRequested) {
             long currentTimeMs = System.currentTimeMillis();
             if (outputLine.isOpen() && outputLine.isRunning() && (currentTimeMs - lastProgressUpdateTime > PROGRESS_UPDATE_INTERVAL_MS)) {
-                long currentPositionMicro = outputLine.getMicrosecondPosition();
-                fireProgressUpdate(currentPositionMicro, totalMicroseconds);
                 lastProgressUpdateTime = currentTimeMs;
             }
 

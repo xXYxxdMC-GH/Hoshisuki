@@ -99,27 +99,15 @@ public class AdvancedPlayer
         {
             ret = decodeFrame();
         }
-
-//		if (!ret) // This condition seems to be always true if loop finishes due to frames--
-        // It should rather check if playback was stopped for other reasons or completed
-        // The original logic seems to always flush and close if play(frames) is called.
         {
-            // last frame, ensure all data flushed to the audio device.
             AudioDevice out = audio;
             if (out != null)
             {
-//				System.out.println(audio.getPosition());
                 out.flush();
-//				System.out.println(audio.getPosition());
                 synchronized (this)
                 {
-                    // If ret is false, it means decodeFrame returned false (end of stream)
-                    complete = (!closed && !ret); // Mark complete if not closed and end of stream reached
-                    // close(); // Closing here means it cannot be resumed or played further.
-                    // This might be intended, but for a player, often 'stop' is different from 'close permanently'
+                    complete = (!closed && !ret);
                 }
-
-                // report to listener only if playback actually finished due to end of stream or explicit stop
                 if(listener != null && complete) {
                     listener.playbackFinished(createEvent(out, PlaybackEvent.STOPPED));
                 }
@@ -138,26 +126,21 @@ public class AdvancedPlayer
         if (out != null)
         {
             closed = true;
-            // Stop playback before closing the device
-            // This ensures that any ongoing audio processing is halted.
-            // However, the original 'stop()' method also calls 'close()'.
-            // If 'close()' is meant to be a full resource release, this is okay.
-            out.close(); // Close the audio device first
-            lastPosition = out.getPosition(); // Get position before nullifying audio
-            audio = null; // Nullify after use
-            decoder = null; // Also nullify decoder
+            out.close();
+            lastPosition = out.getPosition();
+            audio = null;
+            decoder = null;
             try
             {
-                if (bitstream != null) { // Check if bitstream is not null before closing
+                if (bitstream != null) {
                     bitstream.close();
                 }
             }
             catch (BitstreamException ex)
             {
-                // Log or handle exception
                 ex.printStackTrace();
             }
-            bitstream = null; // Nullify after closing
+            bitstream = null;
         }
     }
 
@@ -171,36 +154,31 @@ public class AdvancedPlayer
         try
         {
             AudioDevice out = audio;
-            if (out == null || closed) return false; // if closed or audio is null, cannot decode
+            if (out == null || closed) return false;
 
             Header h = bitstream.readFrame();
-            if (h == null) return false; // End of stream
+            if (h == null) return false;
 
-            // Ensure decoder is available
             if (decoder == null) {
-                // This case should ideally not happen if player is properly initialized
                 throw new JavaLayerException("Decoder not initialized");
             }
-            // sample buffer set when decoder constructed
             SampleBuffer output = (SampleBuffer) decoder.decodeFrame(h, bitstream);
 
             synchronized (this)
             {
-                out = audio; // Re-fetch in case it was closed by another thread
-                if(out != null && !closed) // Check again before writing
+                out = audio;
+                if(out != null && !closed)
                 {
                     out.write(output.getBuffer(), 0, output.getBufferLength());
                 } else {
-                    return false; // Audio device closed or player closed during decode
+                    return false;
                 }
             }
 
             bitstream.closeFrame();
         }
         catch (BitstreamException e) {
-            // If it's an end-of-stream related BitstreamException, it might be normal
-            // For other BitstreamExceptions, rethrow as JavaLayerException
-            if (e.getMessage() != null && e.getMessage().contains("END OF STREAM")) { // Heuristic
+            if (e.getMessage() != null && e.getMessage().contains("END OF STREAM")) {
                 return false;
             }
             throw new JavaLayerException("Exception decoding audio frame", e);
@@ -241,10 +219,10 @@ public class AdvancedPlayer
         while (framesToSkip-- > 0 && ret) {
             ret = skipFrame();
         }
-        if (!ret) { // Could not skip to start frame
+        if (!ret) {
             return false;
         }
-        return play(end - start + 1); // Play 'frameCount' frames, so (end - start + 1)
+        return play(end - start + 1);
     }
 
     /**
@@ -266,7 +244,7 @@ public class AdvancedPlayer
     }
 
     /**
-     * sets the <code>PlaybackListener</code>
+     * sets the <code>OggPlaybackListener</code>
      */
     public void setPlayBackListener(PlaybackListener listener)
     {
@@ -274,7 +252,7 @@ public class AdvancedPlayer
     }
 
     /**
-     * gets the <code>PlaybackListener</code>
+     * gets the <code>OggPlaybackListener</code>
      */
     public PlaybackListener getPlayBackListener()
     {
@@ -282,7 +260,7 @@ public class AdvancedPlayer
     }
 
     /**
-     * Stops the player and notifies the <code>PlaybackListener</code>.
+     * Stops the player and notifies the <code>OggPlaybackListener</code>.
      * This method stops playback and prepares for potential closing,
      * but doesn't release all resources like close() does.
      * The original `stop()` method called `close()`, which might be too aggressive
@@ -290,19 +268,10 @@ public class AdvancedPlayer
      */
     public synchronized void stop()
     {
-        if (!closed) { // Only stop if not already closed
-            // Notify listener that playback is stopping.
-            // The original code created event with PlaybackEvent.STOPPED.
-            // This is fine.
+        if (!closed) {
             if (listener != null) {
                 listener.playbackFinished(createEvent(PlaybackEvent.STOPPED));
             }
-
-            // The original `stop()` called `close()`.
-            // If `stop()` is meant to be a "pause and can resume later" or "stop current track",
-            // then `close()` might be too much as it releases all resources.
-            // For now, let's keep the original behavior of calling close().
-            // If a more sophisticated pause/resume is needed, this part needs rethinking.
             close();
         }
     }
@@ -320,25 +289,21 @@ public class AdvancedPlayer
      */
     public synchronized void setVolume(float volumeDB) {
         AudioDevice out = audio;
-        // 检查 audio device 是否有效、播放器是否关闭，以及 audio device 是否为 SourceDataLine 类型
-        if (!closed && out instanceof javax.sound.sampled.SourceDataLine) {
+        if (!closed && out instanceof javax.sound.sampled.SourceDataLine sdl) {
             try {
-                javax.sound.sampled.SourceDataLine sdl = (javax.sound.sampled.SourceDataLine) out;
-                // 优先尝试 MASTER_GAIN 控制
                 if (sdl.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
                     FloatControl gainControl = (FloatControl) sdl.getControl(FloatControl.Type.MASTER_GAIN);
-                    float min = gainControl.getMinimum(); // 获取最小dB值
-                    float max = gainControl.getMaximum(); // 获取最大dB值
-                    // 确保音量值在允许范围内
+                    float min = gainControl.getMinimum();
+                    float max = gainControl.getMaximum();
                     if (volumeDB < min) volumeDB = min;
                     if (volumeDB > max) volumeDB = max;
-                    gainControl.setValue(volumeDB); // 设置音量 (dB)
+                    gainControl.setValue(volumeDB);
                 } else if (sdl.isControlSupported(FloatControl.Type.VOLUME)) {
-                    // 如果 MASTER_GAIN 不支持，尝试 VOLUME 控制
-                    // 注意：这里的 volumeDB 参数可能需要针对 0.0-1.0 的范围进行重新解释
                     FloatControl volCtrl = (FloatControl) sdl.getControl(FloatControl.Type.VOLUME);
-                    // ... (此处代码块中有注释，说明需要进行dB到线性值的转换)
-                    System.out.println("MASTER_GAIN not supported, VOLUME control might be available but requires different scaling for the 'volumeDB' parameter.");
+                    float minVol = volCtrl.getMinimum();
+                    float maxVol = volCtrl.getMaximum();
+                    float valueToSet = Math.max(minVol, Math.min(volumeDB, maxVol));
+                    volCtrl.setValue(valueToSet);
                 } else {
                     System.out.println("Volume control not supported by this AudioDevice.");
                 }

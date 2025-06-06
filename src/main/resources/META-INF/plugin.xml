@@ -20,16 +20,19 @@
 
     <h2>Features</h2>
     <ul>
-      <li><strong>Support for multiple audio formats</strong>: The plugin includes various libraries that enable playback of <code>WAV</code>, <code>MP3</code>, <code>AIF(F)</code>, and <code>AU</code> audio files.</li>
+      <li><strong>Support for multiple audio formats</strong>: The plugin includes various libraries that enable playback of <code>WAV</code>, <code>MP3</code>, <code>AIF(F)</code>, <code>AU</code>, and <code>OGG</code> audio files.</li>
       <li><strong>Integrated panel</strong>: A panel is added to the left sidebar, where you can play music or configure settings.</li>
       <li><strong>Various playback modes</strong>:
         <ul>
-          <li>Single-track loop</li>
-          <li>Playlist loop</li>
-          <li>Random playback</li>
-          <li>Pause after playback</li>
-          <li>Sequential playback</li>
-          <li>Reverse playback</li>
+          <li>List Cycle</li>
+          <li>List Reverse Cycle</li>
+          <li>Single Track Loop</li>
+          <li>Finite Single Track Loop</li>
+          <li>List Playback</li>
+          <li>Reverse List Playback</li>
+          <li>Shuffle Play</li>
+          <li>Finite Shuffle Play</li>
+          <li>Stop After Playback</li>
         </ul>
       </li>
     </ul>
@@ -40,6 +43,22 @@
     <h2>License</h2>
     <p>This project is licensed under <code>GPL-3</code>. You may use it in your own projects, but you must credit the original author.</p>
   ]]></description>
+
+    <change-notes><![CDATA[
+      <h3>Version 1.1</h3>
+      <ul>
+        <li>Improved performance of the music list display.</li>
+        <li>Updated icons for better clarity.</li>
+        <li>OGG support added.</li>
+      </ul>
+
+      <h3>Version 1.0</h3>
+      <ul>
+        <li>Initial release of Hoshisuki Music Player.</li>
+        <li>Support for WAV, MP3, AIF(F), AU.</li>
+        <li>Basic playback controls and playback modes.</li>
+      </ul>
+    ]]></change-notes>
 
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
