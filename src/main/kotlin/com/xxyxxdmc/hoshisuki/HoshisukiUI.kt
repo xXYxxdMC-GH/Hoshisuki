@@ -654,7 +654,7 @@ class HoshisukiUI : JPanel() {
     private fun playMusic() {
         alonePlayTime = 0
         showCover()
-        if (defaultSettingHeight == 0) defaultSettingHeight = settingPanel.preferredSize.height
+        if (defaultSettingHeight == 0) defaultSettingHeight = settingPanel.size.height
         if (!isPlaying && selectedMusic != null) {
             try {
                 when (currentMusic!!.extension.lowercase(Locale.getDefault())) {
