@@ -25,7 +25,6 @@ public class IconTooltipActionButton extends JComponent {
 
         setPreferredSize(getPreferredSize());
 
-
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -76,12 +75,11 @@ public class IconTooltipActionButton extends JComponent {
     @Override
     public Dimension getPreferredSize() {
         if (myIcon != null) {
-            int padding = 4; // Example padding
+            int padding = 4;
             return new Dimension(myIcon.getIconWidth() + padding * 2, myIcon.getIconHeight() + padding * 2);
         }
         return super.getPreferredSize();
     }
-
 
     public Icon getIcon() {
         return myIcon;
@@ -94,7 +92,7 @@ public class IconTooltipActionButton extends JComponent {
         Dimension newPreferredSize = getPreferredSize();
 
         if (!oldPreferredSize.equals(newPreferredSize)) {
-            setPreferredSize(newPreferredSize); // Explicitly set if it changes
+            setPreferredSize(newPreferredSize);
             revalidate();
         } else {
             revalidate();

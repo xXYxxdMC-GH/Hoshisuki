@@ -9,7 +9,9 @@ public interface MusicIcons {
     Icon run = AllIcons.RunConfigurations.TestState.Run;
     Icon stop = AllIcons.Actions.Suspend;
     Icon playForward = AllIcons.Actions.Play_forward;
+    Icon playLast = AllIcons.Actions.Play_last;
     Icon playBack = AllIcons.Actions.Play_back;
+    Icon playFirst = AllIcons.Actions.Play_first;
     Icon listCycle = AllIcons.Actions.Refresh;
     Icon listReverseCycle = AllIcons.Actions.ToggleSoftWrap;
     Icon listPlay = AllIcons.RunConfigurations.Scroll_down;

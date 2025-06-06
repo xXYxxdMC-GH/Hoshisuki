@@ -88,16 +88,16 @@ public class OggPlayer {
 
         } catch (IOException | LineUnavailableException | SecurityException e) {
             OggPlayerException oggEx = new OggPlayerException("Error during playback setup or IO: " + e.getMessage());
-            firePlaybackError(oggEx); // Notify listeners of the error
-            throw oggEx; // Rethrow
-        } catch (OggPlayerException e) { // Catch exceptions from readOggHeaders or other specific logic
-             firePlaybackError(e); // Notify listeners of the error
-             throw e; // Rethrow
+            firePlaybackError(oggEx);
+            throw oggEx;
+        } catch (OggPlayerException e) {
+             firePlaybackError(e);
+             throw e;
         } finally {
             if (outputLine != null) {
-                outputLine.stop(); // Already handled in decodeAndPlayStream if stopRequested
-                outputLine.flush(); // Already handled
-                outputLine.close(); // Ensure it's closed
+                outputLine.stop();
+                outputLine.flush();
+                outputLine.close();
             }
             streamState.clear();
             dspState.clear();

@@ -18,6 +18,10 @@ import javazoom.jl.player.advanced.PlaybackListener
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
+import java.awt.event.ComponentEvent
+import java.awt.event.ComponentListener
+import java.awt.event.KeyEvent
+import java.awt.event.KeyListener
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
@@ -46,7 +50,7 @@ class HoshisukiUI : JPanel() {
     private fun getExplainableMessage(key: String): String {
         return bundle.message(if (state.detailTooltip) "$key.detail" else key)
     }
-    private val selectButton = JButton(bundle.message("button.choose.text"))
+    private val selectButton = JButton(bundle.message("button.choose.text")).apply { icon = MusicIcons.folder }
     private var likeButton = IconTooltipActionButton(MusicIcons.like, getExplainableMessage("button.like.tooltip")) {}
     private var playButton = IconTooltipActionButton(MusicIcons.run, getExplainableMessage("button.play.tooltip")) {}
     private val nextButton = IconTooltipActionButton(MusicIcons.playForward, getExplainableMessage("button.next.tooltip")) {}
@@ -54,7 +58,10 @@ class HoshisukiUI : JPanel() {
     private val rescanButton = IconTooltipActionButton(MusicIcons.rescan, getExplainableMessage("button.rescan.tooltip")) {}
     private var playCase = IconTooltipActionButton(MusicIcons.listCycle, "") {}
     private val folderLabel = JLabel(bundle.message("folder.label.not.chosen"))
+    private val coverPanel = CoverPanel(null, -1, -1)
     private var scrollPane: Component? = null
+    private var settingPanel: JPanel = JPanel()
+    private var defaultSettingHeight: Int = 0
     private var musicFiles = ArrayList<File>()
     private val listModel = DefaultListModel<File>()
     private val listModelPanel = DefaultListModel<JPanel>()
@@ -75,8 +82,10 @@ class HoshisukiUI : JPanel() {
     private var playedMusic = ArrayList<File>()
 
     init {
+        isFocusable = true
+
         minimumSize = Dimension(150, 0)
-        selectButton.icon = MusicIcons.folder
+
         likeButton.action = Runnable {
             if (selectedMusic != null) {
                 when (selectedMusic) {
@@ -174,7 +183,6 @@ class HoshisukiUI : JPanel() {
                 playCase.icon = MusicIcons.stopOnFinish
             }
         }
-        //val coverPanel = CoverPanel(null, size.width)
 
         val controlPanel = JPanel().apply {
             add(likeButton)
@@ -185,7 +193,7 @@ class HoshisukiUI : JPanel() {
         }
 
         // 这一部分比较抽象，我将会逐条进行讲解
-        val settingPanel = JPanel().apply {
+        settingPanel = JPanel().apply {
             //设置布局管理器
             layout = BoxLayout(this@apply, BoxLayout.PAGE_AXIS)
             //添加一条横线
@@ -220,9 +228,9 @@ class HoshisukiUI : JPanel() {
                         } else if (likeButton.icon == MusicIcons.dislikeAnti && !this.isSelected) {
                             likeButton.icon = MusicIcons.dislike
                         }
+                        refreshPlayingIconInList()
                         revalidate()
                         repaint()
-                        refreshPlayingIconInList()
                     }
                 }, BorderLayout.EAST)
             })
@@ -311,13 +319,15 @@ class HoshisukiUI : JPanel() {
 
         add(JPanel().apply {
             layout = BorderLayout()
+            add(coverPanel, BorderLayout.CENTER)
+            add(JSeparator(SwingConstants.HORIZONTAL), BorderLayout.SOUTH)
             add(displayPanel, BorderLayout.SOUTH)
-            //add(coverPanel, BorderLayout.CENTER)
         }, BorderLayout.NORTH)
-        add(JPanel().apply { layout = BorderLayout() }
-            .apply { add(controlPanel, BorderLayout.NORTH) }
-            .apply { add(settingPanel, BorderLayout.CENTER) }
-            , BorderLayout.SOUTH)
+
+        add(JPanel().apply { layout = BorderLayout()
+            add(controlPanel, BorderLayout.NORTH)
+            add(settingPanel, BorderLayout.CENTER)
+        }, BorderLayout.SOUTH)
 
         if (state.musicFolder!=null) {
             displayMusicList(File(state.musicFolder!!))
@@ -328,27 +338,20 @@ class HoshisukiUI : JPanel() {
         prevButton.action = Runnable {
             if (state.musicFolder != null && isPlaying) {
                 if (musicFiles.size > 1) {
-                    objectivePause = true
-                    var index = musicFiles.indexOf(currentMusic)
-                    if (index == -1 && musicFiles.isNotEmpty()) {
-                        index = 0
-                    } else if (index == -1) {
-                        objectivePause = false
-                        return@Runnable
+                    if (prevButton.icon == MusicIcons.playBack) {
+                        var index = musicFiles.indexOf(currentMusic)
+                        index--
+                        if (index < 0) index = musicFiles.size - 1
+                        currentMusic = musicFiles[index]
+                        selectedMusic = musicFiles[index]
+                        list.selectedIndex = index
+                        playMusic()
+                    } else {
+                        currentMusic = musicFiles.last()
+                        selectedMusic = musicFiles.last()
+                        list.selectedIndex = musicFiles.size - 1
+                        playMusic()
                     }
-
-                    index--
-                    if (index < 0) index = musicFiles.size - 1
-
-                    playedMusic.clear()
-
-                    stopMusic()
-                    currentMusic = musicFiles[index]
-                    selectedMusic = musicFiles[index]
-                    list.selectedIndex = index
-                    playMusic()
-                    refreshPlayingIconInList()
-                    objectivePause = false
                 }
             }
         }
@@ -356,27 +359,21 @@ class HoshisukiUI : JPanel() {
         nextButton.action = Runnable {
             if (state.musicFolder != null && isPlaying) {
                 if (musicFiles.size > 1) {
-                    objectivePause = true
-                    var index = musicFiles.indexOf(currentMusic)
-                    if (index == -1 && musicFiles.isNotEmpty()) {
-                        index = 0
-                    } else if (index == -1) {
-                        objectivePause = false
-                        return@Runnable
+                    if (nextButton.icon == MusicIcons.playForward) {
+                        var index = musicFiles.indexOf(currentMusic)
+                        if (index == -1) index = -1
+                        index++
+                        if (index >= musicFiles.size) index = 0
+                        currentMusic = musicFiles[index]
+                        selectedMusic = musicFiles[index]
+                        list.selectedIndex = index
+                        playMusic()
+                    } else {
+                        currentMusic = musicFiles.first()
+                        selectedMusic = musicFiles.first()
+                        list.selectedIndex = 0
+                        playMusic()
                     }
-
-                    index++
-                    if (index >= musicFiles.size) index = 0
-
-                    playedMusic.clear()
-
-                    stopMusic()
-                    currentMusic = musicFiles[index]
-                    selectedMusic = musicFiles[index]
-                    list.selectedIndex = index
-                    playMusic()
-                    refreshPlayingIconInList()
-                    objectivePause = false
                 }
             }
         }
@@ -430,6 +427,43 @@ class HoshisukiUI : JPanel() {
         if (scrollPane!=null){
             scrollPane?.let { add(it, BorderLayout.CENTER) }
         }
+
+        addComponentListener(object : ComponentListener {
+            override fun componentResized(e: ComponentEvent) {
+                if (isPlaying) {
+                    coverPanel.edgeLength = size.width
+                    revalidate()
+                    repaint()
+                }
+            }
+            override fun componentMoved(e: ComponentEvent?) {
+            }
+            override fun componentShown(e: ComponentEvent?) {
+            }
+            override fun componentHidden(e: ComponentEvent?) {
+            }
+        })
+
+//        addKeyListener( object: KeyListener {
+//            override fun keyTyped(e: KeyEvent?) {
+//            }
+//            override fun keyPressed(e: KeyEvent?) {
+//                if (e?.keyCode == KeyEvent.VK_SHIFT && prevButton.icon == MusicIcons.playBack) {
+//                    prevButton.icon = MusicIcons.playFirst
+//                    nextButton.icon = MusicIcons.playLast
+//                    revalidate()
+//                    repaint()
+//                }
+//            }
+//            override fun keyReleased(e: KeyEvent?) {
+//                if (e?.keyCode == KeyEvent.VK_SHIFT && prevButton.icon == MusicIcons.playFirst) {
+//                    prevButton.icon = MusicIcons.playBack
+//                    nextButton.icon = MusicIcons.playForward
+//                    revalidate()
+//                    repaint()
+//                }
+//            }
+//        })
     }
 
     private fun refreshPlayCaseButtonVisuals() {
@@ -619,6 +653,8 @@ class HoshisukiUI : JPanel() {
 
     private fun playMusic() {
         alonePlayTime = 0
+        showCover()
+        if (defaultSettingHeight == 0) defaultSettingHeight = settingPanel.preferredSize.height
         if (!isPlaying && selectedMusic != null) {
             try {
                 when (currentMusic!!.extension.lowercase(Locale.getDefault())) {
@@ -700,6 +736,7 @@ class HoshisukiUI : JPanel() {
     }
 
     private fun stopMusic() {
+        hideCover()
         if (player != null && mp3PlayThread != null) {
             player!!.close()
             if (mp3PlayThread!!.isAlive) mp3PlayThread!!.interrupt()
@@ -714,6 +751,24 @@ class HoshisukiUI : JPanel() {
         refreshPlayingIconInList()
         playButton.text = getExplainableMessage("button.play.tooltip")
         playButton.icon = MusicIcons.run
+        revalidate()
+        repaint()
+    }
+
+    fun JPanel.setHeight(height: Int) {
+        preferredSize = Dimension(preferredSize.width, height)
+    }
+
+    private fun showCover() {
+        coverPanel.edgeLength = size.width
+        settingPanel.setHeight(0)
+        revalidate()
+        repaint()
+    }
+
+    private fun hideCover() {
+        coverPanel.edgeLength = 0
+        settingPanel.setHeight(defaultSettingHeight)
         revalidate()
         repaint()
     }
@@ -770,15 +825,9 @@ class HoshisukiUI : JPanel() {
             4 -> { // List Play
                 if (musicFiles.isNotEmpty()) {
                     var index = musicFiles.indexOf(currentMusic)
-                    if (index == -1) {
-                        return
-                    }
-                    index--
-                    if (index < 0) {
-                        currentMusic = null
-                        refreshPlayingIconInList()
-                        return
-                    }
+                    if (index == -1) index = -1
+                    index++
+                    if (index >= musicFiles.size) return
                     currentMusic = musicFiles[index]
                     selectedMusic = musicFiles[index]
                     list.selectedIndex = index
@@ -788,18 +837,12 @@ class HoshisukiUI : JPanel() {
             }
             5 -> { // List Reverse Play
                 if (musicFiles.isNotEmpty()) {
-                    var newIndex: Int
-                    if (musicFiles.size > 1) {
-                        val currentIndex = musicFiles.indexOf(currentMusic)
-                        do {
-                            newIndex = Random().nextInt(musicFiles.size)
-                        } while (newIndex == currentIndex)
-                    } else {
-                        newIndex = 0
-                    }
-                    currentMusic = musicFiles[newIndex]
-                    selectedMusic = musicFiles[newIndex]
-                    list.selectedIndex = newIndex
+                    var index = musicFiles.indexOf(currentMusic)
+                    index--
+                    if (index < 0) return
+                    currentMusic = musicFiles[index]
+                    selectedMusic = musicFiles[index]
+                    list.selectedIndex = index
                     refreshPlayingIconInList()
                     playMusic()
                 }
@@ -842,8 +885,8 @@ class HoshisukiUI : JPanel() {
             val chooseLike = if (state.likeWeight < 0) (Math.random() < (1 + state.likeWeight) * 0.1) else (Math.random() < state.likeWeight)
             val chooseDislike = if (state.dislikeWeight < 0) (Math.random() < (1 + state.dislikeWeight) * 0.1) else (Math.random() < state.dislikeWeight)
             currentMusic = weightChooseMusic(chooseLike, chooseDislike, false)
-        } else throw RandomPlayException("")
-        if (currentMusic == null) throw RandomPlayException("")
+        } else throw RandomPlayException("Unknown ERROR: Illegal value")
+        if (currentMusic == null) throw RandomPlayException("Unknown ERROR: currentMusic is null")
         if (recordPlayedMusic && !playedMusic.contains(currentMusic!!)) playedMusic.add(currentMusic!!)
         selectedMusic = currentMusic
         list.selectedIndex = musicFiles.indexOf(currentMusic)

@@ -11,10 +11,9 @@ import java.net.URL;
 public class CoverPanel extends JPanel {
     private ImageIcon cover;
     private int edgeLength;
-    private int padding = 10;
-    private int arcRadius = 20;
+    private int height;
 
-    public CoverPanel(@Nullable ImageIcon cover, int edgeLength) {
+    public CoverPanel(@Nullable ImageIcon cover, int edgeLength, int height) {
         if (cover != null) this.cover = cover;
         else {
             URL defaultCoverUrl = getClass().getClassLoader().getResource("icons/cover.png");
@@ -22,7 +21,7 @@ public class CoverPanel extends JPanel {
             this.cover = new ImageIcon(defaultCoverUrl);
         }
         this.edgeLength = edgeLength;
-        setPreferredSize(new Dimension(edgeLength, edgeLength));
+        setPreferredSize(new Dimension(edgeLength, (height == -1) ? edgeLength : height));
     }
 
     @Override
@@ -33,18 +32,18 @@ public class CoverPanel extends JPanel {
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        int imageX = padding;
-        int imageY = padding;
+        int padding = 10;
         int imageWidth = edgeLength;
-        int imageHeight = edgeLength;
+        int imageHeight = (height == -1) ? edgeLength : height;
 
+        int arcRadius = 20;
         RoundRectangle2D roundedRectangle = new RoundRectangle2D.Float(
-                imageX, imageY, imageWidth, imageHeight, arcRadius, arcRadius
+                padding, padding, imageWidth, imageHeight, arcRadius, arcRadius
         );
 
         g2d.setClip(roundedRectangle);
         if (cover != null && cover.getImage() != null) {
-            g2d.drawImage(cover.getImage(), imageX, imageY, imageWidth, imageHeight, this);
+            g2d.drawImage(cover.getImage(), padding, padding, imageWidth, imageHeight, this);
         }
 
         g2d.setColor(JBColor.BLACK);
@@ -63,7 +62,14 @@ public class CoverPanel extends JPanel {
 
     public void setEdgeLength(int edgeLength) {
         this.edgeLength = edgeLength;
-        setPreferredSize(new Dimension(this.edgeLength + 2 * padding, this.edgeLength + 2 * padding));
+        setPreferredSize(new Dimension(this.edgeLength, this.edgeLength));
+        revalidate();
+        repaint();
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+        setPreferredSize(new Dimension(this.edgeLength, this.height));
         revalidate();
         repaint();
     }
@@ -74,25 +80,5 @@ public class CoverPanel extends JPanel {
 
     public int getEdgeLength() {
         return edgeLength;
-    }
-
-    public void setPadding(int padding) {
-        this.padding = padding;
-        setPreferredSize(new Dimension(edgeLength + 2 * this.padding, edgeLength + 2 * this.padding));
-        revalidate();
-        repaint();
-    }
-
-    public int getPadding() {
-        return padding;
-    }
-
-    public void setArcRadius(int arcRadius) {
-        this.arcRadius = arcRadius;
-        repaint();
-    }
-
-    public int getArcRadius() {
-        return arcRadius;
     }
 }
