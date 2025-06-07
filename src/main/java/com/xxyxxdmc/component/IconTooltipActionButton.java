@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.ActionButtonComponent;
 import com.intellij.openapi.actionSystem.ex.ActionButtonLook;
 import com.intellij.openapi.util.NlsContexts;
 import com.intellij.ui.ClickListener;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,8 +57,8 @@ public final class IconTooltipActionButton extends JComponent {
             public boolean onClick(@NotNull MouseEvent e, int clickCount) {
                 if (!isEnabled()) return false;
                 if (myAction != null) {
-                    myAction.run();
                     if (myLatch) latched = !latched;
+                    myAction.run();
                     return true;
                 }
                 return false;
@@ -73,8 +74,11 @@ public final class IconTooltipActionButton extends JComponent {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        if (hovered || latched) {
+        if (hovered) {
             ActionButtonLook.SYSTEM_LOOK.paintBackground(g, this, ActionButtonComponent.SELECTED);
+        }
+        if (latched) {
+            ActionButtonLook.SYSTEM_LOOK.paintBackground(g, this, ActionButtonComponent.PUSHED);
         }
 
         if (myIcon != null) {

@@ -84,18 +84,15 @@ final class HoshisukiUI : JPanel() {
     private var playedMusic = ArrayList<File>()
 
     init {
-        isFocusable = true
-
         minimumSize = Dimension(150, 0)
-
         layout = BorderLayout()
 
         val controlPanel = JPanel().apply {
             add(settingButton)
             add(likeButton)
-            add(prevButton.apply { size = Dimension(size.width + 1, size.height + 1) })
-            add(playButton.apply { size = Dimension(size.width + 3, size.height + 3) })
-            add(nextButton.apply { size = Dimension(size.width + 1, size.height + 1) })
+            add(prevButton)
+            add(playButton)
+            add(nextButton)
             add(playCase)
             add(coverButton)
         }
@@ -381,12 +378,14 @@ final class HoshisukiUI : JPanel() {
             repaint()
         }
         settingButton.action = Runnable {
-            if (!isPlaying) return@Runnable
-            if (settingButton.isLatched) {
+            if (!settingButton.isLatched) {
                 hideSetting()
             } else {
                 showSetting()
             }
+        }
+        coverButton.action = Runnable {
+
         }
 
         if (state.musicFolder!=null) {
@@ -535,7 +534,14 @@ final class HoshisukiUI : JPanel() {
     }
 
     private fun chooseFolder() {
-        val chooser = JFileChooser().apply { fileSelectionMode = JFileChooser.DIRECTORIES_ONLY }
+        val chooser = JFileChooser().apply { fileSelectionMode = JFileChooser.DIRECTORIES_ONLY;  }
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            displayMusicList(chooser.selectedFile)
+        }
+    }
+
+    private fun chooseCover() {
+        val chooser = JFileChooser().apply { fileSelectionMode = JFileChooser.FILES_ONLY }
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             displayMusicList(chooser.selectedFile)
         }
@@ -622,9 +628,9 @@ final class HoshisukiUI : JPanel() {
 
     private fun playMusic() {
         alonePlayTime = 0
-        showCover()
         if (defaultSettingHeight == 0) defaultSettingHeight = settingPanel.size.height
         if (!isPlaying && selectedMusic != null) {
+            showCover()
             try {
                 when (currentMusic!!.extension.lowercase(Locale.getDefault())) {
                     "mp3" -> {
