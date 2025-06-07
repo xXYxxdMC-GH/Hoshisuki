@@ -26,6 +26,15 @@ public interface MusicIcons {
     Icon dislike = AllIcons.Actions.QuickfixBulb;
     Icon dislikeAnti = AllIcons.Actions.QuickfixOffBulb;
     Icon rescan = AllIcons.Actions.RestartFrame;
+    Icon setting = AllIcons.Actions.InlayGear;
+    Icon addCover = AllIcons.Debugger.AddToWatch;
+    Icon removeCover = AllIcons.Actions.GC;
+    Icon add = AllIcons.General.Add;
+    Icon remove = AllIcons.Diff.Remove;
+    Icon exchange = AllIcons.Diff.ApplyNotConflicts;
+    Icon multiFolder = AllIcons.Actions.ModuleDirectory;
+    Icon extend = AllIcons.Actions.Play_back;
+    Icon foldUp = AllIcons.Actions.FindAndShowNextMatches;
     Icon playing = IconLoader.getIcon("/icons/library.svg", MusicIcons.class);
     Icon player = IconLoader.getIcon("/icons/hoshisuki.svg", MusicIcons.class);
 }

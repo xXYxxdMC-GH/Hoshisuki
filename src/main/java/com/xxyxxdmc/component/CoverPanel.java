@@ -8,14 +8,15 @@ import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.net.URL;
 
-public class CoverPanel extends JPanel {
+public final class CoverPanel extends JPanel {
     private ImageIcon cover;
     private int edgeLength;
 
     public CoverPanel(@Nullable ImageIcon cover, int edgeLength, int height) {
         if (cover != null) this.cover = cover;
         else {
-            URL defaultCoverUrl = getClass().getClassLoader().getResource("icons/cover.png");
+            String themeName = UIManager.getLookAndFeel().getName();
+            URL defaultCoverUrl = getClass().getClassLoader().getResource(String.format("icons/cover_%s.png", (themeName.contains("Darcula") || themeName.contains("Dark")) ? "dark" : "light"));
             assert defaultCoverUrl != null;
             this.cover = new ImageIcon(defaultCoverUrl);
         }
@@ -55,11 +56,6 @@ public class CoverPanel extends JPanel {
 
         if (this.cover != null && this.cover.getImage() != null && this.cover.getImageLoadStatus() == MediaTracker.COMPLETE) {
             g2d.drawImage(this.cover.getImage(), padding, padding, drawableWidth, drawableHeight, this);
-        } else {
-            g2d.setColor(JBColor.LIGHT_GRAY);
-            g2d.fillRect(padding, padding, drawableWidth, drawableHeight);
-            g2d.setColor(JBColor.DARK_GRAY);
-            g2d.drawString("No Cover", padding + 5, padding + 20);
         }
 
         g2d.setClip(null);

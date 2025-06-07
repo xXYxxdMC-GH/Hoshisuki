@@ -12,22 +12,31 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class IconTooltipActionButton extends JComponent {
+public final class IconTooltipActionButton extends JComponent {
     private boolean hovered = false;
     private Icon myIcon;
     private String myTooltip;
+    private final boolean myLatch;
+    private boolean latched;
     private Runnable myAction;
 
     public IconTooltipActionButton(@NotNull Icon icon, @NlsContexts.Tooltip @Nullable String tooltipText, @Nullable final Runnable action) {
+        this(icon, tooltipText, false, action);
+    }
+
+    public IconTooltipActionButton(@NotNull Icon icon, @NlsContexts.Tooltip @Nullable String tooltipText, boolean latch, @Nullable final Runnable action) {
         this.myIcon = icon;
         this.myTooltip = tooltipText;
         this.myAction = action;
+        this.myLatch = latch;
+        this.latched = false;
 
         setPreferredSize(getPreferredSize());
 
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
+                if (!isEnabled()) return;
                 hovered = true;
                 setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 repaint();
@@ -35,6 +44,7 @@ public class IconTooltipActionButton extends JComponent {
 
             @Override
             public void mouseExited(MouseEvent e) {
+                if (!isEnabled()) return;
                 hovered = false;
                 setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 repaint();
@@ -44,8 +54,10 @@ public class IconTooltipActionButton extends JComponent {
         new ClickListener() {
             @Override
             public boolean onClick(@NotNull MouseEvent e, int clickCount) {
+                if (!isEnabled()) return false;
                 if (myAction != null) {
                     myAction.run();
+                    if (myLatch) latched = !latched;
                     return true;
                 }
                 return false;
@@ -61,7 +73,7 @@ public class IconTooltipActionButton extends JComponent {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        if (hovered) {
+        if (hovered || latched) {
             ActionButtonLook.SYSTEM_LOOK.paintBackground(g, this, ActionButtonComponent.SELECTED);
         }
 
@@ -117,5 +129,9 @@ public class IconTooltipActionButton extends JComponent {
     @Nullable
     public Runnable getAction() {
         return this.myAction;
+    }
+
+    public boolean isLatched() {
+        return latched;
     }
 }
