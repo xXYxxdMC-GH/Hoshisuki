@@ -22,7 +22,7 @@ public final class DropDownContainRadioCombo<E> extends ComboBox<E> {
             });
             comboBoxPanel.add(new JCheckBox(), BorderLayout.WEST);
             comboBoxPanel.add(new JLabel(comboBox), BorderLayout.CENTER);
-            this.comboBoxes.add();
+            //this.comboBoxes.add();
         }
     }
 }
