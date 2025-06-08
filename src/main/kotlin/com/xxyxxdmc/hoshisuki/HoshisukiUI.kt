@@ -15,7 +15,6 @@ import javazoom.jl.decoder.JavaLayerException
 import javazoom.jl.player.advanced.AdvancedPlayer
 import javazoom.jl.player.advanced.PlaybackEvent
 import javazoom.jl.player.advanced.PlaybackListener
-import kotlinx.coroutines.Runnable
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
@@ -534,16 +533,21 @@ final class HoshisukiUI : JPanel() {
     }
 
     private fun chooseFolder() {
-        val chooser = JFileChooser().apply { fileSelectionMode = JFileChooser.DIRECTORIES_ONLY;  }
+        val chooser = JFileChooser().apply { fileSelectionMode = JFileChooser.DIRECTORIES_ONLY; isMultiSelectionEnabled = false }
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             displayMusicList(chooser.selectedFile)
         }
     }
 
     private fun chooseCover() {
-        val chooser = JFileChooser().apply { fileSelectionMode = JFileChooser.FILES_ONLY }
+        val chooser = JFileChooser().apply {
+            fileSelectionMode = JFileChooser.FILES_ONLY
+            isMultiSelectionEnabled = false
+            isAcceptAllFileFilterUsed = false
+            fileFilter = PictureFileFilter()
+        }
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            displayMusicList(chooser.selectedFile)
+
         }
     }
 
