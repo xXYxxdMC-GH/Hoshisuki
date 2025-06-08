@@ -20,6 +20,7 @@ class HoshisukiSettings : PersistentStateComponent<HoshisukiSettings> {
     var antiAgainLevel: Int = 0
     var optimizePanel: Boolean = false
     var musicCoverMap: MutableMap<String, String> = mutableMapOf<String, String>()
+    var beautifyTitles = ArrayList<Boolean>()
 
     @Nullable
     override fun getState(): HoshisukiSettings {

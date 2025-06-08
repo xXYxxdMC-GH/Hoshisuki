@@ -13,6 +13,6 @@ class PictureFileFilter: FileFilter() {
     }
 
     override fun getDescription(): String {
-        return HoshisukiBundle.message("file.filter.picture.description")
+        return HoshisukiBundle.message("file.filter.picture.description") + " (jpg, jpeg, png, gif)"
     }
 }

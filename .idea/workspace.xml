@@ -5,10 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="075cc77d-8f2b-49f6-9977-6024817a5659" name="更改" comment="Update">
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/PictureFileFilter.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/DropDownContainRadioCombo.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/CoverPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/CoverPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/IconTooltipActionButton.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/IconTooltipActionButton.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/PictureFileFilter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/PictureFileFilter.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_ja_JP.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_ja_JP.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_zh_CN.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_zh_CN.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,8 +77,8 @@
       <list>
         <option value="Exception" />
         <option value="Interface" />
-        <option value="Class" />
         <option value="Kotlin Class" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -366,7 +372,15 @@
       <option name="project" value="LOCAL" />
       <updated>1749284301430</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749363648451</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1749363648451</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

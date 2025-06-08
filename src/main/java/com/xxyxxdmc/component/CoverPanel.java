@@ -37,6 +37,7 @@ public final class CoverPanel extends JPanel {
 
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        //g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
         int padding = 10;
         int drawableWidth = currentWidth - padding * 2;
@@ -55,7 +56,30 @@ public final class CoverPanel extends JPanel {
         g2d.setClip(roundedRectangle);
 
         if (this.cover != null && this.cover.getImage() != null && this.cover.getImageLoadStatus() == MediaTracker.COMPLETE) {
-            g2d.drawImage(this.cover.getImage(), padding, padding, drawableWidth, drawableHeight, this);
+            Image img = this.cover.getImage();
+            int imgWidth = img.getWidth(this);
+            int imgHeight = img.getHeight(this);
+
+            if (imgWidth > 0 && imgHeight > 0) {
+                double imgAspect = (double) imgWidth / imgHeight;
+                double canvasAspect = (double) drawableWidth / drawableHeight;
+
+                int drawImgWidth;
+                int drawImgHeight;
+                int x = padding;
+                int y = padding;
+
+                if (imgAspect > canvasAspect) {
+                    drawImgHeight = drawableHeight;
+                    drawImgWidth = (int) (drawImgHeight * imgAspect);
+                    x = padding - (drawImgWidth - drawableWidth) / 2;
+                } else {
+                    drawImgWidth = drawableWidth;
+                    drawImgHeight = (int) (drawImgWidth / imgAspect);
+                    y = padding - (drawImgHeight - drawableHeight) / 2;
+                }
+                g2d.drawImage(img, x, y, drawImgWidth, drawImgHeight, this);
+            }
         }
 
         g2d.setClip(null);
@@ -67,8 +91,14 @@ public final class CoverPanel extends JPanel {
     }
 
 
-    public void setCover(ImageIcon cover) {
-        this.cover = cover;
+    public void setCover(@Nullable ImageIcon cover) {
+        if (cover == null) {
+            String themeName = UIManager.getLookAndFeel().getName();
+            URL defaultCoverUrl = getClass().getClassLoader().getResource(String.format("icons/cover_%s.png", (themeName.contains("Darcula") || themeName.contains("Dark")) ? "dark" : "light"));
+            assert defaultCoverUrl != null;
+            this.cover = new ImageIcon(defaultCoverUrl);
+        }
+        else this.cover = cover;
         setPreferredSize(new Dimension(edgeLength, edgeLength));
         repaint();
     }

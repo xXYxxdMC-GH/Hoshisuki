@@ -138,4 +138,8 @@ public final class IconTooltipActionButton extends JComponent {
     public boolean isLatched() {
         return latched;
     }
+
+    public void setLatched(boolean latched) {
+        this.latched = latched;
+    }
 }
