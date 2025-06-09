@@ -823,8 +823,11 @@ final class HoshisukiUI : JPanel() {
         alonePlayTime = 0
         if (defaultSettingHeight <= 0) (if (settingPanel.size.height <= 0) defaultSettingHeight = 268 else defaultSettingHeight = settingPanel.size.height)
         if (!isPlaying && currentMusic != null) {
-            if (!switchMusic) showCover()
+            if (!switchMusic) {
+                showCover()
+            }
             else {
+                switchMusic = false
                 val currentSelectedPath = selectedMusic?.absolutePath
                 if (currentSelectedPath != null && state.musicCoverMap.containsKey(currentSelectedPath)) {
                     coverPanel.cover = ImageIcon(state.musicCoverMap[currentSelectedPath])
@@ -1054,6 +1057,7 @@ final class HoshisukiUI : JPanel() {
         when (state.playCase) {
             0 -> { // List Cycle
                 if (musicFiles.isNotEmpty()) {
+                    switchMusic = true
                     var index = musicFiles.indexOf(currentMusic)
                     if (index == -1) index = -1
                     index++
@@ -1066,6 +1070,7 @@ final class HoshisukiUI : JPanel() {
             }
             1 -> { // List Reverse Cycle
                 if (musicFiles.isNotEmpty()) {
+                    switchMusic = true
                     var index = musicFiles.indexOf(currentMusic)
                     index--
                     if (index < 0) index = musicFiles.size - 1
@@ -1088,10 +1093,14 @@ final class HoshisukiUI : JPanel() {
             }
             4 -> { // List Play
                 if (musicFiles.isNotEmpty()) {
+                    switchMusic = true
                     var index = musicFiles.indexOf(currentMusic)
                     if (index == -1) index = -1
                     index++
-                    if (index >= musicFiles.size) return
+                    if (index >= musicFiles.size) {
+                        switchMusic = false
+                        return
+                    }
                     currentMusic = musicFiles[index]
                     selectedMusic = musicFiles[index]
                     list.selectedIndex = index
@@ -1100,9 +1109,13 @@ final class HoshisukiUI : JPanel() {
             }
             5 -> { // List Reverse Play
                 if (musicFiles.isNotEmpty()) {
+                    switchMusic = true
                     var index = musicFiles.indexOf(currentMusic)
                     index--
-                    if (index < 0) return
+                    if (index < 0) {
+                        switchMusic = false
+                        return
+                    }
                     currentMusic = musicFiles[index]
                     selectedMusic = musicFiles[index]
                     list.selectedIndex = index
@@ -1128,8 +1141,13 @@ final class HoshisukiUI : JPanel() {
 
     private fun randomPlayMusic(recordPlayedMusic: Boolean) {
         if (playedMusic.size == musicFiles.size) return
+        switchMusic = true
         if (musicFiles.size <= 1) {
-            if (recordPlayedMusic) playMusic()
+            if (recordPlayedMusic) {
+                playMusic()
+                switchMusic = false
+                return
+            }
         } else if (state.likeWeight.compare(0.0) && state.dislikeWeight.compare(0.0)) {
             var index = floor(Math.random() * musicFiles.size).toInt()
             while ((state.antiAgainLevel == 2) && currentMusic === musicFiles[index]) {
@@ -1147,7 +1165,10 @@ final class HoshisukiUI : JPanel() {
             val chooseDislike = if (state.dislikeWeight < 0) (Math.random() < (1 + state.dislikeWeight) * 0.1) else (Math.random() < state.dislikeWeight)
             currentMusic = weightChooseMusic(chooseLike, chooseDislike, false)
         } else throw RandomPlayException("Unknown ERROR: Illegal value")
-        if (currentMusic == null) throw RandomPlayException("Unknown ERROR: currentMusic is null")
+        if (currentMusic == null) {
+            switchMusic = false
+            throw RandomPlayException("Unknown ERROR: currentMusic is null")
+        }
         if (recordPlayedMusic && !playedMusic.contains(currentMusic!!)) playedMusic.add(currentMusic!!)
         selectedMusic = currentMusic
         list.selectedIndex = musicFiles.indexOf(currentMusic)

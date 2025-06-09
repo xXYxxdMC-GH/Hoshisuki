@@ -14,11 +14,6 @@
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-    <h1>Warning</h1>
-    <h2>This is a SNAPSHOT version! May have any unknown BUGs!</h2>
-    <h3>Known BUG: Pause Anytime.</h3>
-    <h3>Please think enough time to download!</h3>
-
     <h1>Hoshisuki</h1>
 
     <p>A simple IntelliJ music player plugin that allows you to play specified music while coding.</p>
@@ -27,6 +22,9 @@
     <ul>
       <li><strong>Support for multiple audio formats</strong>: The plugin includes various libraries that enable playback of <code>WAV</code>, <code>MP3</code>, <code>AIF(F)</code>, <code>AU</code>, and <code>OGG</code> audio files.</li>
       <li><strong>Integrated panel</strong>: A panel is added to the left sidebar, where you can play music or configure settings.</li>
+      <li><strong>Cover display</strong>: Display local cover when it is playing.</li>
+      <li><strong>Beauty title</strong>: Beautify the title of the music file in the list.</li>
+      <li><strong>Like or dislike music weight</strong>: Adjust the playback weight of liked or disliked music in random playback mode.</li>
       <li><strong>Various playback modes</strong>:
         <ul>
           <li>List Cycle</li>
@@ -55,6 +53,7 @@
         <li>Improved performance of the music list display.</li>
         <li>Cover display support!</li>
         <li>More setting option.</li>
+        <li>Fix some bugs.</li>
       </ul>
 
       <h3>Version 1.1</h3>
