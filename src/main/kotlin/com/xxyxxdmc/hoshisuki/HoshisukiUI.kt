@@ -701,7 +701,7 @@ final class HoshisukiUI : JPanel() {
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             state.musicCoverMap[selectedMusic!!.absolutePath] = chooser.selectedFile.absolutePath
             musicCoverTempFolder = chooser.currentDirectory
-            tempCover = chooser.selectedFile
+            if (tempCover != chooser.selectedFile) tempCover = chooser.selectedFile
             if (coverPanel.size.height != 0 && currentMusic === selectedMusic) {
                 coverPanel.cover = ImageIcon(chooser.selectedFile.absolutePath)
                 repaint()
@@ -1009,8 +1009,9 @@ final class HoshisukiUI : JPanel() {
         } else {
             coverPanel.cover = null
         }
+        coverPanel.isVisible = true
         coverPanel.edgeLength = size.width
-        settingPanel.setHeight(0)
+        settingPanel.isVisible = false
         settingButton.isEnabled = true
         settingButton.isLatched = false
         revalidate()
@@ -1018,22 +1019,14 @@ final class HoshisukiUI : JPanel() {
     }
 
     private fun showSetting() {
-        if (defaultSettingHeight > 0) {
-            settingPanel.setHeight(defaultSettingHeight)
-        } else {
-            settingPanel.setHeight(settingPanel.preferredSize.height)
-        }
+        settingPanel.isVisible = true
         revalidate()
         repaint()
     }
 
     private fun hideCover() {
-        coverPanel.edgeLength = 0
-        if (defaultSettingHeight > 0) {
-            settingPanel.setHeight(defaultSettingHeight)
-        } else {
-            settingPanel.setHeight(settingPanel.preferredSize.height)
-        }
+        coverPanel.isVisible = false
+        settingPanel.isVisible = true
         settingButton.isLatched = true
         settingButton.isEnabled = false
         revalidate()
@@ -1041,7 +1034,7 @@ final class HoshisukiUI : JPanel() {
     }
 
     private fun hideSetting() {
-        settingPanel.setHeight(0)
+        settingPanel.isVisible = false
         revalidate()
         repaint()
     }

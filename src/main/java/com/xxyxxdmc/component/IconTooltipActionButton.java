@@ -53,30 +53,25 @@ public final class IconTooltipActionButton extends JComponent {
                 setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 repaint();
             }
-        });
 
-        new ClickListener() {
             @Override
-            public boolean onClick(@NotNull MouseEvent e, int clickCount) {
+            public void mouseClicked(MouseEvent e) { // Using mouseClicked for simplicity
+                if (!isEnabled()) return;
+
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    if (!isEnabled()) return false;
                     if (myAction != null) {
                         if (myLatch) latched = !latched;
                         myAction.run();
-                        return true;
+                        repaint();
                     }
-                } else if (e.getButton() == MouseEvent.BUTTON2) {
-                    if (!isEnabled()) return false;
+                } else if (e.getButton() == MouseEvent.BUTTON3) {
                     if (myAction2 != null) {
-                        if (myLatch) latched = !latched;
                         myAction2.run();
-                        return true;
+                        repaint();
                     }
                 }
-                return false;
             }
-        }.installOn(this);
-
+        });
         if (tooltipText != null) {
             this.setToolTipText(tooltipText);
         }

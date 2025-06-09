@@ -1,6 +1,7 @@
 package com.xxyxxdmc.component;
 
 import com.intellij.ui.JBColor;
+import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -15,8 +16,8 @@ public final class CoverPanel extends JPanel {
     public CoverPanel(@Nullable ImageIcon cover, int edgeLength, int height) {
         if (cover != null) this.cover = cover;
         else {
-            String themeName = UIManager.getLookAndFeel().getName();
-            URL defaultCoverUrl = getClass().getClassLoader().getResource(String.format("icons/cover_%s.png", (themeName.contains("Darcula") || themeName.contains("Dark")) ? "dark" : "light"));
+            String themeName = (UIUtil.isUnderWin10LookAndFeel() || UIUtil.isUnderDarcula() || UIUtil.isUnderDefaultMacTheme()) ? "dark" : "light";
+            URL defaultCoverUrl = getClass().getClassLoader().getResource(String.format("icons/cover_%s.png", themeName));
             assert defaultCoverUrl != null;
             this.cover = new ImageIcon(defaultCoverUrl);
         }
