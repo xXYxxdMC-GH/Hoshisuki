@@ -14,6 +14,11 @@
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
+    <h1>Warning</h1>
+    <h2>This is a SNAPSHOT version! May have any unknown BUGs!</h2>
+    <h3>Known BUG: Pause Anytime.</h3>
+    <h3>Please think enough time to download!</h3>
+
     <h1>Hoshisuki</h1>
 
     <p>A simple IntelliJ music player plugin that allows you to play specified music while coding.</p>
