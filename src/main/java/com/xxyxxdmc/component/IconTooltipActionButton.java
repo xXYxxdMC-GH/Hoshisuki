@@ -80,6 +80,9 @@ public final class IconTooltipActionButton extends JComponent {
         if (latched) {
             ActionButtonLook.SYSTEM_LOOK.paintBackground(g, this, ActionButtonComponent.PUSHED);
         }
+        if (!isEnabled()) {
+            ActionButtonLook.SYSTEM_LOOK.paintBackground(g, this, ActionButtonComponent.POPPED);
+        }
 
         if (myIcon != null) {
             int x = (getWidth() - myIcon.getIconWidth()) / 2;
