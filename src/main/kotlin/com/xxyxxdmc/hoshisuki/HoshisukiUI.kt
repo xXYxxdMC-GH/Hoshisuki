@@ -15,11 +15,16 @@ import javazoom.jl.decoder.JavaLayerException
 import javazoom.jl.player.advanced.AdvancedPlayer
 import javazoom.jl.player.advanced.PlaybackEvent
 import javazoom.jl.player.advanced.PlaybackListener
+import kotlinx.coroutines.Runnable
 import java.awt.BorderLayout
 import java.awt.Component
+import java.awt.Cursor
+import java.awt.Desktop
 import java.awt.Dimension
 import java.awt.event.ComponentEvent
 import java.awt.event.ComponentListener
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
@@ -32,7 +37,12 @@ import kotlin.math.floor
 import kotlin.math.round
 
 final class HoshisukiUI : JPanel() {
+    // 语言文件初始化
+    // 让我们说中文！
+    // Let's speak in English!
+    // 日本語話しましう！
     private val bundle = HoshisukiBundle
+    // 防止某些人不知道插音频设备(比如作者，某次没插音频设备发现的)
     init {
         try {
             AudioSystem.getClip()
@@ -44,10 +54,13 @@ final class HoshisukiUI : JPanel() {
             )
         }
     }
+    // 配置文件初始化
     private val state = HoshisukiSettings.instance
+    // 简单的获取详细信息的方法
     private fun getExplainableMessage(key: String): String {
         return bundle.message(if (state.detailTooltip) "$key.detail" else key)
     }
+    // 按钮的初始化
     private val selectButton = JButton(bundle.message("button.choose.text")).apply { icon = MusicIcons.folder }
     private val likeButton = IconTooltipActionButton(MusicIcons.like, getExplainableMessage("button.like.tooltip")) {}
     private val playButton = IconTooltipActionButton(MusicIcons.run, getExplainableMessage("button.play.tooltip")) {}
@@ -55,34 +68,44 @@ final class HoshisukiUI : JPanel() {
     private val prevButton = IconTooltipActionButton(MusicIcons.playBack, getExplainableMessage("button.prev.tooltip")) {}
     private val rescanButton = IconTooltipActionButton(MusicIcons.rescan, getExplainableMessage("button.rescan.tooltip")) {}
     private val settingButton = IconTooltipActionButton(MusicIcons.setting, getExplainableMessage("button.setting.tooltip"), true) {}
-    private val coverButton = IconTooltipActionButton(MusicIcons.addCover, getExplainableMessage("button.add.cover.tooltip")) {}
+    private val coverButton = IconTooltipActionButton(MusicIcons.addCover, getExplainableMessage("button.add.cover.tooltip"), false, {}) {}
     private var playCase = IconTooltipActionButton(MusicIcons.listCycle, "") {}
+    // 面板的初始化
     private val folderLabel = JLabel(bundle.message("folder.label.not.chosen"))
     private val coverPanel = CoverPanel(null, -1, -1)
     private var scrollPane: Component? = null
     private var settingPanel: JPanel = JPanel()
+    // 一些数值的初始化
     private var defaultSettingHeight: Int = 0
+    private var alonePlayTime: Int = 0
+    // 音乐文件列表的初始化
     private var musicFiles = ArrayList<File>()
-    private val listModel = DefaultListModel<File>()
-    private val listModelPanel = DefaultListModel<JPanel>()
-    private val list = JBList(listModelPanel)
-    private var mp3Player: AdvancedPlayer? = null
-    private val clip: Clip = AudioSystem.getClip()
-    private val oggPlayer: OggPlayer = OggPlayer()
-    private var isPlaying = false
-    private var mp3PlayThread: Thread? = null
-    private var oggPlayThread: Thread? = null
-    private var selectedMusic: File? = null
-    private var objectivePause = false
-    private var currentMusic: File? = null
     private var currentLikeList = ArrayList<File>()
     private var currentDislikeList = ArrayList<File>()
     private var currentNormalList = ArrayList<File>()
-    private var alonePlayTime = 0
     private var playedMusic = ArrayList<File>()
-    private var musicCoverTempFolder: File? = null
+    // 列表的初始化
+    private val listModel = DefaultListModel<File>()
+    private val listModelPanel = DefaultListModel<JPanel>()
+    private val list = JBList(listModelPanel)
+    // 播放器的初始化
+    private var mp3Player: AdvancedPlayer? = null
+    private val clip: Clip = AudioSystem.getClip()
+    private val oggPlayer: OggPlayer = OggPlayer()
+    // 播放状态的初始化
+    private var isPlaying: Boolean = false
     private var switchMusic: Boolean = false
+    private var objectivePause: Boolean = false
+    // 播放线程的初始化
+    private var mp3PlayThread: Thread? = null
+    private var oggPlayThread: Thread? = null
+    // 临时文件初始化
+    private var selectedMusic: File? = null
+    private var currentMusic: File? = null
+    private var musicCoverTempFolder: File? = null
+    private var tempCover: File? = null
 
+    // 类初始值设定项(本来不想用这么专业的名字的...)
     init {
         minimumSize = Dimension(150, 0)
         layout = BorderLayout()
@@ -96,7 +119,6 @@ final class HoshisukiUI : JPanel() {
             add(playCase)
             add(coverButton)
         }
-
         val displayPanel = JPanel().apply {
             layout = BorderLayout()
             add(JLabel("  "+bundle.message("music.folder.label.prefix")+" "), BorderLayout.WEST)
@@ -184,7 +206,7 @@ final class HoshisukiUI : JPanel() {
                     add(JBCheckBox("", state.beautifyTitleEnabled).apply {
                         addActionListener {
                             state.beautifyTitleEnabled = this.isSelected
-                            if (state.musicFolder != null && state.beautifyTitle == 0) {
+                            if (state.musicFolder != null && state.beautifyTitle != 0) {
                                 displayMusicList(File(state.musicFolder!!))
                             }
                         }
@@ -280,6 +302,21 @@ final class HoshisukiUI : JPanel() {
 
         selectButton.addActionListener { chooseFolder() }
 
+        folderLabel.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent?) {
+                if (state.musicFolder != null) {
+                    Desktop.getDesktop().open(File(state.musicFolder!!))
+                }
+            }
+            override fun mouseEntered(e: MouseEvent?) {
+                folderLabel.cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+                super.mouseEntered(e)
+            }
+            override fun mouseExited(e: MouseEvent?) {
+                folderLabel.cursor = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)
+            }
+        })
+
         // Action 初始化
         likeButton.action = Runnable {
             if (selectedMusic != null) {
@@ -330,8 +367,10 @@ final class HoshisukiUI : JPanel() {
                 revalidate()
                 repaint()
                 objectivePause = false
-                Timer().schedule(TimerTask() {
-                    playButton.isEnabled = true
+                java.util.Timer().schedule(object: TimerTask() {
+                    override fun run() {
+                        playButton.isEnabled = true
+                    }
                 }, 1000)
             }
         }
@@ -363,8 +402,10 @@ final class HoshisukiUI : JPanel() {
                 }
                 objectivePause = false
                 switchMusic = false
-                Timer().schedule(TimerTask() {
-                    prevButton.isEnabled = true
+                java.util.Timer().schedule(object: TimerTask() {
+                    override fun run() {
+                        prevButton.isEnabled = true
+                    }
                 }, 1000)
             }
         }
@@ -392,8 +433,10 @@ final class HoshisukiUI : JPanel() {
                 }
                 objectivePause = false
                 switchMusic = false
-                Timer().schedule(TimerTask() {
-                    nextButton.isEnabled = true
+                java.util.Timer().schedule(object: TimerTask() {
+                    override fun run() {
+                        nextButton.isEnabled = true
+                    }
                 }, 1000)
             }
         }
@@ -415,6 +458,22 @@ final class HoshisukiUI : JPanel() {
                 if (state.musicCoverMap.keys.contains(selectedMusic!!.absolutePath)) removeCover()
                 else chooseCover()
                 refreshCoverButtonVisuals()
+            }
+        }
+        coverButton.action2 = Runnable {
+            if (state.musicFolder != null && selectedMusic != null) {
+                if (state.musicCoverMap.keys.contains(selectedMusic!!.absolutePath)) removeCover()
+                if (tempCover == null) {
+                    chooseCover()
+                    refreshCoverButtonVisuals()
+                } else {
+                    state.musicCoverMap[selectedMusic!!.absolutePath] = tempCover!!.absolutePath
+                    if (coverPanel.size.height != 0 && currentMusic === selectedMusic) {
+                        coverPanel.cover = ImageIcon(tempCover!!.absolutePath)
+                        repaint()
+                    }
+                    refreshCoverButtonVisuals()
+                }
             }
         }
 
@@ -642,6 +701,7 @@ final class HoshisukiUI : JPanel() {
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             state.musicCoverMap[selectedMusic!!.absolutePath] = chooser.selectedFile.absolutePath
             musicCoverTempFolder = chooser.currentDirectory
+            tempCover = chooser.selectedFile
             if (coverPanel.size.height != 0 && currentMusic === selectedMusic) {
                 coverPanel.cover = ImageIcon(chooser.selectedFile.absolutePath)
                 repaint()
@@ -880,19 +940,41 @@ final class HoshisukiUI : JPanel() {
     }
 
     private fun stopMusic() {
-        if (!switchMusic) hideCover()
+        val wasPlaying = isPlaying
+        isPlaying = false
 
-        if (mp3PlayThread?.isAlive == true) {
+        if (!switchMusic) { 
+            hideCover()
+        }
+
+        val currentMp3Thread = mp3PlayThread
+        if (currentMp3Thread != null && currentMp3Thread.isAlive) {
             mp3Player?.close()
-            mp3PlayThread?.interrupt()
-            mp3PlayThread?.join(100)
+            if (Thread.currentThread() != currentMp3Thread) {
+                currentMp3Thread.interrupt()
+                try {
+                    currentMp3Thread.join(100)
+                } catch (e: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                    System.err.println("Interrupted while joining MP3 thread: ${e.message}")
+                }
+            }
         }
         mp3Player = null
+        mp3PlayThread = null
 
-        if (oggPlayThread?.isAlive == true) {
+        val currentOggThread = oggPlayThread
+        if (currentOggThread != null && currentOggThread.isAlive) {
             oggPlayer.stop()
-            oggPlayThread?.interrupt()
-            oggPlayThread?.join(100)
+            if (Thread.currentThread() != currentOggThread) {
+                currentOggThread.interrupt()
+                try {
+                    currentOggThread.join(100)
+                } catch (e: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                    System.err.println("Interrupted while joining OGG thread: ${e.message}")
+                }
+            }
         }
         oggPlayThread = null
 
@@ -903,14 +985,17 @@ final class HoshisukiUI : JPanel() {
             clip.close()
         }
 
-        alonePlayTime = 0
-        isPlaying = false
+        if (wasPlaying) {
+            alonePlayTime = 0
+        }
+
         refreshPlayingIconInList()
         playButton.text = getExplainableMessage("button.play.tooltip")
         playButton.icon = MusicIcons.run
+        playButton.isEnabled = musicFiles.isNotEmpty()
+
         revalidate()
         repaint()
-
     }
 
     fun JPanel.setHeight(height: Int) {

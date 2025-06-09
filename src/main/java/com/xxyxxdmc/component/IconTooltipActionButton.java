@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.ActionButtonComponent;
 import com.intellij.openapi.actionSystem.ex.ActionButtonLook;
 import com.intellij.openapi.util.NlsContexts;
 import com.intellij.ui.ClickListener;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,15 +19,19 @@ public final class IconTooltipActionButton extends JComponent {
     private final boolean myLatch;
     private boolean latched;
     private Runnable myAction;
+    private Runnable myAction2;
 
     public IconTooltipActionButton(@NotNull Icon icon, @NlsContexts.Tooltip @Nullable String tooltipText, @Nullable final Runnable action) {
-        this(icon, tooltipText, false, action);
+        this(icon, tooltipText, false, action, null);
     }
-
     public IconTooltipActionButton(@NotNull Icon icon, @NlsContexts.Tooltip @Nullable String tooltipText, boolean latch, @Nullable final Runnable action) {
+        this(icon, tooltipText, latch, action, null);
+    }
+    public IconTooltipActionButton(@NotNull Icon icon, @NlsContexts.Tooltip @Nullable String tooltipText, boolean latch, @Nullable final Runnable action, @Nullable final Runnable action2) {
         this.myIcon = icon;
         this.myTooltip = tooltipText;
         this.myAction = action;
+        this.myAction2 = action2;
         this.myLatch = latch;
         this.latched = false;
 
@@ -55,11 +58,20 @@ public final class IconTooltipActionButton extends JComponent {
         new ClickListener() {
             @Override
             public boolean onClick(@NotNull MouseEvent e, int clickCount) {
-                if (!isEnabled()) return false;
-                if (myAction != null) {
-                    if (myLatch) latched = !latched;
-                    myAction.run();
-                    return true;
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    if (!isEnabled()) return false;
+                    if (myAction != null) {
+                        if (myLatch) latched = !latched;
+                        myAction.run();
+                        return true;
+                    }
+                } else if (e.getButton() == MouseEvent.BUTTON2) {
+                    if (!isEnabled()) return false;
+                    if (myAction2 != null) {
+                        if (myLatch) latched = !latched;
+                        myAction2.run();
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -79,9 +91,6 @@ public final class IconTooltipActionButton extends JComponent {
         }
         if (latched) {
             ActionButtonLook.SYSTEM_LOOK.paintBackground(g, this, ActionButtonComponent.PUSHED);
-        }
-        if (!isEnabled()) {
-            ActionButtonLook.SYSTEM_LOOK.paintBackground(g, this, ActionButtonComponent.POPPED);
         }
 
         if (myIcon != null) {
@@ -144,5 +153,14 @@ public final class IconTooltipActionButton extends JComponent {
 
     public void setLatched(boolean latched) {
         this.latched = latched;
+    }
+
+    @Nullable
+    public Runnable getAction2() {
+        return this.myAction2;
+    }
+
+    public void setAction2(@Nullable Runnable action) {
+        this.myAction2 = action;
     }
 }
