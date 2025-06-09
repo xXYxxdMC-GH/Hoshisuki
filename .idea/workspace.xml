@@ -5,16 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="075cc77d-8f2b-49f6-9977-6024817a5659" name="更改" comment="Update">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/DropDownContainRadioCombo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/DropDownContainRadioCheck.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/CoverPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/CoverPanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/IconTooltipActionButton.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/IconTooltipActionButton.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/DropDownContainRadioCombo.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/PictureFileFilter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/PictureFileFilter.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_ja_JP.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_ja_JP.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_zh_CN.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_zh_CN.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -124,30 +121,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
-    &quot;Gradle.Hoshisuki [:com.xxyxxdmc.OggPlayer.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Hoshisuki [:com.xxyxxdmc.player.OggPlayer.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Hoshisuki [buildPlugin].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Hoshisuki [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Hoshisuki [setupDependencies].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Run Plugin.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.构建 Hoshisuki.executor&quot;: &quot;Run&quot;,
-    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;问题&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.3264368&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.editor.code.editing&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Downloaded.Files.Path.Enabled": "false",
+    "Gradle.Hoshisuki [:com.xxyxxdmc.OggPlayer.main()].executor": "Run",
+    "Gradle.Hoshisuki [:com.xxyxxdmc.component.DropDownContainRadioCheck.main()].executor": "Run",
+    "Gradle.Hoshisuki [:com.xxyxxdmc.player.OggPlayer.main()].executor": "Run",
+    "Gradle.Hoshisuki [buildPlugin].executor": "Run",
+    "Gradle.Hoshisuki [build].executor": "Run",
+    "Gradle.Hoshisuki [setupDependencies].executor": "Run",
+    "Gradle.Run Plugin.executor": "Debug",
+    "Gradle.构建 Hoshisuki.executor": "Run",
+    "Repository.Attach.Annotations": "false",
+    "Repository.Attach.JavaDocs": "false",
+    "Repository.Attach.Sources": "false",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "project.structure.last.edited": "问题",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.3264368",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "preferences.rainbow.brackets.lite"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Administrator\Desktop\Hoshisuki\src\main\resources\icons" />
@@ -194,7 +192,7 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="Hoshisuki [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="Hoshisuki [build]" type="GradleRunConfiguration" factoryName="Gradle" activateToolWindowBeforeRun="false" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -380,7 +378,23 @@
       <option name="project" value="LOCAL" />
       <updated>1749363648451</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749392818951</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1749392818951</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749392834071</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1749392834071</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

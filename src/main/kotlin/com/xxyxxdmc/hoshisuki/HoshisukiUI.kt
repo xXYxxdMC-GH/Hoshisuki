@@ -192,7 +192,11 @@ final class HoshisukiUI : JPanel() {
                 val options = arrayOf(bundle.message("option.anti.again.level.off"), bundle.message("option.anti.again.level.normal"), bundle.message("option.anti.again.level.enhanced"))
                 add(JComboBox(options).apply {
                     selectedIndex = state.antiAgainLevel
-                    addItemListener { state.antiAgainLevel = it.stateChange }
+                    addItemListener { event ->
+                        if (event.stateChange == java.awt.event.ItemEvent.SELECTED) {
+                            state.antiAgainLevel = this.selectedIndex
+                        }
+                    }
                     preferredSize = Dimension(80, 30)
                 }, BorderLayout.EAST)
             })
@@ -420,6 +424,7 @@ final class HoshisukiUI : JPanel() {
 
         refreshPlayCaseButtonVisuals()
 
+        settingButton.isLatched = true
         settingButton.isEnabled = false
     }
 
@@ -484,58 +489,89 @@ final class HoshisukiUI : JPanel() {
             return
         }
 
+        var listNeedsRepaint = false 
+
         for (i in 0 until listModelPanel.size()) {
             val panel = listModelPanel.getElementAt(i) ?: continue
             val fileForPanel = listModel.getElementAt(i) ?: continue
 
             if (state.optimizePanel) {
-                var panelHasPlayingIcon = false
-                var panelLikeStatusIcon: Icon? = null
-                var panelHasCorrectNameLabel = false
-                val expectedNameText = " " + fileForPanel.name
+                val playingLabel = panel.components.find { it.name == "playingIndicator" } as? JLabel
+                val likeLabel = panel.components.find { it.name == "likeIndicator" } as? JLabel
 
-                panel.components.forEach { comp ->
-                    if (comp is JLabel) {
-                        if (comp.icon == MusicIcons.playing) {
-                            panelHasPlayingIcon = true
-                        } else if (comp.icon == MusicIcons.like || comp.icon == MusicIcons.dislike || comp.icon == MusicIcons.dislikeAnti) {
-                            panelLikeStatusIcon = comp.icon
-                        } else if (comp.text == expectedNameText && comp.icon == null) {
-                            panelHasCorrectNameLabel = true
-                        }
+                if (playingLabel == null || likeLabel == null) {
+                    panel.removeAll()
+                    if (fileForPanel === currentMusic && isPlaying) {
+                        panel.add(JLabel().apply { name = "playingIndicator"; icon = MusicIcons.playing }, BorderLayout.WEST)
+                    } else {
+                        panel.add(JLabel().apply { name = "playingIndicator" }, BorderLayout.WEST)
                     }
+                    panel.add(JLabel(" " + fileForPanel.name), BorderLayout.CENTER)
+
+                    val likeIndicatorToAdd = JLabel().apply { name = "likeIndicator" }
+                    if (fileForPanel in currentLikeList) {
+                        likeIndicatorToAdd.icon = MusicIcons.like
+                    } else if (fileForPanel in currentDislikeList) {
+                        likeIndicatorToAdd.icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
+                    }
+                    panel.add(likeIndicatorToAdd, BorderLayout.EAST)
+                    panel.revalidate()
+                    listNeedsRepaint = true
+                    continue
                 }
 
+                var panelChanged = false
+
                 val shouldHavePlayingIcon = (fileForPanel === currentMusic && isPlaying)
+                val currentPlayingIcon = playingLabel.icon
+
+                if (shouldHavePlayingIcon && currentPlayingIcon == null) {
+                    playingLabel.icon = MusicIcons.playing
+                    panelChanged = true
+                } else if (!shouldHavePlayingIcon && currentPlayingIcon != null) {
+                    playingLabel.icon = null
+                    panelChanged = true
+                }
+
                 val expectedLikeStatusIcon: Icon? = when {
                     fileForPanel in currentLikeList -> MusicIcons.like
                     fileForPanel in currentDislikeList -> if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
                     else -> null
                 }
 
-                if (panelHasCorrectNameLabel &&
-                    shouldHavePlayingIcon == panelHasPlayingIcon &&
-                    expectedLikeStatusIcon == panelLikeStatusIcon) {
-                    continue
+                if (likeLabel.icon != expectedLikeStatusIcon) {
+                    likeLabel.icon = expectedLikeStatusIcon
+                    panelChanged = true
                 }
+
+                if (panelChanged) {
+                    panel.revalidate()
+                    listNeedsRepaint = true
+                }
+            } else {
+                panel.removeAll()
+                if (fileForPanel === currentMusic && isPlaying) {
+                    panel.add(JLabel().apply { name = "playingIndicator"; icon = MusicIcons.playing }, BorderLayout.WEST)
+                } else {
+                    panel.add(JLabel().apply { name = "playingIndicator" }, BorderLayout.WEST)
+                }
+                panel.add(JLabel(" " + fileForPanel.name), BorderLayout.CENTER)
+
+                val likeIndicatorToAdd = JLabel().apply { name = "likeIndicator" }
+                if (fileForPanel in currentLikeList) {
+                    likeIndicatorToAdd.icon = MusicIcons.like
+                } else if (fileForPanel in currentDislikeList) {
+                    likeIndicatorToAdd.icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
+                }
+                panel.add(likeIndicatorToAdd, BorderLayout.EAST)
+                panel.revalidate()
+                listNeedsRepaint = true
             }
-
-            panel.removeAll()
-
-            if (fileForPanel === currentMusic && isPlaying) {
-                panel.add(JLabel().apply { icon = MusicIcons.playing }, BorderLayout.WEST)
-            }
-            panel.add(JLabel(" " + fileForPanel.name), BorderLayout.CENTER)
-
-            if (fileForPanel in currentLikeList) {
-                panel.add(JLabel().apply { icon = MusicIcons.like }, BorderLayout.EAST)
-            } else if (fileForPanel in currentDislikeList) {
-                panel.add(JLabel().apply { icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike }, BorderLayout.EAST)
-            }
-
-            panel.revalidate()
         }
-        list.repaint()
+
+        if (listNeedsRepaint) {
+            list.repaint()
+        }
     }
 
 
@@ -641,43 +677,64 @@ final class HoshisukiUI : JPanel() {
     private fun createMusicPanel(music: File): JPanel {
         return JPanel().apply {
             layout = BorderLayout()
+
+            val playingLabel = JLabel().apply { name = "playingIndicator" }
+            val nameLabel = JLabel(" " + music.name)
+            val likeLabel = JLabel().apply { name = "likeIndicator" }
+
             if (music === currentMusic && isPlaying) {
-                add(JLabel().apply { icon = MusicIcons.playing }, BorderLayout.WEST)
+                playingLabel.icon = MusicIcons.playing
             }
-            add(JLabel(" " + music.name), BorderLayout.CENTER)
+            add(playingLabel, BorderLayout.WEST)
+
+            add(nameLabel, BorderLayout.CENTER)
+
             if (music in currentLikeList) {
-                add(JLabel().apply { icon = MusicIcons.like }, BorderLayout.EAST)
+                likeLabel.icon = MusicIcons.like
             } else if (music in currentDislikeList) {
-                add(JLabel().apply { icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike }, BorderLayout.EAST)
+                likeLabel.icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
             }
+            add(likeLabel, BorderLayout.EAST)
         }
     }
 
     private fun playMusic() {
         alonePlayTime = 0
         if (defaultSettingHeight == 0) defaultSettingHeight = settingPanel.size.height
-        if (!isPlaying && selectedMusic != null) {
+        if (!isPlaying && currentMusic != null) {
             showCover()
             try {
                 when (currentMusic!!.extension.lowercase(Locale.getDefault())) {
                     "mp3" -> {
-                        val fileStream = currentMusic?.let { FileInputStream(it) }
-                        player = AdvancedPlayer(fileStream)
-                        if (mp3PlayThread != null) if (mp3PlayThread!!.isAlive) mp3PlayThread!!.interrupt()
-                        mp3PlayThread = Thread {
+                        currentMusic?.let { musicFile ->
                             try {
-                                player!!.play()
+                                FileInputStream(musicFile).use { fileStream ->
+                                    player = AdvancedPlayer(fileStream)
+                                    if (mp3PlayThread != null) if (mp3PlayThread!!.isAlive) mp3PlayThread!!.interrupt()
+                                    mp3PlayThread = Thread {
+                                        try {
+                                            player!!.play()
+                                        } catch (e: JavaLayerException) {
+                                            println("Play ERROR: ${e.message}")
+                                        } finally {
+                                            fileStream.close()
+                                        }
+                                    }
+                                    player!!.playBackListener = object: PlaybackListener() {
+                                        override fun playbackFinished(evt: PlaybackEvent?) {
+                                            SwingUtilities.invokeLater {
+                                                stopMusic()
+                                                playCase()
+                                            }
+                                        }
+                                    }
+                                    mp3PlayThread!!.start()
+                                }
                             } catch (e: JavaLayerException) {
-                                println("Play ERROR: ${e.message}")
+                                System.err.println("Play ERROR: ${e.message}")
+                                e.printStackTrace()
                             }
                         }
-                        player!!.playBackListener = object: PlaybackListener() {
-                            override fun playbackFinished(evt: PlaybackEvent?) {
-                                stopMusic()
-                                playCase()
-                            }
-                        }
-                        mp3PlayThread!!.start()
                     }
                     "ogg" -> {
                         if (oggPlayThread != null) if (oggPlayThread!!.isAlive) oggPlayThread!!.interrupt()
@@ -692,8 +749,10 @@ final class HoshisukiUI : JPanel() {
                         oggPlayer.addPlaybackListener(
                             object: OggPlaybackListener {
                                 override fun onPlaybackFinished(filePath: String) {
-                                    stopMusic()
-                                    playCase()
+                                    SwingUtilities.invokeLater {
+                                        stopMusic()
+                                        playCase()
+                                    }
                                 }
                                 override fun onPlaybackStopped(filePath: String, dueToError: Boolean) {
                                 }
@@ -713,8 +772,10 @@ final class HoshisukiUI : JPanel() {
                         clip.removeLineListener { it?.type == LineEvent.Type.STOP }
                         clip.addLineListener { event: LineEvent ->
                             if (event.type === LineEvent.Type.STOP && !objectivePause) {
-                                stopMusic()
-                                playCase()
+                                SwingUtilities.invokeLater {
+                                    stopMusic()
+                                    playCase()
+                                }
                             }
                         }
                     }
@@ -725,7 +786,10 @@ final class HoshisukiUI : JPanel() {
                 refreshPlayingIconInList()
                 revalidate()
                 repaint()
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                System.err.println("Play ERROR: ${e.message}")
+                e.printStackTrace()
+            }
         } else {
             stopMusic()
         }
@@ -768,14 +832,22 @@ final class HoshisukiUI : JPanel() {
     }
 
     private fun showSetting() {
-        settingPanel.setHeight(defaultSettingHeight)
+        if (defaultSettingHeight > 0) {
+            settingPanel.setHeight(defaultSettingHeight)
+        } else {
+            settingPanel.setHeight(settingPanel.preferredSize.height)
+        }
         revalidate()
         repaint()
     }
 
     private fun hideCover() {
         coverPanel.edgeLength = 0
-        settingPanel.setHeight(defaultSettingHeight)
+        if (defaultSettingHeight > 0) {
+            settingPanel.setHeight(defaultSettingHeight)
+        } else {
+            settingPanel.setHeight(settingPanel.preferredSize.height)
+        }
         settingButton.isLatched = true
         settingButton.isEnabled = false
         revalidate()
@@ -796,7 +868,7 @@ final class HoshisukiUI : JPanel() {
         nextButton.text = getExplainableMessage("button.next.tooltip")
         prevButton.text = getExplainableMessage("button.prev.tooltip")
         rescanButton.text = getExplainableMessage("button.rescan.tooltip")
-        coverButton.text = getExplainableMessage(if (state.musicCoverMap.containsKey(selectedMusic!!.absolutePath)) "button.remove.cover.tooltip" else "button.add.cover.tooltip")
+        coverButton.text = getExplainableMessage(if (state.musicCoverMap.containsKey(selectedMusic?.absolutePath)) "button.remove.cover.tooltip" else "button.add.cover.tooltip")
     }
 
     private fun playCase() {
@@ -810,7 +882,6 @@ final class HoshisukiUI : JPanel() {
                     currentMusic = musicFiles[index]
                     selectedMusic = musicFiles[index]
                     list.selectedIndex = index
-                    refreshPlayingIconInList()
                     playMusic()
                 }
             }
@@ -822,19 +893,16 @@ final class HoshisukiUI : JPanel() {
                     currentMusic = musicFiles[index]
                     selectedMusic = musicFiles[index]
                     list.selectedIndex = index
-                    refreshPlayingIconInList()
                     playMusic()
                 }
             }
             2 -> { // Alone Cycle
                 if (currentMusic != null) {
-                    refreshPlayingIconInList()
                     playMusic()
                 }
             }
             3 -> { // Alone Finite Cycle
                 if (currentMusic != null && alonePlayTime < state.alonePlayTimes) {
-                    refreshPlayingIconInList()
                     alonePlayTime++
                     playMusic()
                 }
@@ -848,7 +916,6 @@ final class HoshisukiUI : JPanel() {
                     currentMusic = musicFiles[index]
                     selectedMusic = musicFiles[index]
                     list.selectedIndex = index
-                    refreshPlayingIconInList()
                     playMusic()
                 }
             }
@@ -860,7 +927,6 @@ final class HoshisukiUI : JPanel() {
                     currentMusic = musicFiles[index]
                     selectedMusic = musicFiles[index]
                     list.selectedIndex = index
-                    refreshPlayingIconInList()
                     playMusic()
                 }
             }
@@ -871,7 +937,6 @@ final class HoshisukiUI : JPanel() {
                 randomPlayMusic(true)
             }
             8 -> { // Stop on Finish
-                refreshPlayingIconInList()
             }
         }
     }
@@ -897,7 +962,7 @@ final class HoshisukiUI : JPanel() {
             currentMusic = weightChooseMusic(true, chooseDislike, true)
         } else if (state.dislikeWeight.compare(0.0)) {
             val chooseLike = if (state.likeWeight < 0) (Math.random() < (1 + state.likeWeight) * 0.1) else (Math.random() < state.likeWeight)
-            currentMusic = weightChooseMusic(chooseLike, chooseDislike = true, withNormal = true)
+            currentMusic = weightChooseMusic(chooseLike, true, true)
         } else if (!state.likeWeight.compare(0.0) && !state.dislikeWeight.compare(0.0)) {
             val chooseLike = if (state.likeWeight < 0) (Math.random() < (1 + state.likeWeight) * 0.1) else (Math.random() < state.likeWeight)
             val chooseDislike = if (state.dislikeWeight < 0) (Math.random() < (1 + state.dislikeWeight) * 0.1) else (Math.random() < state.dislikeWeight)
@@ -907,14 +972,13 @@ final class HoshisukiUI : JPanel() {
         if (recordPlayedMusic && !playedMusic.contains(currentMusic!!)) playedMusic.add(currentMusic!!)
         selectedMusic = currentMusic
         list.selectedIndex = musicFiles.indexOf(currentMusic)
-        refreshPlayingIconInList()
         playMusic()
     }
 
     private fun weightChooseMusic(chooseLike: Boolean, chooseDislike: Boolean, withNormal: Boolean): File {
         var tempList = ArrayList<File>()
-        if (chooseLike && state.likeWeight != 1.0) tempList.addAll(currentLikeList)
-        if (chooseDislike && state.dislikeWeight != 1.0) tempList.addAll(currentDislikeList)
+        if (chooseLike && state.likeWeight > -1.0) tempList.addAll(currentLikeList)
+        if (chooseDislike && state.dislikeWeight > -1.0) tempList.addAll(currentDislikeList)
         if (withNormal) tempList.addAll(currentNormalList)
         if (tempList.size > 1) {
             var index = floor(Math.random() * tempList.size).toInt()
