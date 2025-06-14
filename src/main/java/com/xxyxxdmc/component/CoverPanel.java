@@ -16,7 +16,7 @@ public final class CoverPanel extends JPanel {
         if (cover != null) this.cover = cover;
         else {
             String themeName = UIManager.getLookAndFeel().getName();
-            URL defaultCoverUrl = getClass().getClassLoader().getResource(String.format("icons/cover_%s.png", (themeName.contains("Darcula") || themeName.contains("Dark")) ? "dark" : "light"));
+            URL defaultCoverUrl = getClass().getClassLoader().getResource(String.format("icons/cover_%s.png", themeName.contains("Light") ? "light" : "dark"));
             assert defaultCoverUrl != null;
             this.cover = new ImageIcon(defaultCoverUrl);
         }

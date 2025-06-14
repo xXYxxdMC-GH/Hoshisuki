@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.xxyxxdmc"
-version = "1.2"
+version = "1.3-SNAPSHOT"
 
 repositories {
     mavenCentral()
