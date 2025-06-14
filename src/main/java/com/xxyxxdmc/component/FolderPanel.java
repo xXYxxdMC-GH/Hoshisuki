@@ -10,8 +10,8 @@ import java.io.IOException;
 public class FolderPanel extends JPanel {
     private boolean playing;
     private boolean state;
-    private final IconTooltipActionButton folderButton;
-    private final IconTooltipActionButton controlButton;
+    private IconTooltipActionButton folderButton;
+    private IconTooltipActionButton controlButton;
 
     public FolderPanel(boolean playing, String folderPath, String text, boolean state, Runnable action) {
         setLayout(new BorderLayout());
@@ -27,23 +27,13 @@ public class FolderPanel extends JPanel {
                     }
                 }
         );
-        JPanel panel1 = new JPanel();
-        panel1.setLayout(new BorderLayout());
-        panel1.add(Box.createHorizontalStrut(2), BorderLayout.WEST);
-        panel1.add(Box.createHorizontalStrut(2), BorderLayout.EAST);
-        panel1.add(this.folderButton, BorderLayout.CENTER);
-        add(panel1, BorderLayout.WEST);
+        add(this.folderButton, BorderLayout.WEST);
         this.controlButton = new IconTooltipActionButton(
                 state ? MusicIcons.foldUp : MusicIcons.extend,
                 null, action
         );
-        add(new JLabel(folderPath));
-        JPanel panel2 = new JPanel();
-        panel2.setLayout(new BorderLayout());
-        panel2.add(Box.createHorizontalStrut(2), BorderLayout.WEST);
-        panel2.add(Box.createHorizontalStrut(2), BorderLayout.EAST);
-        panel2.add(this.controlButton, BorderLayout.CENTER);
-        add(panel2, BorderLayout.EAST);
+        add(new JLabel(folderPath), BorderLayout.CENTER);
+        add(this.controlButton, BorderLayout.EAST);
     }
 
     public boolean isPlaying() {
@@ -55,12 +45,36 @@ public class FolderPanel extends JPanel {
         this.folderButton.setIcon(playing ? MusicIcons.playingFolder : MusicIcons.multiFolder);
     }
 
-    public boolean isState() {
+    public boolean getState() {
         return state;
     }
 
     public void setState(boolean state) {
         this.state = state;
         this.controlButton.setIcon(state ? MusicIcons.foldUp : MusicIcons.extend);
+    }
+
+    public Runnable getAction() {
+        return this.controlButton.getAction();
+    }
+
+    public void setAction(Runnable action) {
+        this.controlButton.setAction(action);
+    }
+
+    public IconTooltipActionButton getFolderButton() {
+        return this.folderButton;
+    }
+
+    public void setFolderButton(IconTooltipActionButton folderButton) {
+        this.folderButton = folderButton;
+    }
+
+    public IconTooltipActionButton getControlButton() {
+        return this.controlButton;
+    }
+
+    public void setControlButton(IconTooltipActionButton controlButton) {
+        this.controlButton = controlButton;
     }
 }

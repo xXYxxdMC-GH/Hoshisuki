@@ -6,7 +6,11 @@ import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.xxyxxdmc.RandomPlayException
 import com.xxyxxdmc.component.CoverPanel
+import com.xxyxxdmc.component.FolderPanel
 import com.xxyxxdmc.component.IconTooltipActionButton
+import com.xxyxxdmc.component.MusicPanel
+import com.xxyxxdmc.component.MusicScrollPanel
+import com.xxyxxdmc.component.ScrollView
 import com.xxyxxdmc.icons.MusicIcons
 import com.xxyxxdmc.player.OggPlaybackListener
 import com.xxyxxdmc.player.OggPlayer
@@ -25,6 +29,8 @@ import java.awt.event.ComponentEvent
 import java.awt.event.ComponentListener
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.awt.Point
+import java.awt.ScrollPane
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
@@ -74,6 +80,7 @@ final class HoshisukiUI : JPanel() {
     private val folderLabel = JLabel(bundle.message("folder.label.not.chosen"))
     private val coverPanel = CoverPanel(null, -1, -1)
     private var scrollPane: Component? = null
+    private var musicScrollPanel: MusicScrollPanel? = null
     private var settingPanel: JPanel = JPanel()
     // 一些数值的初始化
     private var defaultSettingHeight: Int = 0
@@ -88,6 +95,11 @@ final class HoshisukiUI : JPanel() {
     private val listModel = DefaultListModel<File>()
     private val listModelPanel = DefaultListModel<JPanel>()
     private val list = JBList(listModelPanel)
+    // 表的初始化
+    private val musicFolderMap: MutableMap<String, List<File>> = mutableMapOf<String, List<File>>()
+    private val musicFolderStateMap: MutableMap<String, Boolean> = mutableMapOf<String, Boolean>()
+    private val musicFolderModelList = DefaultListModel<JPanel>()
+    private val folderList = JBList(musicFolderModelList)
     // 播放器的初始化
     private var mp3Player: AdvancedPlayer? = null
     private val clip: Clip = AudioSystem.getClip()
@@ -112,7 +124,7 @@ final class HoshisukiUI : JPanel() {
 
         val controlPanel = JPanel().apply {
             add(settingButton)
-            add(likeButton)
+            //add(likeButton)
             add(prevButton)
             add(playButton)
             add(nextButton)
@@ -303,17 +315,17 @@ final class HoshisukiUI : JPanel() {
         selectButton.addActionListener { chooseFolder() }
 
         folderLabel.addMouseListener(object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent?) {
-                if (state.musicFolder != null) {
-                    Desktop.getDesktop().open(File(state.musicFolder!!))
+            override fun mouseClicked(e: MouseEvent?) {}
+            override fun mouseEntered(e: MouseEvent?) {
+                if (state.musicFolderList.size > 0) {
+                    folderLabel.cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+                    super.mouseEntered(e)
                 }
             }
-            override fun mouseEntered(e: MouseEvent?) {
-                folderLabel.cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-                super.mouseEntered(e)
-            }
             override fun mouseExited(e: MouseEvent?) {
-                folderLabel.cursor = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)
+                if (state.musicFolderList.size > 0) {
+                    folderLabel.cursor = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)
+                }
             }
         })
 
@@ -524,14 +536,6 @@ final class HoshisukiUI : JPanel() {
 
         settingButton.isLatched = true
         settingButton.isEnabled = false
-
-        if (musicFiles.isEmpty()) {
-            playButton.isEnabled = false
-            prevButton.isEnabled = false
-            nextButton.isEnabled = false
-            likeButton.isEnabled = false
-            coverButton.isEnabled = false
-        }
     }
 
     private fun refreshPlayCaseButtonVisuals() {
@@ -686,7 +690,8 @@ final class HoshisukiUI : JPanel() {
             stopMusic()
             currentMusic = null
             selectedMusic = null
-            displayMusicList(chooser.selectedFile)
+            state.musicFolderList.apply { if (!this.contains(chooser.selectedFile.absolutePath)) add(chooser.selectedFile.absolutePath) }
+            displayMusicFolderList()
         }
     }
 
@@ -714,6 +719,136 @@ final class HoshisukiUI : JPanel() {
         state.musicCoverMap.remove(selectedMusic!!.absolutePath)
         if (coverPanel.size.height != 0 && currentMusic === selectedMusic) {
             coverPanel.cover = null
+            repaint()
+        }
+    }
+
+    private fun displayMusicFolderList() {
+        val noMusicFolder = ArrayList<File>()
+        val noSupportMusicFolder = ArrayList<File>()
+        folderLabel.text = state.musicFolderList.size.toString() + " Folder(s)"
+        folderLabel.apply {
+            val sb = StringBuilder()
+            state.musicFolderList.forEach { sb.append(it).append("<br>") }
+            HelpTooltip().setDescription("<html>" + sb.toString() + "</html>").installOn(this)
+        }
+        musicFolderMap.clear()
+        musicFolderModelList.clear()
+        musicFiles.clear()
+        currentDislikeList.clear()
+        currentLikeList.clear()
+        currentNormalList.clear()
+        for (folderPath in state.musicFolderList) {
+            val folder = folderPath.let { File(it) }
+            val musicList = ArrayList<File>()
+            var musicListModel = ArrayList<JPanel>()
+            if (folder.exists() && folder.isDirectory && folder.listFiles().isNotEmpty()) {
+                folder.listFiles().forEach {
+                    if (it.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au", "ogg")) {
+                        musicList.add(it)
+                        var processedName = if (state.beautifyTitleEnabled) when (state.beautifyTitle) {
+                            1 -> it.nameWithoutExtension.replace("_", " ")
+                            2 -> it.nameWithoutExtension.let { it.first().uppercase() + it.substring(1) }
+                            3 -> it.nameWithoutExtension.let { it.split("_").joinToString("") { it.first().uppercase() + it.substring(1) }}
+                            4 -> it.nameWithoutExtension.let { it.first().uppercase() + it.substring(1) }.replace("_", " ")
+                            5 -> it.nameWithoutExtension.let { it.split("_").joinToString(" ") { it.first().uppercase() + it.substring(1) }}
+                            else -> it.nameWithoutExtension
+                        } else it.name
+                        val likeInfo = when {
+                            (it in currentLikeList) -> 1
+                            (it in currentDislikeList && state.sensitiveIcon) -> 3
+                            (it in currentDislikeList && !state.sensitiveIcon) -> 2
+                            else -> 0
+                        }
+                        val tooltip = when {
+                            currentLikeList.contains(it) -> getExplainableMessage("button.like.tooltip")
+                            currentDislikeList.contains(it) -> getExplainableMessage("button.dislike.tooltip")
+                            else -> getExplainableMessage("button.un.dislike.tooltip")
+                        }
+                        musicListModel.add(MusicPanel((isPlaying && it === currentMusic), true, processedName, likeInfo) {}.apply {
+                            HelpTooltip().setDescription(tooltip).installOn(this)
+                            action = Runnable {
+                                when (it) {
+                                    in currentLikeList -> {
+                                        currentLikeList.remove(it)
+                                        state.likeList.remove(it.absolutePath)
+                                        currentDislikeList.add(it)
+                                        state.dislikeList.add(it.absolutePath)
+                                        this.likeButton.icon = MusicIcons.like
+                                        this.likeButton.text = getExplainableMessage("button.dislike.tooltip")
+                                    }
+                                    in currentDislikeList -> {
+                                        currentDislikeList.remove(it)
+                                        state.dislikeList.remove(it.absolutePath)
+                                        this.likeButton.icon = MusicIcons.dislike
+                                        this.likeButton.text = getExplainableMessage("button.un.dislike.tooltip")
+                                    }
+                                    else -> {
+                                        currentLikeList.add(it)
+                                        state.likeList.add(it.absolutePath)
+                                        this.likeButton.icon = MusicIcons.unDislike
+                                        this.likeButton.text = getExplainableMessage("button.like.tooltip")
+                                    }
+                                }
+                            }
+                        })
+                    }
+                }
+                if (musicList.isEmpty()) {
+                    noSupportMusicFolder.add(folder)
+                    continue
+                }
+            }
+            else {
+                noMusicFolder.add(folder)
+                continue
+            }
+            musicFolderMap[folderPath] = musicList
+            musicFolderModelList.addElement(
+                FolderPanel(
+                (isPlaying && musicFolderMap[folderPath]!!.contains(currentMusic) == true),
+                folderPath,
+                bundle.message("button.open.folder.tooltip"),
+                true,
+                {}).apply {
+                action = Runnable {
+                    musicFolderStateMap[folderPath] = this.state
+                    displayMusicFolderList()
+                }
+            })
+            musicFiles.add(folder)
+            musicFiles.addAll(musicList);
+            if (true) musicListModel.forEach {
+                musicFolderModelList.addElement(it)
+            }
+        }
+        musicFiles.forEach {
+            when (it.absolutePath) {
+                in state.likeList -> currentLikeList.add(it)
+                in state.dislikeList -> currentDislikeList.add(it)
+                else -> currentNormalList.add(it)
+            }
+        }
+        scrollPane?.let { remove(it) }
+        musicScrollPanel?.let { remove(it) }
+        //folderList.cellRenderer = PanelCellRenderer()
+        //folderList.selectionMode = ListSelectionModel.SINGLE_SELECTION
+        //folderList.listSelectionListeners.forEach { folderList.removeListSelectionListener(it) }
+        //folderList.addListSelectionListener {
+        //    if (!it.valueIsAdjusting) {
+        //        if (folderList.selectedIndex != -1 && folderList.selectedIndex < musicFolderModelList.size()) {
+        //            selectedMusic = listModel.elementAt(folderList.selectedIndex)
+        //            refreshCoverButtonVisuals()
+        //        }
+        //    }
+        //}
+        musicScrollPanel = MusicScrollPanel(ScrollView(musicFolderModelList)).apply {
+            preferredSize = Dimension(200, 150)
+
+        }
+        if (scrollPane != null) {
+            scrollPane?.let { add(it, BorderLayout.CENTER) }
+            revalidate()
             repaint()
         }
     }
@@ -760,6 +895,7 @@ final class HoshisukiUI : JPanel() {
                 musicFiles.forEach { listModel.addElement(it) }
                 musicFiles.forEach { listModelPanel.addElement(createMusicPanel(it)) }
                 scrollPane?.let { remove(it) }
+                musicScrollPanel?.let { remove(it) }
                 list.cellRenderer = PanelCellRenderer()
                 list.selectionMode = ListSelectionModel.SINGLE_SELECTION
                 list.listSelectionListeners.forEach { list.removeListSelectionListener(it) }

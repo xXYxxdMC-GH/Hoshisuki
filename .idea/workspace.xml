@@ -5,12 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="075cc77d-8f2b-49f6-9977-6024817a5659" name="更改" comment="Update">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/FolderPanel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/MusicPanel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/icons/libraryFolder.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/MusicScrollPanel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/ScrollView.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/icons/MusicIcons.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/icons/MusicIcons.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/FolderPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/FolderPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/IconTooltipActionButton.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/IconTooltipActionButton.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/MusicPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/MusicPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_zh_CN.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_zh_CN.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -125,6 +129,7 @@
     "Downloaded.Files.Path.Enabled": "false",
     "Gradle.Hoshisuki [:com.xxyxxdmc.OggPlayer.main()].executor": "Run",
     "Gradle.Hoshisuki [:com.xxyxxdmc.component.DropDownContainRadioCheck.main()].executor": "Run",
+    "Gradle.Hoshisuki [:com.xxyxxdmc.component.IconTooltipActionButton.main()].executor": "Debug",
     "Gradle.Hoshisuki [:com.xxyxxdmc.player.OggPlayer.main()].executor": "Run",
     "Gradle.Hoshisuki [buildPlugin].executor": "Run",
     "Gradle.Hoshisuki [build].executor": "Run",
@@ -142,7 +147,7 @@
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.3264368",
     "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "File.Encoding"
+    "settings.editor.selected.configurable": "preferences.rainbow.brackets.lite"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -158,7 +163,7 @@
       <command value="restart" />
     </option>
   </component>
-  <component name="RunManager" selected="Gradle.Hoshisuki [build]">
+  <component name="RunManager" selected="Gradle.Run Plugin">
     <configuration name="OggPlayer" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.xxyxxdmc.player.OggPlayer" />
       <module name="Hoshisuki.main" />
@@ -444,7 +449,15 @@
       <option name="project" value="LOCAL" />
       <updated>1749502589968</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749825495763</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1749825495763</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -479,13 +492,5 @@
         </breakpoint>
       </breakpoints>
     </breakpoint-manager>
-    <watches-manager>
-      <configuration name="GradleRunConfiguration">
-        <watch expression="coverPanel.size" language="kotlin" />
-        <watch expression="coverPanel.cover" language="kotlin" />
-        <watch expression="settingPanel.size" language="kotlin" />
-        <watch expression="settingButton.isLatched" language="JAVA" />
-      </configuration>
-    </watches-manager>
   </component>
 </project>

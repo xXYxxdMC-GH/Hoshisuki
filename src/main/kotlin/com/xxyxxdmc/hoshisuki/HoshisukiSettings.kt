@@ -22,6 +22,7 @@ class HoshisukiSettings : PersistentStateComponent<HoshisukiSettings> {
     var musicCoverMap: MutableMap<String, String> = mutableMapOf<String, String>()
     var beautifyTitle: Int = 0
     var beautifyTitleEnabled: Boolean = false
+    var musicFolderList = ArrayList<String>()
 
     @Nullable
     override fun getState(): HoshisukiSettings {

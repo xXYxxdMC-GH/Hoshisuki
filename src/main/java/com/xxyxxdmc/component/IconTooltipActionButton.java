@@ -3,7 +3,6 @@ package com.xxyxxdmc.component;
 import com.intellij.openapi.actionSystem.ActionButtonComponent;
 import com.intellij.openapi.actionSystem.ex.ActionButtonLook;
 import com.intellij.openapi.util.NlsContexts;
-import com.intellij.ui.ClickListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,6 +35,7 @@ public final class IconTooltipActionButton extends JComponent {
         this.latched = false;
 
         setPreferredSize(getPreferredSize());
+        setFocusable(true);
 
         this.addMouseListener(new MouseAdapter() {
             @Override
