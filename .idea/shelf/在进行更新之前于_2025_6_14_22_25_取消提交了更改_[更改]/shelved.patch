@@ -1,0 +1,25 @@
+Index: .idea/encodings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"Encoding\">\r\n    <file url=\"file://$PROJECT_DIR$/build.gradle.kts\" charset=\"UTF-8\" />\r\n    <file url=\"file://$PROJECT_DIR$/src/main/java/com/xxyxxdmc/ui/icons/MusicIcons.java\" charset=\"UTF-8\" />\r\n    <file url=\"file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt\" charset=\"UTF-8\" />\r\n    <file url=\"file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSideBar.kt\" charset=\"UTF-8\" />\r\n    <file url=\"file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt\" charset=\"UTF-8\" />\r\n    <file url=\"jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/ui/roots/IconActionComponent.java\" charset=\"UTF-8\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/encodings.xml b/.idea/encodings.xml
+--- a/.idea/encodings.xml	(revision d920850324e329587f0444084d2a9a91ceac15c2)
++++ b/.idea/encodings.xml	(date 1749911123155)
+@@ -1,11 +1,11 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+-  <component name="Encoding">
++  <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
+     <file url="file://$PROJECT_DIR$/build.gradle.kts" charset="UTF-8" />
+     <file url="file://$PROJECT_DIR$/src/main/java/com/xxyxxdmc/ui/icons/MusicIcons.java" charset="UTF-8" />
+     <file url="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" charset="UTF-8" />
+     <file url="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSideBar.kt" charset="UTF-8" />
+     <file url="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" charset="UTF-8" />
+-    <file url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/ui/roots/IconActionComponent.java" charset="UTF-8" />
++    <file url="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/PanelCellRenderer.kt" charset="UTF-8" />
+   </component>
+ </project>
+\ No newline at end of file
