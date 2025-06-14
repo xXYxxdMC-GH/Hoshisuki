@@ -9,12 +9,13 @@ public class MusicPanel extends JPanel {
     private boolean playing;
     private JLabel playingLabel;
     private boolean blank;
-    private Component blankPlace;
+    private JLabel blankPlace;
     private final JLabel nameLabel;
     private IconTooltipActionButton likeButton;
 
     public MusicPanel(boolean playing, boolean blank, String musicName, int likeInfo, Runnable action) {
         setLayout(new BorderLayout());
+        setPreferredSize(getPreferredSize());
         this.playing = playing;
         this.blank = blank;
         this.likeButton = new IconTooltipActionButton(
@@ -27,18 +28,13 @@ public class MusicPanel extends JPanel {
                 null, action
         );
         this.nameLabel = new JLabel(musicName);
-        this.blankPlace = Box.createHorizontalStrut(7);
+        this.blankPlace = new JLabel("     ");
         add(this.blankPlace, BorderLayout.WEST);
         this.playingLabel = new JLabel(" ");
         this.playingLabel.setIcon(MusicIcons.playing);
         add(this.playingLabel, BorderLayout.WEST);
         add(this.nameLabel, BorderLayout.CENTER);
-        JPanel panel1 = new JPanel();
-        panel1.setLayout(new BorderLayout());
-        panel1.add(Box.createHorizontalStrut(2), BorderLayout.WEST);
-        panel1.add(Box.createHorizontalStrut(2), BorderLayout.EAST);
-        panel1.add(this.likeButton, BorderLayout.CENTER);
-        add(panel1, BorderLayout.EAST);
+        add(this.likeButton, BorderLayout.EAST);
         playingLabel.setVisible(playing);
         blankPlace.setVisible(blank);
     }
@@ -83,7 +79,7 @@ public class MusicPanel extends JPanel {
         return blankPlace;
     }
 
-    public void setBlankPlace(Component blankPlace) {
+    public void setBlankPlace(JLabel blankPlace) {
         this.blankPlace = blankPlace;
     }
 

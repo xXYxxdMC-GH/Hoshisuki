@@ -5,12 +5,7 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.xxyxxdmc.RandomPlayException
-import com.xxyxxdmc.component.CoverPanel
-import com.xxyxxdmc.component.FolderPanel
-import com.xxyxxdmc.component.IconTooltipActionButton
-import com.xxyxxdmc.component.MusicPanel
-import com.xxyxxdmc.component.MusicScrollPanel
-import com.xxyxxdmc.component.ScrollView
+import com.xxyxxdmc.component.*
 import com.xxyxxdmc.icons.MusicIcons
 import com.xxyxxdmc.player.OggPlaybackListener
 import com.xxyxxdmc.player.OggPlayer
@@ -19,18 +14,14 @@ import javazoom.jl.decoder.JavaLayerException
 import javazoom.jl.player.advanced.AdvancedPlayer
 import javazoom.jl.player.advanced.PlaybackEvent
 import javazoom.jl.player.advanced.PlaybackListener
-import kotlinx.coroutines.Runnable
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Cursor
-import java.awt.Desktop
 import java.awt.Dimension
 import java.awt.event.ComponentEvent
 import java.awt.event.ComponentListener
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.awt.Point
-import java.awt.ScrollPane
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
@@ -40,9 +31,11 @@ import javax.sound.sampled.FloatControl
 import javax.sound.sampled.LineEvent
 import javax.swing.*
 import kotlin.math.floor
+import kotlin.math.pow
 import kotlin.math.round
 
-final class HoshisukiUI : JPanel() {
+@Suppress("NestedLambdaShadowedImplicitParameter")
+class HoshisukiUI : JPanel() {
     // 语言文件初始化
     // 让我们说中文！
     // Let's speak in English!
@@ -96,8 +89,8 @@ final class HoshisukiUI : JPanel() {
     private val listModelPanel = DefaultListModel<JPanel>()
     private val list = JBList(listModelPanel)
     // 表的初始化
-    private val musicFolderMap: MutableMap<String, List<File>> = mutableMapOf<String, List<File>>()
-    private val musicFolderStateMap: MutableMap<String, Boolean> = mutableMapOf<String, Boolean>()
+    private val musicFolderMap = mutableMapOf<String, List<File>>()
+    private val musicFolderStateMap = mutableMapOf<String, Boolean>()
     private val musicFolderModelList = DefaultListModel<JPanel>()
     private val folderList = JBList(musicFolderModelList)
     // 播放器的初始化
@@ -317,13 +310,13 @@ final class HoshisukiUI : JPanel() {
         folderLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {}
             override fun mouseEntered(e: MouseEvent?) {
-                if (state.musicFolderList.size > 0) {
+                if (state.musicFolderList.isNotEmpty()) {
                     folderLabel.cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
                     super.mouseEntered(e)
                 }
             }
             override fun mouseExited(e: MouseEvent?) {
-                if (state.musicFolderList.size > 0) {
+                if (state.musicFolderList.isNotEmpty()) {
                     folderLabel.cursor = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)
                 }
             }
@@ -532,7 +525,7 @@ final class HoshisukiUI : JPanel() {
 
         refreshPlayCaseButtonVisuals()
 
-        if (defaultSettingHeight <= 0) (if (settingPanel.size.height <= 0) defaultSettingHeight = 268 else defaultSettingHeight = settingPanel.size.height)
+        if (defaultSettingHeight <= 0) defaultSettingHeight = (if (settingPanel.size.height <= 0) 268 else settingPanel.size.height)
 
         settingButton.isLatched = true
         settingButton.isEnabled = false
@@ -643,9 +636,9 @@ final class HoshisukiUI : JPanel() {
                     panelChanged = true
                 }
 
-                val expectedLikeStatusIcon: Icon? = when {
-                    fileForPanel in currentLikeList -> MusicIcons.like
-                    fileForPanel in currentDislikeList -> if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
+                val expectedLikeStatusIcon: Icon? = when (fileForPanel) {
+                    in currentLikeList -> MusicIcons.like
+                    in currentDislikeList -> if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
                     else -> null
                 }
 
@@ -706,7 +699,7 @@ final class HoshisukiUI : JPanel() {
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             state.musicCoverMap[selectedMusic!!.absolutePath] = chooser.selectedFile.absolutePath
             musicCoverTempFolder = chooser.currentDirectory
-            if (tempCover != chooser.selectedFile) tempCover = chooser.selectedFile
+            if (tempCover !== chooser.selectedFile) tempCover = chooser.selectedFile
             if (coverPanel.size.height != 0 && currentMusic === selectedMusic) {
                 coverPanel.cover = ImageIcon(chooser.selectedFile.absolutePath)
                 repaint()
@@ -730,7 +723,7 @@ final class HoshisukiUI : JPanel() {
         folderLabel.apply {
             val sb = StringBuilder()
             state.musicFolderList.forEach { sb.append(it).append("<br>") }
-            HelpTooltip().setDescription("<html>" + sb.toString() + "</html>").installOn(this)
+            HelpTooltip().setDescription("<html>$sb</html>").installOn(this)
         }
         musicFolderMap.clear()
         musicFolderModelList.clear()
@@ -739,14 +732,14 @@ final class HoshisukiUI : JPanel() {
         currentLikeList.clear()
         currentNormalList.clear()
         for (folderPath in state.musicFolderList) {
-            val folder = folderPath.let { File(it) }
+            val folder = File(folderPath)
             val musicList = ArrayList<File>()
-            var musicListModel = ArrayList<JPanel>()
+            val musicListModel = ArrayList<JPanel>()
             if (folder.exists() && folder.isDirectory && folder.listFiles().isNotEmpty()) {
                 folder.listFiles().forEach {
                     if (it.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au", "ogg")) {
                         musicList.add(it)
-                        var processedName = if (state.beautifyTitleEnabled) when (state.beautifyTitle) {
+                        val processedName = if (state.beautifyTitleEnabled) when (state.beautifyTitle) {
                             1 -> it.nameWithoutExtension.replace("_", " ")
                             2 -> it.nameWithoutExtension.let { it.first().uppercase() + it.substring(1) }
                             3 -> it.nameWithoutExtension.let { it.split("_").joinToString("") { it.first().uppercase() + it.substring(1) }}
@@ -806,18 +799,18 @@ final class HoshisukiUI : JPanel() {
             musicFolderMap[folderPath] = musicList
             musicFolderModelList.addElement(
                 FolderPanel(
-                (isPlaying && musicFolderMap[folderPath]!!.contains(currentMusic) == true),
+                (isPlaying && musicFolderMap[folderPath]!!.contains(currentMusic)),
                 folderPath,
                 bundle.message("button.open.folder.tooltip"),
-                true,
-                {}).apply {
+                true
+                ) {}.apply {
                 action = Runnable {
                     musicFolderStateMap[folderPath] = this.state
                     displayMusicFolderList()
                 }
             })
             musicFiles.add(folder)
-            musicFiles.addAll(musicList);
+            musicFiles.addAll(musicList)
             if (true) musicListModel.forEach {
                 musicFolderModelList.addElement(it)
             }
@@ -844,10 +837,9 @@ final class HoshisukiUI : JPanel() {
         //}
         musicScrollPanel = MusicScrollPanel(ScrollView(musicFolderModelList)).apply {
             preferredSize = Dimension(200, 150)
-
         }
-        if (scrollPane != null) {
-            scrollPane?.let { add(it, BorderLayout.CENTER) }
+        if (musicScrollPanel != null) {
+            musicScrollPanel?.let { add(it, BorderLayout.CENTER) }
             revalidate()
             repaint()
         }
@@ -927,7 +919,7 @@ final class HoshisukiUI : JPanel() {
         return JPanel().apply {
             layout = BorderLayout()
 
-            var processedName = if (state.beautifyTitleEnabled) when (state.beautifyTitle) {
+            val processedName = if (state.beautifyTitleEnabled) when (state.beautifyTitle) {
                 1 -> music.nameWithoutExtension.replace("_", " ")
                 2 -> music.nameWithoutExtension.let { it.first().uppercase() + it.substring(1) }
                 3 -> music.nameWithoutExtension.let { it.split("_").joinToString("") { it.first().uppercase() + it.substring(1) }}
@@ -957,7 +949,7 @@ final class HoshisukiUI : JPanel() {
 
     private fun playMusic() {
         alonePlayTime = 0
-        if (defaultSettingHeight <= 0) (if (settingPanel.size.height <= 0) defaultSettingHeight = 268 else defaultSettingHeight = settingPanel.size.height)
+        if (defaultSettingHeight <= 0) defaultSettingHeight = (if (settingPanel.size.height <= 0) 268 else settingPanel.size.height)
         if (!isPlaying && currentMusic != null) {
             if (!switchMusic) {
                 showCover()
@@ -995,14 +987,14 @@ final class HoshisukiUI : JPanel() {
                             }
                         }
                         mp3PlayThread = newMp3PlayThread
-                        mp3Player?.setPlayBackListener(object : PlaybackListener() {
+                        mp3Player?.playBackListener = object : PlaybackListener() {
                             override fun playbackFinished(evt: PlaybackEvent?) {
                                 if (evt?.source == mp3Player && isPlaying) {
                                     stopMusic()
                                     playCase()
                                 }
                             }
-                        })
+                        }
                         mp3PlayThread?.start()
                     }
                     "ogg" -> {
@@ -1295,7 +1287,7 @@ final class HoshisukiUI : JPanel() {
             currentMusic = weightChooseMusic(true, chooseDislike, true)
         } else if (state.dislikeWeight.compare(0.0)) {
             val chooseLike = if (state.likeWeight < 0) (Math.random() < (1 + state.likeWeight) * 0.1) else (Math.random() < state.likeWeight)
-            currentMusic = weightChooseMusic(chooseLike, true, true)
+            currentMusic = weightChooseMusic(chooseLike, chooseDislike = true, withNormal = true)
         } else if (!state.likeWeight.compare(0.0) && !state.dislikeWeight.compare(0.0)) {
             val chooseLike = if (state.likeWeight < 0) (Math.random() < (1 + state.likeWeight) * 0.1) else (Math.random() < state.likeWeight)
             val chooseDislike = if (state.dislikeWeight < 0) (Math.random() < (1 + state.dislikeWeight) * 0.1) else (Math.random() < state.dislikeWeight)
@@ -1312,7 +1304,7 @@ final class HoshisukiUI : JPanel() {
     }
 
     private fun weightChooseMusic(chooseLike: Boolean, chooseDislike: Boolean, withNormal: Boolean): File {
-        var tempList = ArrayList<File>()
+        val tempList = ArrayList<File>()
         if (chooseLike && state.likeWeight > -1.0) tempList.addAll(currentLikeList)
         if (chooseDislike && state.dislikeWeight > -1.0) tempList.addAll(currentDislikeList)
         if (withNormal) tempList.addAll(currentNormalList)
@@ -1347,7 +1339,7 @@ final class HoshisukiUI : JPanel() {
                     gainControl.value = actualVolumeDB
                 } else if (clip.isControlSupported(FloatControl.Type.VOLUME)) {
                     val volumeControl = clip.getControl(FloatControl.Type.VOLUME) as FloatControl
-                    val linearVolume = Math.pow(10.0, (volumeDB / 20.0)).toFloat()
+                    val linearVolume = 10.0.pow((volumeDB / 20.0)).toFloat()
                     val minLin = volumeControl.minimum
                     val maxLin = volumeControl.maximum
                     var actualLinearVolume = linearVolume

@@ -26,7 +26,7 @@ public class MusicScrollPanel extends JPanel {
             scrollView.repaint();
         });
         scrollView.addMouseWheelListener(e -> {
-            int scrollAmount = e.getUnitsToScroll() * scrollView.getScrollableUnitIncrement(scrollView.getVisibleRect(), JScrollBar.VERTICAL, e.getWheelRotation());
+            int scrollAmount = e.getUnitsToScroll() * scrollView.getScrollableUnitIncrement(scrollView.getVisibleRect(), SwingConstants.VERTICAL, e.getWheelRotation());
             int newValue = verticalScrollBar.getValue() + scrollAmount;
             verticalScrollBar.setValue(Math.max(verticalScrollBar.getMinimum(), Math.min(verticalScrollBar.getMaximum() - verticalScrollBar.getVisibleAmount(), newValue)));
         });
