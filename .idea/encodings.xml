@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="Encoding">
+  <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
     <file url="file://$PROJECT_DIR$/build.gradle.kts" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/java/com/xxyxxdmc/ui/icons/MusicIcons.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/xxyxxdmc/RandomPlayException.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/CoverPanel.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/FolderPanel.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/IconTooltipActionButton.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/xxyxxdmc/icons/MusicIcons.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/xxyxxdmc/player/OggPlayer.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/javazoom/jl/player/advanced/AdvancedPlayer.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSideBar.kt" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" charset="UTF-8" />
-    <file url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/ui/roots/IconActionComponent.java" charset="UTF-8" />
   </component>
 </project>

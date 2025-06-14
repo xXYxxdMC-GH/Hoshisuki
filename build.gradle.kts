@@ -5,16 +5,19 @@ plugins {
 }
 
 group = "com.xxyxxdmc"
-version = "1.0"
+version = "1.2"
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://www.beatunes.com/repo/maven2/")
+    }
 }
 
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-    version.set("2023.2.6")
+    version.set("2022.2.1")
     type.set("IC") // Target IDE Platform
 
     plugins.set(listOf(/* Plugin Dependencies */))
@@ -31,7 +34,7 @@ tasks {
     }
 
     patchPluginXml {
-        sinceBuild.set("232")
+        sinceBuild.set("222")
         untilBuild.set("251.*")
     }
 
@@ -47,5 +50,7 @@ tasks {
 
     dependencies {
         implementation("javazoom:jlayer:1.0.1")
+        implementation("org.jcraft:jorbis:0.0.17")
+        implementation("com.jcraft:jogg:0.0.7")
     }
 }

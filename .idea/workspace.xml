@@ -4,7 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18085aad-ed2c-4b1c-994e-e6e662d3c204" name="更改" comment="push" />
+    <list default="true" id="075cc77d-8f2b-49f6-9977-6024817a5659" name="更改" comment="Update">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/MusicScrollPanel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/ScrollView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/FolderPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/FolderPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/IconTooltipActionButton.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/IconTooltipActionButton.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/MusicPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/MusicPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_zh_CN.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_zh_CN.properties" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -32,6 +43,28 @@
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="Hoshisuki" type="f1a62948:ProjectNode" />
               </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Hoshisuki" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Hoshisuki" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Hoshisuki" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="intellij" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Hoshisuki" type="f1a62948:ProjectNode" />
+                <item name="Dependencies" type="6de06a37:ExternalSystemViewDefaultContributor$MyDependenciesNode" />
+              </path>
             </expand>
             <select />
           </tree_state>
@@ -42,8 +75,10 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
+        <option value="Exception" />
+        <option value="Interface" />
         <option value="Kotlin Class" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -62,6 +97,11 @@
     &quot;accountId&quot;: &quot;1550f01b-4004-46e1-bbcb-4e9eb0f78170&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$PROJECT_DIR$/../../../../Program Files/Java/jdk1.8.0_281/src.zip!/java/lang/Exception.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2022.2.1/3c31d85ee47bd925abc44df600835cba77074454/ideaIC-2022.2.1-sources.jar!/com/intellij/util/ui/StartupUiUtil.java" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="LogFilters">
     <option name="FILTER_ERRORS" value="false" />
     <option name="FILTER_WARNINGS" value="false" />
@@ -69,17 +109,14 @@
     <option name="FILTER_DEBUG" value="true" />
     <option name="CUSTOM_FILTER" />
   </component>
-  <component name="PerforceDirect.Settings">
-    <option name="CHARSET" value="none" />
-  </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
-  &quot;customColor&quot;: &quot;&quot;,
-  &quot;associatedIndex&quot;: 0
+  &quot;customColor&quot;: &quot;e39cdbff&quot;,
+  &quot;associatedIndex&quot;: 1
 }</component>
-  <component name="ProjectId" id="2xB0df04ktjz41rMgNDJDRaJ4qA" />
+  <component name="ProjectId" id="2xqP4SrPvMPRHVZFIjhJLQqGx5g" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
@@ -89,28 +126,57 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "Gradle.Hoshisuki [:JOrbisComment.main()].executor": "Run",
+    "Downloaded.Files.Path.Enabled": "false",
+    "Gradle.Hoshisuki [:com.xxyxxdmc.OggPlayer.main()].executor": "Run",
+    "Gradle.Hoshisuki [:com.xxyxxdmc.component.DropDownContainRadioCheck.main()].executor": "Run",
+    "Gradle.Hoshisuki [:com.xxyxxdmc.component.IconTooltipActionButton.main()].executor": "Debug",
+    "Gradle.Hoshisuki [:com.xxyxxdmc.player.OggPlayer.main()].executor": "Run",
     "Gradle.Hoshisuki [buildPlugin].executor": "Run",
+    "Gradle.Hoshisuki [build].executor": "Run",
     "Gradle.Hoshisuki [setupDependencies].executor": "Run",
     "Gradle.Run Plugin.executor": "Debug",
     "Gradle.构建 Hoshisuki.executor": "Run",
+    "Repository.Attach.Annotations": "false",
+    "Repository.Attach.JavaDocs": "false",
+    "Repository.Attach.Sources": "false",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "deletionFromPopupRequiresConfirmation": "false",
     "git-widget-placeholder": "master",
-    "kotlin-language-version-configured": "true",
+    "ignore.virus.scanning.warn.message": "true",
     "project.structure.last.edited": "问题",
     "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.22528736",
-    "settings.editor.selected.configurable": "File.Encoding"
+    "project.structure.side.proportion": "0.3264368",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "preferences.rainbow.brackets.lite"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\Backup\Player\Hoshisuki\src\main\resources\icons" />
+      <recent name="C:\Users\Administrator\Desktop\Hoshisuki\src\main\resources\icons" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.xxyxxdmc.component" />
     </key>
   </component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="restart" />
+    </option>
+  </component>
   <component name="RunManager" selected="Gradle.Run Plugin">
+    <configuration name="OggPlayer" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.xxyxxdmc.player.OggPlayer" />
+      <module name="Hoshisuki.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.xxyxxdmc.player.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Hoshisuki [buildPlugin]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -133,144 +199,268 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
+    <configuration name="Hoshisuki [build]" type="GradleRunConfiguration" factoryName="Gradle" activateToolWindowBeforeRun="false" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="Run Plugin" type="GradleRunConfiguration" factoryName="Gradle" activateToolWindowBeforeRun="false">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="runIde" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Gradle.Run Plugin" />
+      <item itemvalue="Gradle.Hoshisuki [buildPlugin]" />
+      <item itemvalue="Gradle.Hoshisuki [build]" />
+      <item itemvalue="应用程序.OggPlayer" />
+    </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.Hoshisuki [build]" />
         <item itemvalue="Gradle.Hoshisuki [buildPlugin]" />
+        <item itemvalue="应用程序.OggPlayer" />
       </list>
     </recent_temporary>
   </component>
-  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="默认任务">
-      <changelist id="18085aad-ed2c-4b1c-994e-e6e662d3c204" name="更改" comment="" />
-      <created>1747396249787</created>
+      <changelist id="075cc77d-8f2b-49f6-9977-6024817a5659" name="更改" comment="" />
+      <created>1748662439148</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1747396249787</updated>
+      <updated>1748662439148</updated>
     </task>
-    <task id="LOCAL-00001" summary="push">
+    <task id="LOCAL-00001" summary="Update">
       <option name="closed" value="true" />
-      <created>1747475564493</created>
+      <created>1748676096990</created>
       <option name="number" value="00001" />
       <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
-      <updated>1747475564493</updated>
+      <updated>1748676096990</updated>
     </task>
-    <task id="LOCAL-00002" summary="push">
+    <task id="LOCAL-00002" summary="Update">
       <option name="closed" value="true" />
-      <created>1747494516469</created>
+      <created>1748684011585</created>
       <option name="number" value="00002" />
       <option name="presentableId" value="LOCAL-00002" />
       <option name="project" value="LOCAL" />
-      <updated>1747494516469</updated>
+      <updated>1748684011585</updated>
     </task>
-    <task id="LOCAL-00003" summary="push">
+    <task id="LOCAL-00003" summary="Update">
       <option name="closed" value="true" />
-      <created>1747553139010</created>
+      <created>1748759274337</created>
       <option name="number" value="00003" />
       <option name="presentableId" value="LOCAL-00003" />
       <option name="project" value="LOCAL" />
-      <updated>1747553139010</updated>
+      <updated>1748759274337</updated>
     </task>
-    <task id="LOCAL-00004" summary="push">
+    <task id="LOCAL-00004" summary="Update">
       <option name="closed" value="true" />
-      <created>1747553532654</created>
+      <created>1748770374655</created>
       <option name="number" value="00004" />
       <option name="presentableId" value="LOCAL-00004" />
       <option name="project" value="LOCAL" />
-      <updated>1747553532654</updated>
+      <updated>1748770374655</updated>
     </task>
-    <task id="LOCAL-00005" summary="push">
+    <task id="LOCAL-00005" summary="Update">
       <option name="closed" value="true" />
-      <created>1747553768599</created>
+      <created>1748786255488</created>
       <option name="number" value="00005" />
       <option name="presentableId" value="LOCAL-00005" />
       <option name="project" value="LOCAL" />
-      <updated>1747553768599</updated>
+      <updated>1748786255488</updated>
     </task>
-    <task id="LOCAL-00006" summary="push">
+    <task id="LOCAL-00006" summary="Update">
       <option name="closed" value="true" />
-      <created>1747554043287</created>
+      <created>1748827674996</created>
       <option name="number" value="00006" />
       <option name="presentableId" value="LOCAL-00006" />
       <option name="project" value="LOCAL" />
-      <updated>1747554043287</updated>
+      <updated>1748827674996</updated>
     </task>
-    <task id="LOCAL-00007" summary="push">
+    <task id="LOCAL-00007" summary="Update">
       <option name="closed" value="true" />
-      <created>1747558801945</created>
+      <created>1748827965150</created>
       <option name="number" value="00007" />
       <option name="presentableId" value="LOCAL-00007" />
       <option name="project" value="LOCAL" />
-      <updated>1747558801945</updated>
+      <updated>1748827965150</updated>
     </task>
-    <task id="LOCAL-00008" summary="push">
+    <task id="LOCAL-00008" summary="Update">
       <option name="closed" value="true" />
-      <created>1748010906996</created>
+      <created>1748849684275</created>
       <option name="number" value="00008" />
       <option name="presentableId" value="LOCAL-00008" />
       <option name="project" value="LOCAL" />
-      <updated>1748010906996</updated>
+      <updated>1748849684275</updated>
     </task>
-    <task id="LOCAL-00009" summary="push">
+    <task id="LOCAL-00009" summary="Update">
       <option name="closed" value="true" />
-      <created>1748064079265</created>
+      <created>1749173320121</created>
       <option name="number" value="00009" />
       <option name="presentableId" value="LOCAL-00009" />
       <option name="project" value="LOCAL" />
-      <updated>1748064079265</updated>
+      <updated>1749173320121</updated>
     </task>
-    <task id="LOCAL-00010" summary="push">
+    <task id="LOCAL-00010" summary="Update">
       <option name="closed" value="true" />
-      <created>1748064155319</created>
+      <created>1749183110410</created>
       <option name="number" value="00010" />
       <option name="presentableId" value="LOCAL-00010" />
       <option name="project" value="LOCAL" />
-      <updated>1748064155319</updated>
+      <updated>1749183110410</updated>
     </task>
-    <task id="LOCAL-00011" summary="push">
+    <task id="LOCAL-00012" summary="Update">
       <option name="closed" value="true" />
-      <created>1748150826146</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1748150826146</updated>
-    </task>
-    <task id="LOCAL-00012" summary="push">
-      <option name="closed" value="true" />
-      <created>1748655454600</created>
+      <created>1749212203514</created>
       <option name="number" value="00012" />
       <option name="presentableId" value="LOCAL-00012" />
       <option name="project" value="LOCAL" />
-      <updated>1748655454600</updated>
+      <updated>1749212203514</updated>
     </task>
-    <task id="LOCAL-00013" summary="push">
+    <task id="LOCAL-00013" summary="Update">
       <option name="closed" value="true" />
-      <created>1748655919547</created>
+      <created>1749284213083</created>
       <option name="number" value="00013" />
       <option name="presentableId" value="LOCAL-00013" />
       <option name="project" value="LOCAL" />
-      <updated>1748655919547</updated>
+      <updated>1749284213084</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749284239071</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1749284239071</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749284301430</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1749284301430</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749363648451</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1749363648451</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749392818951</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1749392818951</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749392834071</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1749392834071</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749435886828</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1749435886828</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749472464998</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1749472464998</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749477250826</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1749477250826</updated>
+    </task>
+    <task id="LOCAL-00022" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749479038745</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1749479038746</updated>
+    </task>
+    <task id="LOCAL-00023" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749501242025</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1749501242025</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749502589967</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1749502589968</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Update">
+      <option name="closed" value="true" />
+      <created>1749825495763</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1749825495763</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
-    <option name="RECENT_FILTERS">
-      <map>
-        <entry key="Branch">
-          <value>
-            <list>
-              <RecentGroup>
-                <option name="FILTER_VALUES">
-                  <option value="origin/master" />
-                </option>
-              </RecentGroup>
-            </list>
-          </value>
-        </entry>
-      </map>
-    </option>
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
@@ -282,8 +472,25 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Push" />
-    <MESSAGE value="push" />
-    <option name="LAST_COMMIT_MESSAGE" value="push" />
+    <MESSAGE value="Update" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint type="java-exception">
+          <properties class="java.security.cert.CertificateParsingException" package="java.security.cert" />
+          <option name="timeStamp" value="28" />
+        </breakpoint>
+        <breakpoint type="java-exception">
+          <properties class="com.intellij.diagnostic.PluginException" package="com.intellij.diagnostic" />
+          <option name="timeStamp" value="29" />
+        </breakpoint>
+        <breakpoint type="java-exception">
+          <properties class="java.lang.IllegalArgumentException" package="java.lang" />
+          <option name="timeStamp" value="74" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
