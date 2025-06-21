@@ -1,20 +1,31 @@
 package com.xxyxxdmc.component;
 
+import com.intellij.ui.Gray;
+import com.intellij.ui.JBColor;
+import com.intellij.util.ui.UIUtil;
 import com.xxyxxdmc.icons.MusicIcons;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 
-public class FolderPanel extends JPanel {
+public class FolderPanel extends BoxPanel {
     private boolean playing;
     private boolean state;
     private IconTooltipActionButton folderButton;
     private IconTooltipActionButton controlButton;
 
+    private static final Color DEFAULT_BACKGROUND = UIUtil.getLabelBackground();
+    private static final Color SELECTED_BACKGROUND = UIUtil.getListSelectionBackground(true);
+    private static final Color HOVER_BACKGROUND = new JBColor(Color.GRAY, Color.DARK_GRAY);
+
     public FolderPanel(boolean playing, String folderPath, String text, boolean state, Runnable action) {
         setLayout(new BorderLayout());
+        updateBackground();
+        super.setSelected(false);
         this.playing = playing;
         this.state = state;
         this.folderButton = new IconTooltipActionButton(
@@ -34,6 +45,45 @@ public class FolderPanel extends JPanel {
         );
         add(new JLabel(folderPath), BorderLayout.CENTER);
         add(this.controlButton, BorderLayout.EAST);
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (getParent().getParent() instanceof ListPanel listPanel) {
+                    listPanel.setSelectedItem(FolderPanel.this);
+                }
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (!FolderPanel.super.isSelected()) {
+                    setBackground(HOVER_BACKGROUND);
+                    repaint();
+                }
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (!FolderPanel.super.isSelected()) {
+                    setBackground(DEFAULT_BACKGROUND);
+                    repaint();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void setSelected(boolean selected) {
+        super.setSelected(selected);
+        updateBackground();
+    }
+
+    private void updateBackground() {
+        if (isSelected()) {
+            setBackground(SELECTED_BACKGROUND);
+        } else {
+            setBackground(DEFAULT_BACKGROUND);
+        }
     }
 
     public boolean isPlaying() {

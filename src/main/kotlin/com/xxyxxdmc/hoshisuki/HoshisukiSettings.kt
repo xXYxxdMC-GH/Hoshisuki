@@ -19,7 +19,7 @@ class HoshisukiSettings : PersistentStateComponent<HoshisukiSettings> {
     var dislikeWeight: Double = 0.0
     var antiAgainLevel: Int = 0
     var optimizePanel: Boolean = false
-    var musicCoverMap: MutableMap<String, String> = mutableMapOf<String, String>()
+    var musicCoverMap = mutableMapOf<String, String>()
     var beautifyTitle: Int = 0
     var beautifyTitleEnabled: Boolean = false
     var musicFolderList = ArrayList<String>()

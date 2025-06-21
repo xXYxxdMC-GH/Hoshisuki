@@ -2,7 +2,6 @@ package com.xxyxxdmc.component;
 
 import com.intellij.openapi.actionSystem.ActionButtonComponent;
 import com.intellij.openapi.actionSystem.ex.ActionButtonLook;
-import com.intellij.openapi.util.NlsContexts;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,13 +19,13 @@ public final class IconTooltipActionButton extends JComponent {
     private Runnable myAction;
     private Runnable myAction2;
 
-    public IconTooltipActionButton(@NotNull Icon icon, @NlsContexts.Tooltip @Nullable String tooltipText, @Nullable final Runnable action) {
+    public IconTooltipActionButton(@NotNull Icon icon, @Nullable String tooltipText, @Nullable final Runnable action) {
         this(icon, tooltipText, false, action, null);
     }
-    public IconTooltipActionButton(@NotNull Icon icon, @NlsContexts.Tooltip @Nullable String tooltipText, boolean latch, @Nullable final Runnable action) {
+    public IconTooltipActionButton(@NotNull Icon icon, @Nullable String tooltipText, boolean latch, @Nullable final Runnable action) {
         this(icon, tooltipText, latch, action, null);
     }
-    public IconTooltipActionButton(@NotNull Icon icon, @NlsContexts.Tooltip @Nullable String tooltipText, boolean latch, @Nullable final Runnable action, @Nullable final Runnable action2) {
+    public IconTooltipActionButton(@NotNull Icon icon, @Nullable String tooltipText, boolean latch, @Nullable final Runnable action, @Nullable final Runnable action2) {
         this.myIcon = icon;
         this.myTooltip = tooltipText;
         this.myAction = action;
@@ -34,6 +33,7 @@ public final class IconTooltipActionButton extends JComponent {
         this.myLatch = latch;
         this.latched = false;
 
+        setOpaque(false);
         setPreferredSize(getPreferredSize());
         setFocusable(true);
 
@@ -123,7 +123,7 @@ public final class IconTooltipActionButton extends JComponent {
         repaint();
     }
 
-    public void setText(@NlsContexts.Tooltip @Nullable String tooltip) {
+    public void setText(@Nullable String tooltip) {
         this.myTooltip = tooltip;
         this.setToolTipText(tooltip);
     }

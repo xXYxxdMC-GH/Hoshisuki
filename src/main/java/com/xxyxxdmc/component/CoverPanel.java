@@ -5,14 +5,19 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.net.URL;
 
 public final class CoverPanel extends JPanel {
     private ImageIcon cover;
     private int edgeLength;
+    private JPopupMenu contextMenu;
+    private Runnable action;
 
-    public CoverPanel(@Nullable ImageIcon cover, int edgeLength, int height) {
+    public CoverPanel(@Nullable ImageIcon cover, int edgeLength, int height, Runnable action) {
+        this.action = action;
         if (cover != null) this.cover = cover;
         else {
             String themeName = UIManager.getLookAndFeel().getName();
@@ -22,6 +27,33 @@ public final class CoverPanel extends JPanel {
         }
         this.edgeLength = edgeLength;
         setPreferredSize(new Dimension(edgeLength, (height == -1) ? edgeLength : height));
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    action.run();
+                } else if (e.getButton() == MouseEvent.BUTTON3) {
+                    maybeShowPopup(e);
+                }
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            }
+        });
+    }
+
+    private void maybeShowPopup(MouseEvent e) {
+        if (e.isPopupTrigger()) {
+            contextMenu.show(e.getComponent(), e.getX(), e.getY());
+        }
     }
 
     @Override
@@ -90,7 +122,6 @@ public final class CoverPanel extends JPanel {
         g2d.dispose();
     }
 
-
     public void setCover(@Nullable ImageIcon cover) {
         if (cover == null) {
             String themeName = UIManager.getLookAndFeel().getName();
@@ -122,5 +153,21 @@ public final class CoverPanel extends JPanel {
 
     public int getEdgeLength() {
         return edgeLength;
+    }
+
+    public void setContextMenu(JPopupMenu contextMenu) {
+        this.contextMenu = contextMenu;
+    }
+
+    public JPopupMenu getContextMenu() {
+        return contextMenu;
+    }
+
+    public void setAction(Runnable action) {
+        this.action = action;
+    }
+
+    public Runnable getAction() {
+        return action;
     }
 }
