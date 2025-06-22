@@ -606,8 +606,7 @@ class HoshisukiUI : JPanel() {
                     noSupportMusicFolder.add(folder)
                     continue
                 }
-            }
-            else {
+            } else {
                 noMusicFolder.add(folder)
                 continue
             }
@@ -641,7 +640,12 @@ class HoshisukiUI : JPanel() {
         listPanel = ListPanel(musicFolderModelList).apply {
             removeListeners()
             addListener {
-                box -> if (box.music != null) selectedMusic = box.music
+                box -> {
+                    if (box.music != null) {
+                        selectedMusic = box.music
+                        this.setSelectedItem(box.music)
+                    }
+                }
                 if (isPlaying) {
                     if (selectedMusic != null && selectedMusic !== currentMusic) {
                         playButton.icon = MusicIcons.resume
@@ -651,8 +655,8 @@ class HoshisukiUI : JPanel() {
                         playButton.text = getExplainableMessage("button.stop.tooltip")
                     }
                 } else {
-                    playButton.icon = MusicIcons.stop
-                    playButton.text = getExplainableMessage("button.stop.tooltip")
+                    playButton.icon = MusicIcons.run
+                    playButton.text = getExplainableMessage("button.play.tooltip")
                 }
             }
         }
