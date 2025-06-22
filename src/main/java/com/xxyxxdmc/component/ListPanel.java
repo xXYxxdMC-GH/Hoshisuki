@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -65,8 +66,18 @@ public class ListPanel extends JPanel {
                 newSelectedItem.setSelected(true);
             }
         }
-
         refreshSelection(newSelectedItem);
+    }
+
+    public void setSelectedItem(File file) {
+        for (Component component: itemsContainer.getComponents()) {
+            if (component instanceof BoxPanel box) {
+                if (box.getMusic() == file) {
+                    setSelectedItem(box);
+                    break;
+                }
+            }
+        }
     }
 
     public BoxPanel getSelectedItem() {

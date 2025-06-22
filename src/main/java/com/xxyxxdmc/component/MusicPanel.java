@@ -1,6 +1,5 @@
 package com.xxyxxdmc.component;
 
-import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.UIUtil;
 import com.xxyxxdmc.icons.MusicIcons;

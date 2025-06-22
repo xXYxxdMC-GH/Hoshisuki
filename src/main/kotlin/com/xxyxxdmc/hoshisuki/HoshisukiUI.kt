@@ -1,7 +1,6 @@
 package com.xxyxxdmc.hoshisuki
 
 import com.intellij.ide.HelpTooltip
-import com.intellij.openapi.ui.JBPopupMenu
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
@@ -15,12 +14,10 @@ import javazoom.jl.decoder.JavaLayerException
 import javazoom.jl.player.advanced.AdvancedPlayer
 import javazoom.jl.player.advanced.PlaybackEvent
 import javazoom.jl.player.advanced.PlaybackListener
-import kotlinx.coroutines.Runnable
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Cursor
 import java.awt.Dimension
-import java.awt.ScrollPane
 import java.awt.event.ComponentEvent
 import java.awt.event.ComponentListener
 import java.awt.event.MouseAdapter
@@ -64,13 +61,11 @@ class HoshisukiUI : JPanel() {
     }
     // 按钮的初始化
     private val selectButton = JButton(bundle.message("button.choose.text")).apply { icon = MusicIcons.folder }
-    private val likeButton = IconTooltipActionButton(MusicIcons.like, getExplainableMessage("button.like.tooltip")) {}
     private val playButton = IconTooltipActionButton(MusicIcons.run, getExplainableMessage("button.play.tooltip")) {}
     private val nextButton = IconTooltipActionButton(MusicIcons.playForward, getExplainableMessage("button.next.tooltip")) {}
     private val prevButton = IconTooltipActionButton(MusicIcons.playBack, getExplainableMessage("button.prev.tooltip")) {}
     private val rescanButton = IconTooltipActionButton(MusicIcons.rescan, getExplainableMessage("button.rescan.tooltip")) {}
     private val settingButton = IconTooltipActionButton(MusicIcons.setting, getExplainableMessage("button.setting.tooltip"), true) {}
-    private val coverButton = IconTooltipActionButton(MusicIcons.addCover, getExplainableMessage("button.add.cover.tooltip"), false, {}) {}
     private var playCase = IconTooltipActionButton(MusicIcons.listCycle, "") {}
     // 面板的初始化
     private val folderLabel = JLabel(bundle.message("folder.label.not.chosen"))
@@ -86,15 +81,11 @@ class HoshisukiUI : JPanel() {
     private var currentDislikeList = ArrayList<File>()
     private var currentNormalList = ArrayList<File>()
     private var playedMusic = ArrayList<File>()
-    // 列表的初始化
-    private val listModel = DefaultListModel<File>()
-    private val listModelPanel = DefaultListModel<JPanel>()
-    private val list = JBList(listModelPanel)
     // 表的初始化
     private val musicFolderMap = mutableMapOf<String, List<File>>()
     private val musicFolderStateMap = mutableMapOf<String, Boolean>()
     private val musicFolderModelList = DefaultListModel<JPanel>()
-    private var listPanel: JBScrollPane? = null
+    private var listPanel: ListPanel? = null
     // 播放器的初始化
     private var mp3Player: AdvancedPlayer? = null
     private val clip: Clip = AudioSystem.getClip()
@@ -119,12 +110,10 @@ class HoshisukiUI : JPanel() {
 
         val controlPanel = JPanel().apply {
             add(settingButton)
-            //add(likeButton)
             add(prevButton)
             add(playButton)
             add(nextButton)
             add(playCase)
-            //add(coverButton)
         }
         val displayPanel = JPanel().apply {
             layout = BorderLayout()
@@ -169,12 +158,7 @@ class HoshisukiUI : JPanel() {
                 add(JBCheckBox("", state.sensitiveIcon).apply {
                     addActionListener {
                         state.sensitiveIcon = this.isSelected
-                        if (likeButton.icon == MusicIcons.dislike && this.isSelected) {
-                            likeButton.icon = MusicIcons.dislikeAnti
-                        } else if (likeButton.icon == MusicIcons.dislikeAnti && !this.isSelected) {
-                            likeButton.icon = MusicIcons.dislike
-                        }
-                        refreshPlayingIconInList()
+                        displayMusicFolderList()
                         revalidate()
                         repaint()
                     }
@@ -182,19 +166,6 @@ class HoshisukiUI : JPanel() {
             })
             //添加空缺
             add(Box.createVerticalStrut(7))
-            ////添加面板显示优化
-            //add(JPanel().apply {
-            //    layout = BorderLayout()
-            //    add(JLabel("  "+bundle.message("option.optimize.panel.text")).apply {
-            //        HelpTooltip().setDescription(bundle.message("option.optimize.panel.context")).installOn(this)
-            //    }, BorderLayout.WEST)
-            //    add(JBCheckBox("", state.optimizePanel).apply {
-            //        addActionListener {
-            //            state.optimizePanel = this.isSelected
-            //        } }, BorderLayout.EAST)
-            //})
-            ////添加空缺
-            //add(Box.createVerticalStrut(7))
             //添加美化标题面板
             add(JPanel().apply {
                 layout = BorderLayout()
@@ -325,35 +296,6 @@ class HoshisukiUI : JPanel() {
         })
 
         // Action 初始化
-        likeButton.action = Runnable {
-            if (selectedMusic != null) {
-                when (selectedMusic) {
-                    in currentLikeList -> {
-                        currentLikeList.remove(selectedMusic)
-                        state.likeList.remove(selectedMusic!!.absolutePath)
-                        currentDislikeList.add(selectedMusic!!)
-                        state.dislikeList.add(selectedMusic!!.absolutePath)
-                        likeButton.text = getExplainableMessage("button.un.dislike.tooltip")
-                        likeButton.icon = MusicIcons.unDislike
-                    }
-                    in currentDislikeList -> {
-                        currentDislikeList.remove(selectedMusic)
-                        state.dislikeList.remove(selectedMusic!!.absolutePath)
-                        likeButton.text = getExplainableMessage("button.like.tooltip")
-                        likeButton.icon = MusicIcons.like
-                    }
-                    else -> {
-                        currentLikeList.add(selectedMusic!!)
-                        state.likeList.add(selectedMusic!!.absolutePath)
-                        likeButton.text = getExplainableMessage("button.dislike.tooltip")
-                        likeButton.icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
-                    }
-                }
-                refreshPlayingIconInList()
-                revalidate()
-                repaint()
-            }
-        }
         playButton.action = Runnable {
             if (state.musicFolderList.isNotEmpty()) {
                 playButton.isEnabled = false
@@ -361,14 +303,13 @@ class HoshisukiUI : JPanel() {
                 currentMusic = if (selectedMusic != null) {
                     selectedMusic
                 } else if (musicFiles.isNotEmpty()) {
-                    list.selectedIndex = 0
                     musicFiles[0]
                 } else null
 
                 playedMusic.clear()
-                if (currentMusic != null) {
-                    playMusic()
-                }
+                if (currentMusic != null && !isPlaying) {
+                    stopMusic(true)
+                } else stopMusic()
                 revalidate()
                 repaint()
                 objectivePause = false
@@ -393,15 +334,13 @@ class HoshisukiUI : JPanel() {
                     var index = musicFiles.indexOf(currentMusic)
                     index--
                     if (index < 0) index = musicFiles.size - 1
-                    stopMusic()
                     currentMusic = musicFiles[index]
                     selectedMusic = musicFiles[index]
-                    playMusic()
+                    stopMusic(true)
                 } else {
-                    stopMusic()
                     currentMusic = musicFiles.last()
                     selectedMusic = musicFiles.last()
-                    playMusic()
+                    stopMusic(true)
                 }
                 objectivePause = false
                 switchMusic = false
@@ -422,15 +361,13 @@ class HoshisukiUI : JPanel() {
                     if (index == -1) index = -1
                     index++
                     if (index >= musicFiles.size) index = 0
-                    stopMusic()
                     currentMusic = musicFiles[index]
                     selectedMusic = musicFiles[index]
-                    playMusic()
+                    stopMusic(true)
                 } else {
-                    stopMusic()
                     currentMusic = musicFiles.first()
                     selectedMusic = musicFiles.first()
-                    playMusic()
+                    stopMusic(true)
                 }
                 objectivePause = false
                 switchMusic = false
@@ -454,29 +391,10 @@ class HoshisukiUI : JPanel() {
                 showSetting()
             }
         }
-        coverButton.action = Runnable {
-            if (state.musicFolderList.isNotEmpty() && selectedMusic != null) {
-                if (state.musicCoverMap.keys.contains(selectedMusic!!.absolutePath)) removeCover()
-                else chooseCover()
-            }
-        }
-        coverButton.action2 = Runnable {
-            if (state.musicFolderList.isNotEmpty() && selectedMusic != null) {
-                if (state.musicCoverMap.keys.contains(selectedMusic!!.absolutePath)) removeCover()
-                if (tempCover == null) {
-                    chooseCover()
-                } else {
-                    state.musicCoverMap[selectedMusic!!.absolutePath] = tempCover!!.absolutePath
-                    if (coverPanel.size.height != 0 && currentMusic === selectedMusic) {
-                        coverPanel.cover = ImageIcon(tempCover!!.absolutePath)
-                        repaint()
-                    }
-                }
-            }
-        }
 
         if (state.musicFolderList.isNotEmpty()) {
-            if (!state.musicFolderList.contains(state.musicFolder!!)) state.musicFolderList.add(state.musicFolder!!)
+            if (state.musicFolder != null)
+            if (!state.musicFolderList.contains(state.musicFolder)) state.musicFolderList.add(state.musicFolder!!)
             displayMusicFolderList()
         }
 
@@ -573,133 +491,6 @@ class HoshisukiUI : JPanel() {
         playCase.icon = icon
     }
 
-    private fun refreshLikeButtonVisuals() {
-        if (selectedMusic != null) {
-            when {
-                currentLikeList.contains(selectedMusic) -> {
-                    likeButton.text = getExplainableMessage("button.dislike.tooltip")
-                    likeButton.icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
-                }
-                currentDislikeList.contains(selectedMusic) -> {
-                    likeButton.text = getExplainableMessage("button.un.dislike.tooltip")
-                    likeButton.icon = MusicIcons.unDislike
-                }
-                else -> {
-                    likeButton.text = getExplainableMessage("button.like.tooltip")
-                    likeButton.icon = MusicIcons.like
-                }
-            }
-        } else {
-            likeButton.text = getExplainableMessage("button.like.tooltip")
-            likeButton.icon = MusicIcons.like
-        }
-    }
-
-    private fun refreshCoverButtonVisuals() {
-        if (selectedMusic != null) {
-            if (state.musicCoverMap.containsKey(selectedMusic!!.absolutePath)) {
-                coverButton.text = getExplainableMessage("button.remove.cover.tooltip")
-                coverButton.icon = MusicIcons.removeCover
-            } else {
-                coverButton.text = getExplainableMessage("button.add.cover.tooltip")
-                coverButton.icon = MusicIcons.addCover
-            }
-        } else {
-            coverButton.text = getExplainableMessage("button.add.cover.tooltip")
-            coverButton.icon = MusicIcons.addCover
-        }
-    }
-
-    private fun refreshPlayingIconInList() {
-        if (listModelPanel.isEmpty || listModel.isEmpty || listModelPanel.size() != listModel.size()) {
-            return
-        }
-
-        var listNeedsRepaint = false
-
-        for (i in 0 until listModelPanel.size()) {
-            val panel = listModelPanel.getElementAt(i) ?: continue
-            val fileForPanel = listModel.getElementAt(i) ?: continue
-
-            if (state.optimizePanel) {
-                val playingLabel = panel.components.find { it.name == "playingIndicator" } as? JLabel
-                val likeLabel = panel.components.find { it.name == "likeIndicator" } as? JLabel
-
-                if (playingLabel == null || likeLabel == null) {
-                    panel.removeAll()
-                    if (fileForPanel === currentMusic && isPlaying) {
-                        panel.add(JLabel().apply { name = "playingIndicator"; icon = MusicIcons.playing }, BorderLayout.WEST)
-                    } else {
-                        panel.add(JLabel().apply { name = "playingIndicator" }, BorderLayout.WEST)
-                    }
-                    panel.add(JLabel(" " + fileForPanel.name), BorderLayout.CENTER)
-
-                    val likeIndicatorToAdd = JLabel().apply { name = "likeIndicator" }
-                    if (fileForPanel in currentLikeList) {
-                        likeIndicatorToAdd.icon = MusicIcons.like
-                    } else if (fileForPanel in currentDislikeList) {
-                        likeIndicatorToAdd.icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
-                    }
-                    panel.add(likeIndicatorToAdd, BorderLayout.EAST)
-                    panel.revalidate()
-                    listNeedsRepaint = true
-                    continue
-                }
-
-                var panelChanged = false
-
-                val shouldHavePlayingIcon = (fileForPanel === currentMusic && isPlaying)
-                val currentPlayingIcon = playingLabel.icon
-
-                if (shouldHavePlayingIcon && currentPlayingIcon == null) {
-                    playingLabel.icon = MusicIcons.playing
-                    panelChanged = true
-                } else if (!shouldHavePlayingIcon && currentPlayingIcon != null) {
-                    playingLabel.icon = null
-                    panelChanged = true
-                }
-
-                val expectedLikeStatusIcon: Icon? = when (fileForPanel) {
-                    in currentLikeList -> MusicIcons.like
-                    in currentDislikeList -> if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
-                    else -> null
-                }
-
-                if (likeLabel.icon != expectedLikeStatusIcon) {
-                    likeLabel.icon = expectedLikeStatusIcon
-                    panelChanged = true
-                }
-
-                if (panelChanged) {
-                    panel.revalidate()
-                    listNeedsRepaint = true
-                }
-            } else {
-                panel.removeAll()
-                if (fileForPanel === currentMusic && isPlaying) {
-                    panel.add(JLabel().apply { name = "playingIndicator"; icon = MusicIcons.playing }, BorderLayout.WEST)
-                } else {
-                    panel.add(JLabel().apply { name = "playingIndicator" }, BorderLayout.WEST)
-                }
-                panel.add(JLabel(" " + fileForPanel.name), BorderLayout.CENTER)
-
-                val likeIndicatorToAdd = JLabel().apply { name = "likeIndicator" }
-                if (fileForPanel in currentLikeList) {
-                    likeIndicatorToAdd.icon = MusicIcons.like
-                } else if (fileForPanel in currentDislikeList) {
-                    likeIndicatorToAdd.icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
-                }
-                panel.add(likeIndicatorToAdd, BorderLayout.EAST)
-                panel.revalidate()
-                listNeedsRepaint = true
-            }
-        }
-
-        if (listNeedsRepaint) {
-            list.repaint()
-        }
-    }
-
     private fun chooseFolder() {
         val chooser = JFileChooser().apply { fileSelectionMode = JFileChooser.DIRECTORIES_ONLY; isMultiSelectionEnabled = false }
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
@@ -781,7 +572,7 @@ class HoshisukiUI : JPanel() {
                             else -> getExplainableMessage("button.un.dislike.tooltip")
                         }
                         musicListModel.add(MusicPanel(it.absolutePath, processedName, likeInfo) {}.apply {
-                            isPlaying = isPlaying && it === currentMusic
+                            isPlaying = this@HoshisukiUI.isPlaying && it === currentMusic
                             this.likeButton.text = tooltip
                             action = Runnable {
                                 if (!this.isVisible) this.isVisible = true
@@ -845,129 +636,45 @@ class HoshisukiUI : JPanel() {
                 else -> currentNormalList.add(it)
             }
         }
+        playButton.isEnabled = true
         scrollPane?.let { remove(it) }
-        listPanel?.let { remove(it) }
-        listPanel = JBScrollPane(ListPanel(musicFolderModelList).apply {
+        listPanel = ListPanel(musicFolderModelList).apply {
             removeListeners()
-            addListener { box -> if (box.music != null) selectedMusic = box.music }
-        }).apply {
+            addListener {
+                box -> if (box.music != null) selectedMusic = box.music
+                if (isPlaying) {
+                    if (selectedMusic != null && selectedMusic !== currentMusic) {
+                        playButton.icon = MusicIcons.resume
+                        playButton.text
+                    } else {
+                        playButton.icon = MusicIcons.stop
+                        playButton.text = getExplainableMessage("button.stop.tooltip")
+                    }
+                } else {
+                    playButton.icon = MusicIcons.stop
+                    playButton.text = getExplainableMessage("button.stop.tooltip")
+                }
+            }
+        }
+        scrollPane = JBScrollPane(listPanel).apply {
             preferredSize = Dimension(200, 150)
         }
-        if (listPanel != null) {
-            listPanel?.let { add(listPanel!!, BorderLayout.CENTER) }
+        if (scrollPane != null) {
+            scrollPane?.let { add(scrollPane!!, BorderLayout.CENTER) }
             revalidate()
             repaint()
         }
-    }
-
-    private fun displayMusicList(selectedFile: File) {
-        val musicList = ArrayList<File>()
-        if (selectedFile.listFiles()?.isNotEmpty() == true) {
-            selectedFile.listFiles()?.forEach {
-                if (it.isFile && it.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au", "ogg")) {
-                    musicList.add(it)
-                }
-            }
-            if (musicList.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                    bundle.message("message.no.supported.music"),
-                    bundle.message("message.no.music.title"),
-                    JOptionPane.INFORMATION_MESSAGE
-                )
-                return
-            }
-            state.musicFolder = selectedFile.absolutePath
-            folderLabel.text = selectedFile.path
-
-            playButton.isEnabled = true
-            prevButton.isEnabled = true
-            nextButton.isEnabled = true
-            likeButton.isEnabled = true
-            coverButton.isEnabled = true
-
-            currentLikeList.clear()
-            currentDislikeList.clear()
-            currentNormalList.clear()
-            musicFiles = musicList
-            if (musicFiles.isNotEmpty()) {
-                musicFiles.forEach {
-                    when (it.absolutePath) {
-                        in state.likeList -> currentLikeList.add(it)
-                        in state.dislikeList -> currentDislikeList.add(it)
-                        else -> currentNormalList.add(it)
-                    }
-                }
-                listModel.clear()
-                listModelPanel.clear()
-                musicFiles.forEach { listModel.addElement(it) }
-                musicFiles.forEach { listModelPanel.addElement(createMusicPanel(it)) }
-                scrollPane?.let { remove(it) }
-                list.cellRenderer = PanelCellRenderer()
-                list.selectionMode = ListSelectionModel.SINGLE_SELECTION
-                list.listSelectionListeners.forEach { list.removeListSelectionListener(it) }
-                list.addListSelectionListener {
-                    if (!it.valueIsAdjusting) {
-                        if (list.selectedIndex != -1 && list.selectedIndex < listModel.size()) {
-                            selectedMusic = listModel.elementAt(list.selectedIndex)
-                        }
-                    }
-                }
-                scrollPane = JBScrollPane(list).apply {
-                    preferredSize = Dimension(200, 150)
-                }
-            }
-            if (scrollPane!=null){
-                scrollPane?.let { add(it, BorderLayout.CENTER) }
-            }
-            refreshPlayingIconInList()
-            revalidate()
-            repaint()
-        } else {
-            JOptionPane.showMessageDialog(null, bundle.message("message.empty.folder"))
-        }
-    }
-
-    private fun createMusicPanel(music: File): JPanel {
-        return JPanel().apply {
-            layout = BorderLayout()
-
-            val processedName = if (state.beautifyTitleEnabled) when (state.beautifyTitle) {
-                1 -> music.nameWithoutExtension.replace("_", " ")
-                2 -> music.nameWithoutExtension.let { it.first().uppercase() + it.substring(1) }
-                3 -> music.nameWithoutExtension.let { it.split("_").joinToString("") { it.first().uppercase() + it.substring(1) }}
-                4 -> music.nameWithoutExtension.let { it.first().uppercase() + it.substring(1) }.replace("_", " ")
-                5 -> music.nameWithoutExtension.let { it.split("_").joinToString(" ") { it.first().uppercase() + it.substring(1) }}
-                else -> music.nameWithoutExtension
-            } else music.name
-            val playingLabel = JLabel().apply { name = "playingIndicator" }
-            val nameLabel = JLabel(" $processedName")
-            val likeLabel = JLabel().apply { name = "likeIndicator" }
-
-            if (music === currentMusic && isPlaying) {
-                playingLabel.icon = MusicIcons.playing
-            }
-            add(playingLabel, BorderLayout.WEST)
-
-            add(nameLabel, BorderLayout.CENTER)
-
-            if (music in currentLikeList) {
-                likeLabel.icon = MusicIcons.like
-            } else if (music in currentDislikeList) {
-                likeLabel.icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
-            }
-            add(likeLabel, BorderLayout.EAST)
-        }
+        refreshAllButtonTooltips()
     }
 
     private fun playMusic() {
         alonePlayTime = 0
-        if (defaultSettingHeight <= 0) defaultSettingHeight = (if (settingPanel.size.height <= 0) 268 else settingPanel.size.height)
+        currentMusic = playCase()
         if (!isPlaying && currentMusic != null) {
             if (!switchMusic) {
                 showCover()
-            }
-            else {
                 switchMusic = false
+            } else {
                 val currentSelectedPath = selectedMusic?.absolutePath
                 if (currentSelectedPath != null && state.musicCoverMap.containsKey(currentSelectedPath)) {
                     coverPanel.cover = ImageIcon(state.musicCoverMap[currentSelectedPath])
@@ -1002,8 +709,7 @@ class HoshisukiUI : JPanel() {
                         mp3Player?.playBackListener = object : PlaybackListener() {
                             override fun playbackFinished(evt: PlaybackEvent?) {
                                 if (evt?.source == mp3Player && isPlaying) {
-                                    stopMusic()
-                                    playCase()
+                                    stopMusic(true)
                                 }
                             }
                         }
@@ -1030,8 +736,7 @@ class HoshisukiUI : JPanel() {
                         oggPlayer.addPlaybackListener(
                             object : OggPlaybackListener {
                                 override fun onPlaybackFinished(filePath: String) {
-                                    stopMusic()
-                                    playCase()
+                                    stopMusic(true)
                                 }
                                 override fun onPlaybackStopped(filePath: String, dueToError: Boolean) {}
                                 override fun onPlaybackError(filePath: String, e: OggPlayerException) {
@@ -1054,8 +759,7 @@ class HoshisukiUI : JPanel() {
                         clip.addLineListener { event: LineEvent ->
                             if (event.type === LineEvent.Type.STOP && !objectivePause) {
                                 if (event.line == clip && isPlaying) {
-                                    stopMusic()
-                                    playCase()
+                                    stopMusic(true)
                                 }
                             }
                         }
@@ -1064,7 +768,7 @@ class HoshisukiUI : JPanel() {
                 isPlaying = true
                 playButton.text = getExplainableMessage("button.stop.tooltip")
                 playButton.icon = MusicIcons.stop
-                refreshPlayingIconInList()
+                displayMusicFolderList()
                 revalidate()
                 repaint()
             } catch (fnf: java.io.FileNotFoundException) {
@@ -1074,8 +778,7 @@ class HoshisukiUI : JPanel() {
             } catch (e: Exception) {
                 System.err.println("Play ERROR during setup or start: ${e.message}")
                 e.printStackTrace()
-                stopMusic()
-                JOptionPane.showMessageDialog(this@HoshisukiUI, "Error starting playback: ${e.message}", "Playback Error", JOptionPane.ERROR_MESSAGE)
+                stopMusic(true)
             }
         } else if (isPlaying) {
             stopMusic()
@@ -1083,10 +786,14 @@ class HoshisukiUI : JPanel() {
     }
 
     private fun stopMusic() {
+        stopMusic(false)
+    }
+
+    private fun stopMusic(play: Boolean){
         val wasPlaying = isPlaying
         isPlaying = false
 
-        if (!switchMusic) { 
+        if (!switchMusic) {
             hideCover()
         }
 
@@ -1121,7 +828,6 @@ class HoshisukiUI : JPanel() {
         }
         oggPlayThread = null
 
-
         if (clip.isOpen) {
             clip.stop()
             clip.flush()
@@ -1132,10 +838,12 @@ class HoshisukiUI : JPanel() {
             alonePlayTime = 0
         }
 
-        refreshPlayingIconInList()
-        playButton.text = getExplainableMessage("button.play.tooltip")
-        playButton.icon = MusicIcons.run
-        playButton.isEnabled = musicFiles.isNotEmpty()
+        if (!play) {
+            displayMusicFolderList()
+            playButton.text = getExplainableMessage("button.play.tooltip")
+            playButton.icon = MusicIcons.run
+            playButton.isEnabled = musicFiles.isNotEmpty()
+        } else playMusic()
 
         revalidate()
         repaint()
@@ -1190,7 +898,7 @@ class HoshisukiUI : JPanel() {
         rescanButton.text = getExplainableMessage("button.rescan.tooltip")
     }
 
-    private fun playCase() {
+    private fun playCase(): File? {
         when (state.playCase) {
             0 -> { // List Cycle
                 if (musicFiles.isNotEmpty()) {
@@ -1199,9 +907,7 @@ class HoshisukiUI : JPanel() {
                     if (index == -1) index = -1
                     index++
                     if (index >= musicFiles.size) index = 0
-                    currentMusic = musicFiles[index]
-                    selectedMusic = musicFiles[index]
-                    playMusic()
+                    return musicFiles[index]
                 }
             }
             1 -> { // List Reverse Cycle
@@ -1210,21 +916,19 @@ class HoshisukiUI : JPanel() {
                     var index = musicFiles.indexOf(currentMusic)
                     index--
                     if (index < 0) index = musicFiles.size - 1
-                    currentMusic = musicFiles[index]
-                    selectedMusic = musicFiles[index]
-                    playMusic()
+                    return musicFiles[index]
                 }
             }
             2 -> { // Alone Cycle
-                if (currentMusic != null) {
-                    playMusic()
-                }
+                return if (currentMusic != null) {
+                    currentMusic
+                } else null
             }
             3 -> { // Alone Finite Cycle
                 if (currentMusic != null && alonePlayTime < state.alonePlayTimes) {
                     alonePlayTime++
-                    playMusic()
-                }
+                    return currentMusic
+                } else return null
             }
             4 -> { // List Play
                 if (musicFiles.isNotEmpty()) {
@@ -1234,11 +938,9 @@ class HoshisukiUI : JPanel() {
                     index++
                     if (index >= musicFiles.size) {
                         switchMusic = false
-                        return
+                        return null
                     }
-                    currentMusic = musicFiles[index]
-                    selectedMusic = musicFiles[index]
-                    playMusic()
+                    return musicFiles[index]
                 }
             }
             5 -> { // List Reverse Play
@@ -1248,22 +950,21 @@ class HoshisukiUI : JPanel() {
                     index--
                     if (index < 0) {
                         switchMusic = false
-                        return
+                        return null
                     }
-                    currentMusic = musicFiles[index]
-                    selectedMusic = musicFiles[index]
-                    playMusic()
+                    return musicFiles[index]
                 }
             }
             6 -> { // Random
-                randomPlayMusic(false)
+                return randomPlayMusic(false)
             }
             7 -> { // Random Finite
-                randomPlayMusic(true)
+                return randomPlayMusic(true)
             }
             8 -> { // Stop on Finish
             }
         }
+        return null
     }
 
     fun Double.compare(value: Double): Boolean {
@@ -1272,40 +973,38 @@ class HoshisukiUI : JPanel() {
         return roundedThis == roundedOther
     }
 
-    private fun randomPlayMusic(recordPlayedMusic: Boolean) {
-        if (playedMusic.size == musicFiles.size) return
+    private fun randomPlayMusic(recordPlayedMusic: Boolean): File? {
+        if (playedMusic.size == musicFiles.size) return null
         switchMusic = true
+        var chooseMusic: File? = null
         if (musicFiles.size <= 1) {
             if (recordPlayedMusic) {
-                playMusic()
                 switchMusic = false
-                return
+                return null
             }
         } else if (state.likeWeight.compare(0.0) && state.dislikeWeight.compare(0.0)) {
             var index = floor(Math.random() * musicFiles.size).toInt()
             while ((state.antiAgainLevel == 2) && currentMusic === musicFiles[index]) {
                 index = floor(Math.random() * musicFiles.size).toInt()
             }
-            currentMusic = musicFiles[index]
+            chooseMusic = musicFiles[index]
         } else if (state.likeWeight.compare(0.0)) {
             val chooseDislike = if (state.dislikeWeight < 0) (Math.random() < (1 + state.dislikeWeight) * 0.1) else (Math.random() < state.dislikeWeight)
-            currentMusic = weightChooseMusic(true, chooseDislike, true)
+            chooseMusic = weightChooseMusic(true, chooseDislike, true)
         } else if (state.dislikeWeight.compare(0.0)) {
             val chooseLike = if (state.likeWeight < 0) (Math.random() < (1 + state.likeWeight) * 0.1) else (Math.random() < state.likeWeight)
-            currentMusic = weightChooseMusic(chooseLike, chooseDislike = true, withNormal = true)
+            chooseMusic = weightChooseMusic(chooseLike, chooseDislike = true, withNormal = true)
         } else if (!state.likeWeight.compare(0.0) && !state.dislikeWeight.compare(0.0)) {
             val chooseLike = if (state.likeWeight < 0) (Math.random() < (1 + state.likeWeight) * 0.1) else (Math.random() < state.likeWeight)
             val chooseDislike = if (state.dislikeWeight < 0) (Math.random() < (1 + state.dislikeWeight) * 0.1) else (Math.random() < state.dislikeWeight)
-            currentMusic = weightChooseMusic(chooseLike, chooseDislike, false)
+            chooseMusic = weightChooseMusic(chooseLike, chooseDislike, false)
         } else throw RandomPlayException("Unknown ERROR: Illegal value")
-        if (currentMusic == null) {
+        if (chooseMusic == null) {
             switchMusic = false
             throw RandomPlayException("Unknown ERROR: currentMusic is null")
         }
-        if (recordPlayedMusic && !playedMusic.contains(currentMusic!!)) playedMusic.add(currentMusic!!)
-        selectedMusic = currentMusic
-        list.selectedIndex = musicFiles.indexOf(currentMusic)
-        playMusic()
+        if (recordPlayedMusic && !playedMusic.contains(chooseMusic)) playedMusic.add(chooseMusic)
+        return chooseMusic
     }
 
     private fun weightChooseMusic(chooseLike: Boolean, chooseDislike: Boolean, withNormal: Boolean): File {
@@ -1327,36 +1026,6 @@ class HoshisukiUI : JPanel() {
                 index = floor(Math.random() * musicFiles.size).toInt()
             }
             return musicFiles[index]
-        }
-    }
-
-    // TODO: Volume Control
-    private fun setClipVolume(clip: Clip, volumeDB: Float) {
-        if (clip.isOpen) {
-            try {
-                if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
-                    val gainControl = clip.getControl(FloatControl.Type.MASTER_GAIN) as FloatControl
-                    val min = gainControl.minimum
-                    val max = gainControl.maximum
-                    var actualVolumeDB = volumeDB
-                    if (actualVolumeDB < min) actualVolumeDB = min
-                    if (actualVolumeDB > max) actualVolumeDB = max
-                    gainControl.value = actualVolumeDB
-                } else if (clip.isControlSupported(FloatControl.Type.VOLUME)) {
-                    val volumeControl = clip.getControl(FloatControl.Type.VOLUME) as FloatControl
-                    val linearVolume = 10.0.pow((volumeDB / 20.0)).toFloat()
-                    val minLin = volumeControl.minimum
-                    val maxLin = volumeControl.maximum
-                    var actualLinearVolume = linearVolume
-                    if (actualLinearVolume < minLin) actualLinearVolume = minLin
-                    if (actualLinearVolume > maxLin) actualLinearVolume = maxLin
-                    volumeControl.value = actualLinearVolume
-                } else {
-                    println("Clip: Volume control not supported.")
-                }
-            } catch (e: IllegalArgumentException) {
-                println("Error setting clip volume: ${e.message}")
-            }
         }
     }
 }

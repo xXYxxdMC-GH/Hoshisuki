@@ -5,21 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c0c465be-2dff-4731-9dfc-8ab0f8bccd30" name="更改" comment="Update">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/BoxPanel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/ListPanel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/ListSelectionListener.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/icons/EmptyIcon.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/CoverPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/CoverPanel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/FolderPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/FolderPanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/IconTooltipActionButton.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/IconTooltipActionButton.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/ListPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/ListPanel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/MusicPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/MusicPanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/MusicScrollPanel.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/ScrollView.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/icons/MusicIcons.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/icons/MusicIcons.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -72,6 +62,7 @@
       <list>
         <option value="Class" />
         <option value="Interface" />
+        <option value="Kotlin Class" />
       </list>
     </option>
   </component>
@@ -91,8 +82,6 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="jar://$PROJECT_DIR$/../../../../Program Files/Java/jdk1.8.0_281/src.zip!/java/lang/Exception.java" root0="SKIP_INSPECTION" />
-    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2022.2.1/3c31d85ee47bd925abc44df600835cba77074454/ideaIC-2022.2.1-sources.jar!/com/intellij/util/ui/StartupUiUtil.java" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="LogFilters">
@@ -122,13 +111,13 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;项目&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;模块&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.3264368&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.updates&quot;
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.IDE.editor.colors.Kotlin&quot;
   }
 }</component>
-  <component name="RunManager" selected="Gradle.Hoshisuki [build]">
+  <component name="RunManager" selected="Gradle.Run Plugin">
     <configuration name="Hoshisuki [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -236,5 +225,12 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Update" />
     <option name="LAST_COMMIT_MESSAGE" value="Update" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="GradleRunConfiguration">
+        <watch expression="switchMusic" language="kotlin" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

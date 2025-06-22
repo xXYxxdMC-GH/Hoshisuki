@@ -37,6 +37,7 @@ public interface MusicIcons {
     Icon foldUp = AllIcons.Actions.FindAndShowNextMatches;
     Icon empty = new EmptyIcon(16,16);
     Icon playing = IconLoader.getIcon("/icons/library.svg", MusicIcons.class);
+    Icon resume = IconLoader.getIcon("/icons/resume.svg", MusicIcons.class);
     Icon playingFolder = IconLoader.getIcon("/icons/libraryFolder.svg", MusicIcons.class);
     Icon player = IconLoader.getIcon("/icons/hoshisuki.svg", MusicIcons.class);
 }
