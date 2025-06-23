@@ -49,7 +49,7 @@ public class MusicPanel extends BoxPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (getParent().getParent() instanceof ListPanel listPanel) {
-                    listPanel.setSelectedItem(MusicPanel.this);
+                    listPanel.setSelectedItem(MusicPanel.this, true);
                 }
             }
 

@@ -33,11 +33,14 @@ public final class CoverPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     action.run();
-                } else if (e.getButton() == MouseEvent.BUTTON3) {
+                }
+            }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
                     maybeShowPopup(e);
                 }
             }
-
             @Override
             public void mouseEntered(MouseEvent e) {
                 setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

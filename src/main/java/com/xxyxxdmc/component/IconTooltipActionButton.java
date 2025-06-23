@@ -2,6 +2,7 @@ package com.xxyxxdmc.component;
 
 import com.intellij.openapi.actionSystem.ActionButtonComponent;
 import com.intellij.openapi.actionSystem.ex.ActionButtonLook;
+import com.xxyxxdmc.icons.MusicIcons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,6 +43,7 @@ public final class IconTooltipActionButton extends JComponent {
             public void mouseEntered(MouseEvent e) {
                 if (!isEnabled()) return;
                 hovered = true;
+                if (icon == MusicIcons.empty) setIcon(MusicIcons.unDislike);
                 setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 repaint();
             }
@@ -50,6 +52,7 @@ public final class IconTooltipActionButton extends JComponent {
             public void mouseExited(MouseEvent e) {
                 if (!isEnabled()) return;
                 hovered = false;
+                if (icon == MusicIcons.unDislike) setIcon(MusicIcons.empty);
                 setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 repaint();
             }

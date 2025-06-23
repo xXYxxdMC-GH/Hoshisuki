@@ -66,6 +66,10 @@ public class ListPanel extends JPanel {
                 newSelectedItem.setSelected(true);
             }
         }
+    }
+
+    public void setSelectedItem(BoxPanel newSelectedItem, boolean objectiveSelect) {
+        setSelectedItem(newSelectedItem);
         refreshSelection(newSelectedItem);
     }
 
