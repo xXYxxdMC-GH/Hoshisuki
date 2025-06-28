@@ -43,7 +43,7 @@ class HoshisukiUI : JPanel() {
         } catch (_ : Exception) {
             JOptionPane.showMessageDialog(null,
                 bundle.message("message.no.audio.device"),
-                bundle.message("message.no.audio.device.title"),
+                bundle.message("message.error.title"),
                 JOptionPane.ERROR_MESSAGE
             )
         }
@@ -544,6 +544,11 @@ class HoshisukiUI : JPanel() {
                 folder.listFiles().forEach {
                     if (it.extension.lowercase(Locale.getDefault()) in listOf("mp3", "wav", "aif", "aiff", "au", "ogg")) {
                         musicList.add(it)
+                        when (it.absolutePath) {
+                            in state.likeList -> currentLikeList.add(it)
+                            in state.dislikeList -> currentDislikeList.add(it)
+                            else -> currentNormalList.add(it)
+                        }
                         val processedName = if (state.beautifyTitleEnabled) when (state.beautifyTitle) {
                             1 -> it.nameWithoutExtension.replace("_", " ")
                             2 -> it.nameWithoutExtension.let { it.first().uppercase() + it.substring(1) }
@@ -567,26 +572,28 @@ class HoshisukiUI : JPanel() {
                             isPlaying = this@HoshisukiUI.isPlaying && it.absolutePath == currentMusic?.absolutePath
                             this.likeButton.text = tooltip
                             action = Runnable {
-                                if (!this.isVisible) this.isVisible = true
+                                //if (!this.isVisible) this.isVisible = true
                                 when (it) {
                                     in currentLikeList -> {
                                         currentLikeList.remove(it)
                                         state.likeList.remove(it.absolutePath)
                                         currentDislikeList.add(it)
                                         state.dislikeList.add(it.absolutePath)
-                                        this.likeButton.icon = MusicIcons.like
+                                        this.likeButton.icon = if (state.sensitiveIcon) MusicIcons.dislikeAnti else MusicIcons.dislike
                                         this.likeButton.text = getExplainableMessage("button.dislike.tooltip")
                                     }
                                     in currentDislikeList -> {
                                         currentDislikeList.remove(it)
                                         state.dislikeList.remove(it.absolutePath)
-                                        this.likeButton.icon = MusicIcons.dislike
+                                        currentNormalList.add(it)
+                                        this.likeButton.icon = MusicIcons.unDislike
                                         this.likeButton.text = getExplainableMessage("button.un.dislike.tooltip")
                                     }
                                     else -> {
                                         currentLikeList.add(it)
                                         state.likeList.add(it.absolutePath)
-                                        this.likeButton.icon = MusicIcons.unDislike
+                                        currentNormalList.remove(it)
+                                        this.likeButton.icon = MusicIcons.like
                                         this.likeButton.text = getExplainableMessage("button.like.tooltip")
                                     }
                                 }
@@ -608,7 +615,7 @@ class HoshisukiUI : JPanel() {
                 (isPlaying && musicFolderMap[folderPath]!!.contains(currentMusic)),
                 folderPath,
                 bundle.message("button.open.folder.tooltip"),
-                    musicFolderStateMap[folderPath] == true
+                    musicFolderStateMap[folderPath] == true || musicFolderStateMap[folderPath] == null
                     ,{}) {
                     state.musicFolderList.remove(folderPath)
                     displayMusicFolderList()
@@ -623,13 +630,6 @@ class HoshisukiUI : JPanel() {
                 musicFolderModelList.addElement(it)
             }
         }
-        musicFiles.forEach {
-            when (it.absolutePath) {
-                in state.likeList -> currentLikeList.add(it)
-                in state.dislikeList -> currentDislikeList.add(it)
-                else -> currentNormalList.add(it)
-            }
-        }
         playButton.isEnabled = true
         scrollPane?.let { remove(it) }
         listPanel = ListPanel(musicFolderModelList).apply {
@@ -640,9 +640,9 @@ class HoshisukiUI : JPanel() {
                     this@apply.setSelectedItem(it.music)
                 }
                 if (isPlaying) {
-                    if (selectedMusic != null && selectedMusic!!.absolutePath != currentMusic!!.absolutePath) {
+                    if (selectedMusic?.absolutePath != currentMusic!!.absolutePath) {
                         playButton.icon = MusicIcons.resume
-                        playButton.text
+                        playButton.text = getExplainableMessage("button.stop.and.play.tooltip")
                     } else {
                         playButton.icon = MusicIcons.stop
                         playButton.text = getExplainableMessage("button.stop.tooltip")
@@ -662,11 +662,11 @@ class HoshisukiUI : JPanel() {
             repaint()
         }
         refreshAllButtonTooltips()
-        val errorFrame: JFrame = JFrame().apply frame@{
+        val errorFrame: JFrame = JFrame(bundle.message("message.error.title")).apply frame@{
             layout = BorderLayout()
             size = Dimension(400, 160)
             setLocationRelativeTo(null)
-            add(JLabel("  " + "ERROR"), BorderLayout.NORTH)
+            add(JLabel("  " + bundle.message("message.no.or.support.music")), BorderLayout.NORTH)
             val errorFolderList = DefaultListModel<JPanel>()
             var listPanel = ListPanel(errorFolderList)
             noMusicFolder.forEach { each ->
@@ -674,7 +674,7 @@ class HoshisukiUI : JPanel() {
                     layout = BorderLayout()
                     add(IconTooltipActionButton(
                         MusicIcons.noMusic,
-                        bundle.message("button.open.folder.tooltip"),
+                        bundle.message("button.open.folder.no.music.tooltip"),
                         false,
                         {
                             try {
@@ -695,7 +695,7 @@ class HoshisukiUI : JPanel() {
                     layout = BorderLayout()
                     add(IconTooltipActionButton(
                         MusicIcons.noSupportMusic,
-                        bundle.message("button.open.folder.tooltip"),
+                        bundle.message("button.open.folder.no.support.music.tooltip"),
                         false,
                         {
                             try {
@@ -713,18 +713,18 @@ class HoshisukiUI : JPanel() {
             }
             listPanel = ListPanel(errorFolderList)
             add(JPanel().apply {
-                add(JButton("Clear All").apply {
+                add(JButton(bundle.message("button.clear.all.text")).apply {
                     addActionListener {
-                        if (this.text == "Confirm?") {
+                        if (this.text == bundle.message("button.confirm.text")) {
                             this@frame.dispose()
                             noMusicFolder.forEach { this@HoshisukiUI.state.musicFolderList.remove(it.absolutePath) }
                             noSupportMusicFolder.forEach { this@HoshisukiUI.state.musicFolderList.remove(it.absolutePath) }
                         } else {
-                            this.text = "Confirm?"
+                            this.text = bundle.message("button.confirm.text")
                         }
                     }
                 })
-                add(JButton("Ignore").apply {
+                add(JButton(bundle.message("button.ignore.text")).apply {
                     addActionListener {
                         this@frame.dispose()
                     }
@@ -912,7 +912,7 @@ class HoshisukiUI : JPanel() {
     }
 
     private fun refreshCover() {
-        val currentSelectedPath = selectedMusic?.absolutePath
+        val currentSelectedPath = currentMusic?.absolutePath
         if (currentSelectedPath != null && state.musicCoverMap.containsKey(currentSelectedPath)) {
             coverPanel.cover = ImageIcon(state.musicCoverMap[currentSelectedPath])
         } else {
@@ -941,7 +941,9 @@ class HoshisukiUI : JPanel() {
 
     private fun refreshAllButtonTooltips() {
         refreshPlayCaseButtonVisuals()
-        playButton.text = if (isPlaying) getExplainableMessage("button.stop.tooltip") else getExplainableMessage("button.play.tooltip")
+        playButton.text = if (isPlaying && selectedMusic?.absolutePath != currentMusic!!.absolutePath) getExplainableMessage("button.stop.and.play.tooltip")
+        else if (isPlaying) getExplainableMessage("button.stop.tooltip")
+        else getExplainableMessage("button.play.tooltip")
         nextButton.text = getExplainableMessage("button.next.tooltip")
         prevButton.text = getExplainableMessage("button.prev.tooltip")
         rescanButton.text = getExplainableMessage("button.rescan.tooltip")

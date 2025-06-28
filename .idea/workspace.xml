@@ -6,19 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="c0c465be-2dff-4731-9dfc-8ab0f8bccd30" name="更改" comment="Update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/BoxPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/BoxPanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/CoverPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/CoverPanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/FolderPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/FolderPanel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/IconTooltipActionButton.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/IconTooltipActionButton.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/ListPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/component/ListPanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/icons/MusicIcons.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/icons/MusicIcons.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/player/OggPlayer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/xxyxxdmc/player/OggPlayer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiSettings.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/HoshisukiUI.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/PanelCellRenderer.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/PictureFileFilter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/xxyxxdmc/hoshisuki/PictureFileFilter.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_ja_JP.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_ja_JP.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_zh_CN.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/messages/HoshisukiBundle_zh_CN.properties" afterDir="false" />
@@ -116,22 +105,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.Hoshisuki [build].executor": "Run",
-    "Gradle.Hoshisuki [setupDependencies].executor": "Run",
-    "Gradle.Run Plugin.executor": "Debug",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "project.structure.last.edited": "模块",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.3264368",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.Hoshisuki [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Hoshisuki [setupDependencies].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Run Plugin.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;模块&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.3264368&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Gradle.Run Plugin">
     <configuration name="Hoshisuki [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
