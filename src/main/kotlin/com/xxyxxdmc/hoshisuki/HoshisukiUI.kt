@@ -99,6 +99,8 @@ class HoshisukiUI : JPanel() {
             if (state.musicCoverMap.keys.contains(selectedMusic!!.absolutePath)) removeCover()
             else chooseCover()
         }
+    }.apply {
+        HelpTooltip().setDescription(bundle.message("cover.panel.tooltip")).installOn(this)
     }
     private var scrollPane: Component? = null
     private var settingPanel: JPanel = JPanel()
@@ -530,6 +532,7 @@ class HoshisukiUI : JPanel() {
             state.musicFolderList.forEach { sb.append(it).append("<br>") }
             HelpTooltip().setDescription("<html>$sb</html>").installOn(this)
         }
+        if (coverPanel.size.height == 0) refreshCover()
         musicFolderMap.clear()
         musicFolderModelList.clear()
         musicFiles.clear()
