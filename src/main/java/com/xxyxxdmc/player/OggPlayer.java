@@ -1,11 +1,21 @@
 package com.xxyxxdmc.player;
 
-import com.jcraft.jogg.*;
-import com.jcraft.jorbis.*;
+import com.jcraft.jogg.Packet;
+import com.jcraft.jogg.Page;
+import com.jcraft.jogg.StreamState;
+import com.jcraft.jogg.SyncState;
+import com.jcraft.jorbis.Block;
+import com.jcraft.jorbis.Comment;
+import com.jcraft.jorbis.DspState;
+import com.jcraft.jorbis.Info;
+
 import javax.sound.sampled.*;
-import java.io.*;
-import java.util.List; // Added
-import java.util.concurrent.CopyOnWriteArrayList; // Added
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class OggPlayer {
 

@@ -2,7 +2,8 @@ package com.xxyxxdmc.icons;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.util.IconLoader;
-import javax.swing.Icon;
+
+import javax.swing.*;
 
 public interface MusicIcons {
     Icon folder = AllIcons.Nodes.Folder;
@@ -35,6 +36,8 @@ public interface MusicIcons {
     Icon multiFolder = AllIcons.Actions.ModuleDirectory;
     Icon extend = AllIcons.Actions.Play_back;
     Icon foldUp = AllIcons.Actions.FindAndShowNextMatches;
+    Icon noMusic = AllIcons.Modules.ExcludeRoot;
+    Icon noSupportMusic = AllIcons.Nodes.LogFolder;
     Icon empty = new EmptyIcon(16,16);
     Icon playing = IconLoader.getIcon("/icons/library.svg", MusicIcons.class);
     Icon resume = IconLoader.getIcon("/icons/resume.svg", MusicIcons.class);

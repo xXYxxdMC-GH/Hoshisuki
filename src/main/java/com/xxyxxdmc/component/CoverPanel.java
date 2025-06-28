@@ -1,6 +1,7 @@
 package com.xxyxxdmc.component;
 
 import com.intellij.ui.JBColor;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -53,7 +54,7 @@ public final class CoverPanel extends JPanel {
         });
     }
 
-    private void maybeShowPopup(MouseEvent e) {
+    private void maybeShowPopup(@NotNull MouseEvent e) {
         if (e.isPopupTrigger()) {
             contextMenu.show(e.getComponent(), e.getX(), e.getY());
         }

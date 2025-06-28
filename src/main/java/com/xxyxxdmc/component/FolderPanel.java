@@ -21,7 +21,7 @@ public class FolderPanel extends BoxPanel {
     private static final Color SELECTED_BACKGROUND = UIUtil.getListSelectionBackground(true);
     private static final Color HOVER_BACKGROUND = new JBColor(Color.GRAY, Color.DARK_GRAY);
 
-    public FolderPanel(boolean playing, String folderPath, String text, boolean state, Runnable action) {
+    public FolderPanel(boolean playing, String folderPath, String text, boolean state, Runnable action, Runnable action2) {
         setLayout(new BorderLayout());
         updateBackground();
         super.setSelected(false);
@@ -29,14 +29,15 @@ public class FolderPanel extends BoxPanel {
         this.state = state;
         this.folderButton = new IconTooltipActionButton(
                 playing ? MusicIcons.playingFolder : MusicIcons.multiFolder,
-                text, () -> {
+                text, false, () -> {
                     try {
                         Desktop.getDesktop().open(new File(folderPath));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                }
+                }, action2
         );
+        super.setMusic(new File(folderPath));
         add(this.folderButton, BorderLayout.WEST);
         this.controlButton = new IconTooltipActionButton(
                 state ? MusicIcons.foldUp : MusicIcons.extend,

@@ -7,11 +7,11 @@ public class BoxPanel extends JPanel {
     private boolean selected = false;
     private File music;
 
-    public boolean isSelected() {
+    protected boolean isSelected() {
         return selected;
     }
 
-    public void setSelected(boolean selected) {
+    protected void setSelected(boolean selected) {
         this.selected = selected;
     }
 

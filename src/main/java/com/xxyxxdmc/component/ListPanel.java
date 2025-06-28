@@ -54,6 +54,17 @@ public class ListPanel extends JPanel {
         itemsContainer.repaint();
     }
 
+    public void removeItem(String path) {
+        for (Component panel: itemsContainer.getComponents()) {
+            if (panel instanceof BoxPanel) {
+                if (((BoxPanel) panel).getMusic().getAbsolutePath().equals(path)) itemsContainer.remove(panel);
+            }
+        }
+
+        itemsContainer.revalidate();
+        itemsContainer.repaint();
+    }
+
     public void setSelectedItem(BoxPanel newSelectedItem) {
         BoxPanel oldSelectedItem = this.selectedPanel;
 
@@ -86,5 +97,13 @@ public class ListPanel extends JPanel {
 
     public BoxPanel getSelectedItem() {
         return this.selectedPanel;
+    }
+
+    public void removePanel(JPanel panel) {
+        this.itemsContainer.remove(panel);
+    }
+
+    public boolean isEmpty() {
+        return this.itemsContainer.getComponentCount() == 0;
     }
 }

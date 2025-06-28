@@ -43,7 +43,6 @@ public final class IconTooltipActionButton extends JComponent {
             public void mouseEntered(MouseEvent e) {
                 if (!isEnabled()) return;
                 hovered = true;
-                if (icon == MusicIcons.empty) setIcon(MusicIcons.unDislike);
                 setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 repaint();
             }
@@ -52,7 +51,6 @@ public final class IconTooltipActionButton extends JComponent {
             public void mouseExited(MouseEvent e) {
                 if (!isEnabled()) return;
                 hovered = false;
-                if (icon == MusicIcons.unDislike) setIcon(MusicIcons.empty);
                 setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 repaint();
             }

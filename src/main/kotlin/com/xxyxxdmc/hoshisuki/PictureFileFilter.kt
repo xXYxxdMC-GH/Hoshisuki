@@ -1,7 +1,7 @@
 package com.xxyxxdmc.hoshisuki
 
 import java.io.File
-import java.util.Locale
+import java.util.*
 import javax.swing.filechooser.FileFilter
 
 class PictureFileFilter: FileFilter() {
